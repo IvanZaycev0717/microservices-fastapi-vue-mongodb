@@ -1,0 +1,204 @@
+/* Глобальные переменные */
+:root {
+  /* Цвет шрифта */
+  --text-color: black;
+
+  /* Цвет текста ошибок */
+  --error-text-color: red;
+
+  /* Цвет выделения текста */
+  --selection-color: #ee8848;
+
+  /* Размер шрифта по умолчанию */
+  --title-font-size: 16px;
+
+  /* Цвет скролла */
+  --scroll-bar-gradient: linear-gradient(to bottom, #ff9a00, #ff6e00);
+
+  /* Цвет заднего фона кнопок */
+  --button-background-color: rgba(238, 164, 28, 0.9);
+  --logout-background-color: #dd0000;
+  /* Цвет заднего фона кнопок ПРИ НАВЕДЕНИИ*/
+  --hover-button-background-color: #ee8848;
+
+  /* Переменные логотипа */
+  --header-title-color: #f17328;
+
+  /* Переменные боковой панели */
+  --sidebar-background-color: rgba(255, 255, 255, 0.7);
+  --sidebar-border: 2px solid black;
+  --sidebar-background-image: url('@/assets/logo/shield.webp');
+
+  /* Переменные кнопки бокового меню */
+  --sidebar-button-active: black;
+  --sidebar-button-disabled: black;
+
+  /* Переменные гамбургер-меню */
+  --hamburger-line-color: black;
+
+  /* Переменные multiselect (выбор языка и темы) */
+  --multiselect-tags-background-color: rgba(255, 255, 255, 0.7);
+  --multiselect-single-background-color: trasparent;
+  --multiselect-conten-wrapper-background-color: white;
+  --multiselect-new-selection-color: #dee2e6;
+
+  /* Модальные окна */
+  --modal-background: white;
+  --modal-input-background: white;
+  --modal-button-background: var(--button-background-color);
+  --modal-hover-button-background: var(--hover-button-background-color);
+  --modal-disabled-button-background: #cccccc;
+  --modal-disabled-button-text: #666666;
+
+  /* Интерактивная карта */
+  --map-hover-color: rgba(255, 255, 255, 0.1);
+
+  /* Иконки социальных сетей */
+  --github-color: gray;
+  --leetcode-hover: #f7eee2;
+  --telegram-hover: #24a1de;
+
+  /* Выпадающий список сортировки */
+  --sort-dropdown-background-color: white;
+
+  /* Таблица в Публикациях*/
+  --pub-table-background: #ffeb99;
+
+  --table-header-font-size: 14px;
+  --table-row-font-size: 12px;
+}
+
+/* Параметры тёмной темы */
+.dark-theme {
+  /* Цвет шрифта */
+  --text-color: #f0f0f0;
+
+  /* */
+  --selection-color: #293f53;
+
+  /* Цвет заднего фона кнопок */
+  --button-background-color: rgba(31, 42, 52, 0.95);
+  /* Цвет заднего фона кнопок ПРИ НАВЕДЕНИИ*/
+  --hover-button-background-color: #222f3c;
+
+  /* Цвет скролла */
+  --scroll-bar-gradient: linear-gradient(to bottom, #293f53, #25384a);
+
+  /* Переменные логотипа */
+  --header-title-color: #c2b280;
+
+  /* Переменные боковой панели */
+  --sidebar-background-color: transparent;
+  --sidebar-border: none;
+  --sidebar-background-image: none;
+
+  /* Переменные кнопки бокового меню */
+  --sidebar-button-active: white;
+  --sidebar-button-disabled: #c2b280;
+
+  /* Переменные гамбургер-меню */
+  --hamburger-line-color: white;
+
+  /* Переменные multiselect */
+  --multiselect-tags-background-color: var(--button-background-color);
+  --multiselect-single-background-color: var(--button-background-color);
+  --multiselect-conten-wrapper-background-color: var(--button-background-color);
+  --multiselect-new-selection-color: #293f53;
+
+  /* Модальные окна */
+  --modal-background: #1f2a34;
+  --modal-input-background: #293f53;
+  --modal-button-background: #25384a;
+  --modal-disabled-button-background: #636267;
+  --modal-disabled-button-text: #48484a;
+
+  --leetcode-hover: #eaa240;
+
+  /* Выпадающий список сортировки */
+  --sort-dropdown-background-color: var(--modal-background);
+
+  /* Таблица в Публикациях*/
+  --pub-table-background: #5f72b0;
+}
+
+/* Параметры ползунка прокрутки */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--button-background-color);
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-bar-gradient);
+}
+
+::selection {
+  background-color: var(--selection-color);
+}
+
+/* Шрифт */
+@font-face {
+  font-family: 'MyFont';
+  src: url('/fonts/font.woff2') format('woff2');
+}
+
+/* Глобальные настройки основных тегов */
+html {
+  width: 100vw;
+  height: 100vh;
+  font-size: var(--title-font-size);
+  overflow: hidden;
+}
+body {
+  width: 100%;
+  height: 100%;
+  font-family: 'MyFont', sans-serif;
+  font-size: 1rem;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.SidebarSVG {
+  width: 20px;
+  height: 20px;
+}
+
+.dark-theme .SidebarSVG path,
+.dark-theme .SidebarSVG line,
+.dark-theme .SidebarSVG rect {
+  stroke: white !important;
+  fill: white !important;
+}
+
+@media (min-width: 1440px) {
+  body {
+    font-size: 1.25rem;
+  }
+  .SidebarSVG {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (min-width: 2560px) {
+  body {
+    font-size: 2rem;
+  }
+  .SidebarSVG {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+h1,
+h3 {
+  margin: 0;
+}

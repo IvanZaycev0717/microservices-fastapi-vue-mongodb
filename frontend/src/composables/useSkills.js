@@ -1,0 +1,94 @@
+import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
+
+export function useSkills() {
+  const { t } = useI18n()
+  const BASE_SKILLS_DATA = {
+    backend_kingdom: {
+      kingdom: 'Backend',
+      items: [
+        'Skill 1',
+        'Skill 2',
+      ],
+    },
+    database_kingdom: {
+      kingdom: 'Databases',
+      items: [
+        'Skill 1',
+        'Skill 2',
+      ],
+    },
+    frontend_kingdom: {
+      kingdom: 'Frontend',
+      items: [
+        'Skill 1',
+        'Skill 2',
+      ],
+    },
+    desktop_kingdom: {
+      kingdom: 'Desktop',
+      items: [
+        'Skill 1',
+        'Skill 2',
+      ],
+    },
+    devops_kingdom: {
+      kingdom: 'DevOps',
+      items: [
+        'Skill 1',
+        'Skill 2',
+      ],
+    },
+    telegram_kingdom: {
+      kingdom: 'Telegram',
+      items: [
+        'Skill 1',
+        'Skill 2',
+      ],
+    },
+    parsing_kingdom: {
+      kingdom: 'Parsing',
+      items: [
+        'Skill 1',
+        'Skill 2',
+      ],
+    },
+    computerscience_kingdom: {
+      kingdom: 'ComputerScience',
+      items: [
+        'Skill 1',
+        'Skill 2',
+      ],
+    },
+    gamedev_kingdom: {
+      kingdom: 'GameDev',
+      items: [
+        'Skill 1',
+        'Skill 2',
+      ],
+    },
+    ai_kingdom: {
+      kingdom: 'AI',
+      items: [
+        'Skill 1',
+        'Skill 2',
+      ],
+    },
+  }
+
+  const skillsData = computed(() => {
+    return Object.entries(BASE_SKILLS_DATA).reduce((acc, [key, category]) => {
+      acc[key] = {
+        kingdom: t(`MapMarkers.${category.kingdom}`, { defaultValue: category.kingdom }),
+        items: category.items.map((item) => {
+          const translation = t(`MapMarkers.${item}`, { defaultValue: item })
+          return translation.startsWith('MapMarkers.')
+            ? translation.slice('MapMarkers.'.length)
+            : translation
+        }),
+      }
+      return acc
+    }, {})
+  })
+  return skillsData
+}

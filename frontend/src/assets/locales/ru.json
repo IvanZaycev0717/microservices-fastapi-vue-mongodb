@@ -1,0 +1,102 @@
+{
+  "author": "Имя автора",
+  "job": "Профессия автора",
+  "desc1": "Навык 1",
+  "desc2": "Навык 2",
+  "desc3": "Навык 3",
+  "UserAuthDialog": {
+    "Enter": "Войти",
+    "Email": "Адрес вашей электронной почты",
+    "EmailPlaceholder": "Введите ваш email",
+    "Password": "Пароль",
+    "PasswordPlaceholder": "Введите ваш пароль",
+    "SubmitEnterButton": "Войти",
+    "Register": "Регистрация",
+    "ForgotPassword": "Забыли пароль?",
+    "ForgotPasswordMsg": "Введите адрес электронной почты, чтобы сбросить пароль",
+    "ResetPassword": "Сбросить пароль",
+    "HaveAnAccount": "Уже есть аккаунт? Войти",
+    "RepeatPassword": "Повторите пароль",
+    "RepeatPasswordPlaceholder": "Введите пароль еще раз",
+    "SignUp": "Зарегистрироваться",
+    "ResetEmailSent": "Письмо со сбросом пароля было отправлено на указанную элетронную почту",
+    "CloseModal": "Понятно",
+    "MyAccount": "Личный кабинет"
+  },
+  "SidebarButton": {
+    "AboutMe": "Обо мне",
+    "Technologies": "Технологии",
+    "Projects": "Проекты",
+    "Certificates": "Сертификаты",
+    "Publications": "Публикации",
+    "Contacts": "Контакты",
+    "Main": "Главная"
+  },
+  "SortControl": {
+    "Sorting": "Сортировать по",
+    "NewestFirst": "Вначале новые",
+    "OldestFirst": "Вначале старые",
+    "MostPopular": "Наиболее популярные"
+  },
+  "validation": {
+    "emailRequired": "Email обязателен",
+    "emailInvalid": "Некорректный email",
+    "passwordRequired": "Пароль обязателен",
+    "passwordMin": "Пароль должен быть не менее {min} символов",
+    "passwordsMustMatch": "Пароли должны совпадать"
+  },
+  "auth": {
+    "invalid_credentials": "Неверное имя или пароль",
+    "login_error": "Ошибка входа. Повторите попытку",
+    "network_error": "Проблема с интернет-соединением",
+    "successful": "Вы успешно вошли",
+    "logout": "Вы вышли из аккаунта",
+    "user_already_exists": "Такой пользователь уже существует"
+  },
+  "technologies": {
+    "description": "Используйте интерактивную карту ниже, что узнать какими технологиями я владею",
+    "Reset": "Сброс"
+  },
+  "MapMarkers": {
+    "Backend": "Бэкенд",
+    "Frontend": "Фронтенд",
+    "Databases": "Базы данных",
+    "Desktop": "Desktop-приложения",
+    "DevOps": "DevOps",
+    "Telegram": "Telegram-боты",
+    "Parsing": "Парсинг данных",
+    "ComputerScience": "Computer Science",
+    "GameDev": "Компьютерные игры",
+    "AI": "Искусственный интеллект",
+    "RegExp": "Регулярные выражения",
+    "Networks": "Компьютерные сети",
+    "OOP": "Объектно-ориентированное программирование",
+    "Algorithm": "Алгоритмы",
+    "DataStructure": "Структуры данных",
+    "DesignPatterns": "Паттерны проектирования",
+    "Architecture": "Архитектура ПО",
+    "Microservices": "Микросервисы"
+  },
+  "PublicationsView": {
+    "description": "Помимо веб-разработки я пишу технические статьи для популярных IT-ресурсов",
+    "title": "Название статьи",
+    "site": "Сайт",
+    "rating": "Рейтинг",
+    "pub_date": "Дата публикации"
+  },
+  "ContactsView": {
+    "title": "Контакты",
+    "description": "Для связи со мной кликните на карточку"
+  },
+  "CertificatesView": {
+    "description": "Несмотря на основное образование, я постоянно повышаю квалификацию и улучшаю свои профессиональные навыки"
+  },
+  "ProjectsView": {
+    "title": "Проекты",
+    "description": "Здесь представлены проекты, которые я создал с нуля и которые не нарушают коммерческую тайну и соглашение о неразглашении (NDA)"
+  },
+  "ProjectPortfolio": {
+    "look": "Посмотреть полный код на GitHub"
+  },
+  "removed": "Функция не включена в публичную сборку, но присутствует в исходном коде на GitHub"
+}

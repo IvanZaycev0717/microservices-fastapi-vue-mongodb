@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /$
+Allow: /index.html$
+Allow: /projects/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /node_modules/
+Crawl-delay: 2
+
+User-agent: Googlebot
+Allow: /images/
+Allow: /styles/
+Disallow: /scripts/
+
+User-agent: *
+Disallow: /*.pdf$
+Disallow: /*.zip$
+Disallow: /*.js$

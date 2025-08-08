@@ -1,0 +1,102 @@
+{
+  "author": "Author's name",
+  "job": "Author's job",
+  "desc1": "Skill 1",
+  "desc2": "Skill 2",
+  "desc3": "Skill 3",
+  "UserAuthDialog": {
+    "Enter": "Enter",
+    "Email": "Your email",
+    "EmailPlaceholder": "Enter your email",
+    "Password": "Password",
+    "PasswordPlaceholder": "Enter your password",
+    "SubmitEnterButton": "Sign in",
+    "Register": "Register",
+    "ForgotPassword": "Forgot password?",
+    "ForgotPasswordMsg": "Enter email to reset password",
+    "ResetPassword": "Reset password",
+    "HaveAnAccount": "Already have an account? Sign in",
+    "RepeatPassword": "Repeat password",
+    "RepeatPasswordPlaceholder": "Enter your password again",
+    "SignUp": "Sign Up",
+    "ResetEmailSent": "The password reset link has been sent to your email",
+    "CloseModal": "Close",
+    "MyAccount": "My Account"
+  },
+  "SidebarButton": {
+    "AboutMe": "About Me",
+    "Technologies": "Technologies",
+    "Projects": "Projects",
+    "Certificates": "Certificates",
+    "Publications": "Publications",
+    "Contacts": "Contacts",
+    "Main": "Main Page"
+  },
+  "SortControl": {
+    "Sorting": "Sort by",
+    "NewestFirst": "Newest first",
+    "OldestFirst": "Oldest first",
+    "MostPopular": "Most popular"
+  },
+  "validation": {
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email",
+    "passwordRequired": "Password is required",
+    "passwordMin": "Password must be at least {min} characters",
+    "passwordsMustMatch": "Passwords must match"
+  },
+  "auth": {
+    "invalid_credentials": "Invalid email or password",
+    "login_error": "Login failed",
+    "network_error": "Network connection error",
+    "successful": "Login successful!",
+    "logout": "You have been logged out",
+    "user_already_exists": "User already exists"
+  },
+  "technologies": {
+    "description": "Use the interactive map below to see which technologies I’m skilled in",
+    "Reset": "Reset"
+  },
+  "MapMarkers": {
+    "Backend": "Backend",
+    "Frontend": "Frontend",
+    "Databases": "Databases",
+    "Desktop": "Desktop apps",
+    "DevOps": "DevOps",
+    "Telegram": "Telegram bots",
+    "Parsing": "Data parsing",
+    "ComputerScience": "Computer Science",
+    "GameDev": "GameDev",
+    "AI": "Artificial intelligence",
+    "RegExp": "Regular expressions",
+    "Networks": "Computer networks",
+    "OOP": "Object-oriented programming",
+    "Algorithm": "Algorithms",
+    "DataStructure": "Data structures",
+    "DesignPatterns": "Design patterns",
+    "Architecture": "Software architecture",
+    "Microservices": "Microservices"
+  },
+  "PublicationsView": {
+    "description": "Besides web development, I also write technical content for major IT platforms",
+    "title": "Article Title",
+    "site": "Website",
+    "rating": "Rating",
+    "pub_date": "Publication Date"
+  },
+  "ContactsView": {
+    "title": "Conatcts",
+    "description": "Click the card to contact me"
+  },
+  "CertificatesView": {
+    "description": "Despite my degree, I continuously improve my professional skills"
+  },
+  "ProjectsView": {
+    "title": "Projects",
+    "description": "Below you'll find projects I've created from scratch, all developed in compliance with client rights and without breaching any commercial confidentiality or NDA obligations"
+  },
+  "ProjectPortfolio": {
+    "look": "Check out the full code on GitHub"
+  },
+  "removed": "This feature is excluded from the public release but available in the project's GitHub repo"
+}
