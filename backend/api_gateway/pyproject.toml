@@ -9,6 +9,11 @@ license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi (>=0.116.1,<0.117.0)",
+    "uvicorn (>=0.35.0,<0.36.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "grpcio (>=1.74.0,<2.0.0)",
+    "grpcio-tools (>=1.74.0,<2.0.0)"
 ]
 
 
