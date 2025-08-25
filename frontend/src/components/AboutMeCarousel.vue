@@ -1,17 +1,50 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import 'vue3-carousel/carousel.css'
+import axios from 'axios'
 import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 import AboutMeCard from '@components/AboutMeCard.vue'
 
-const cards = [
-  { image: 'image_1.jpg', title: 'Some title 1', description: 'Some description 1' },
-  { image: 'image_2.jpg', title: 'Some title 2', description: 'Some description 2' }
-]
 
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+  headers: {
+    'Content-Type': 'application/json',
+  }
+})
+
+const cards = ref([])
+const loading = ref(true)
+const error = ref(null)
 const isMounted = ref(false)
+
+const fetchAboutData = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    
+    const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_ABOUT)
+
+    cards.value = response.data
+    
+  } catch (err) {
+    if (err.response) {
+      error.value = `Ошибка сервера: ${err.response.status} - ${err.response.data?.message || err.response.statusText}`
+    } else if (err.request) {
+      error.value = 'Не удалось подключиться к серверу. Проверьте соединение.'
+    } else {
+      error.value = `Ошибка при настройке запроса: ${err.message}`
+    }
+    console.error('Ошибка при загрузке данных:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
   isMounted.value = true
+  fetchAboutData()
 })
 
 const carouselConfig = {
@@ -28,7 +61,7 @@ const carouselConfig = {
 
 <template>
   <Carousel v-if="isMounted" v-bind="carouselConfig">
-    <Slide v-for="card in cards" :key="card.image">
+    <Slide v-for="(card, index) in cards" :key="index">
       <AboutMeCard>
         <template #image>
           <img
