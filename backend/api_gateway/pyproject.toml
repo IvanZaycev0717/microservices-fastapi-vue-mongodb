@@ -1,0 +1,17 @@
+[project]
+name = "personal_site_api_gateway"
+version = "1.0"
+description = "API Gateway for Personal site"
+authors = [
+    {name = "IvanZaycev0717",email = "ivzaycev0717@yandex.ru"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
