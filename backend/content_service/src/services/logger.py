@@ -1,10 +1,10 @@
 import logging
 import sys
 from typing import Optional
-
+import colorlog
 from settings import LOGGING_LEVEL
 
-LOG_FORMAT = "%(levelname)s - %(message)s"
+COLOR_FORMAT = "%(log_color)s%(levelname)s - %(message)s%(reset)s"
 
 
 class AppLogger:
@@ -18,21 +18,27 @@ class AppLogger:
 
     @classmethod
     def _setup_logger(cls, name: str):
-        """Настройка логгера"""
+        """Настройка цветного логгера"""
         logger = logging.getLogger(name)
         logger.setLevel(LOGGING_LEVEL)
-
         logger.handlers.clear()
 
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(logging.INFO)
-
-        formatter = logging.Formatter(LOG_FORMAT)
-        console_handler.setFormatter(formatter)
+        console_handler = colorlog.StreamHandler(sys.stdout)
+        console_handler.setFormatter(
+            colorlog.ColoredFormatter(
+                COLOR_FORMAT,
+                log_colors={
+                    "DEBUG": "cyan",
+                    "INFO": "green",
+                    "WARNING": "yellow",
+                    "ERROR": "red",
+                    "CRITICAL": "red,bg_white",
+                },
+            )
+        )
 
         logger.addHandler(console_handler)
         logger.propagate = False
-
         cls._logger = logger
 
 
