@@ -16,14 +16,14 @@ async def technologies():
     return {"Content": "technologies"}
 
 
-@router.get("/certificates")
-async def certificates():
-    return {"Content": "certificates"}
-
-
 @router.get("/projects")
 async def projects():
     return {"Content": "projects"}
+
+
+@router.get("/certificates")
+async def certificates():
+    return {"Content": "certificates"}
 
 
 @router.get("/publications")
