@@ -8,8 +8,7 @@ from pymongo.asynchronous.topology import ServerSelectionTimeoutError
 from pymongo.errors import ConnectionFailure, OperationFailure
 
 from services.logger import get_logger
-from settings import (MONGO_DB_CONNECTION_TIMEOUT_MS,
-                      MONGO_SERVER_SELECTION_TIMEOUT_MS, PATH_ABOUT_JSON)
+from settings import settings
 
 logger = get_logger("db_connection")
 
@@ -48,8 +47,8 @@ class MongoConnectionManager:
         try:
             self.client = AsyncMongoClient(
                 self.host,
-                connectTimeoutMS=MONGO_DB_CONNECTION_TIMEOUT_MS,
-                serverSelectionTimeoutMS=MONGO_SERVER_SELECTION_TIMEOUT_MS,
+                connectTimeoutMS=settings.MONGO_DB_CONNECTION_TIMEOUT_MS,
+                serverSelectionTimeoutMS=settings.MONGO_SERVER_SELECTION_TIMEOUT_MS,
             )
             await self.client.admin.command("ping")
             logger.info("MongoDB connection successful")
@@ -187,7 +186,7 @@ class MongoCollectionsManager:
         """
         try:
             await self.load_and_insert_data(
-                PATH_ABOUT_JSON, self.db["about"], logger
+                settings.PATH_ABOUT_JSON, self.db["about"], logger
                 )
             logger.info("All collections initialized successfully")
         except Exception as e:

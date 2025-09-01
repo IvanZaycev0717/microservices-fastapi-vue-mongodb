@@ -4,10 +4,10 @@ from typing import Optional
 
 import colorlog
 
-from settings import LOGGING_LEVEL, SERVICE_NAME
+from settings import settings
 
 COLOR_FORMAT = (
-    f"{SERVICE_NAME}: %(log_color)s%(levelname)s - %(message)s%(reset)s"
+    f"{settings.SERVICE_NAME}: %(log_color)s%(levelname)s - %(message)s%(reset)s"
 )
 
 
@@ -41,7 +41,7 @@ class AppLogger:
             name (str): Name of the logger to configure.
         """
         logger = logging.getLogger(name)
-        logger.setLevel(LOGGING_LEVEL)
+        logger.setLevel(settings.LOGGING_LEVEL)
         logger.handlers.clear()
 
         console_handler = colorlog.StreamHandler(sys.stdout)
