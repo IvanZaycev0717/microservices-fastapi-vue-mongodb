@@ -28,8 +28,7 @@ async def lifespan(app: FastAPI):
         else:
             db = client[settings.MONGO_DB_NAME]
         mongo_collections_manager = MongoCollectionsManager(client, db)
-        if not await mongo_collections_manager.collection_exists("about"):
-            await mongo_collections_manager.initialize_collections()
+        await mongo_collections_manager.initialize_collections()
     except Exception:
         logger.error("Failed to connect to MongoDB")
     yield

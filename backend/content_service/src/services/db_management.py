@@ -56,8 +56,7 @@ class MongoConnectionManager:
 
         except OperationFailure as e:
             if "Authentication failed" in str(e):
-                logger.error(
-                    "MongoDB authentication failed: invalid login or password")
+                logger.error("MongoDB authentication failed: invalid login or password")
             else:
                 logger.error(f"MongoDB operation failed: {e}")
             raise
@@ -160,6 +159,13 @@ class MongoCollectionsManager:
         """
         self.client = client
         self.db = db
+        self.collection_paths: dict[str, Path] = {
+            "about": settings.PATH_ABOUT_JSON,
+            "tech": settings.PATH_TECH_JSON,
+            "projects": settings.PATH_PROJECTS_JSON,
+            "certificates": settings.PATH_CERTIFICATES_JSON,
+            "publications": settings.PATH_PUBLICATIONS_JSON,
+        }
 
     async def collection_exists(self, collection_name: str) -> bool:
         """Checks if a collection exists in the current database.
@@ -185,12 +191,20 @@ class MongoCollectionsManager:
             Exception: If any error occurs during collection initialization.
         """
         try:
-            await self.load_and_insert_data(
-                settings.PATH_ABOUT_JSON, self.db["about"], logger
+            for collection_name, file_path in self.collection_paths.items():
+                if await self.collection_exists(collection_name):
+                    continue
+
+                await self.load_and_insert_data(
+                    file_path, self.db[collection_name], logger
                 )
+                logger.info(f"Collection {collection_name} initialized successfully")
+
             logger.info("All collections initialized successfully")
+
         except Exception as e:
             logger.error(f"Failed to initialize collections: {e}")
+            raise
 
     @staticmethod
     async def load_and_insert_data(file_path: Path, collection, logger):
@@ -211,9 +225,16 @@ class MongoCollectionsManager:
             if file_path.exists():
                 with open(file_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    await collection.insert_many(data)
-                    logger.info(f"Data loaded from {file_path.name}")
+                    if data:
+                        await collection.insert_many(data)
+                        logger.info(f"Data loaded from {file_path.name} ({len(data)} documents)")
+                    else:
+                        logger.warning(f"File {file_path.name} is empty")
             else:
                 logger.warning(f"File {file_path} not found")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in {file_path}: {e}")
+            raise
         except Exception as e:
             logger.error(f"Error loading {file_path}: {e}")
+            raise

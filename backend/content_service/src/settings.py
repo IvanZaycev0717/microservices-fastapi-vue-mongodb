@@ -7,12 +7,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # From .env file
-    MONGO_ROOT_USERNAME: str = Field(..., description="MongoDB root username")
-    MONGO_ROOT_PASSWORD: str = Field(..., description="MongoDB root password")
-    MONGODB_URL: str = Field(..., description="MongoDB connection URL")
-    MONGO_DATABASE: str = Field(..., description="MongoDB database name")
-    MONGO_PORT: int = Field(..., description="MongoDB port")
-    ME_CONFIG_MONGODB_URL: str = Field(..., description="Mongo Express connection URL")
+    MONGO_ROOT_USERNAME: str = Field(description="MongoDB root username")
+    MONGO_ROOT_PASSWORD: str = Field(description="MongoDB root password")
+    MONGODB_URL: str = Field(description="MongoDB connection URL")
+    MONGO_DATABASE: str = Field(description="MongoDB database name")
+    MONGO_PORT: int = Field(description="MongoDB port")
+    ME_CONFIG_MONGODB_URL: str = Field(description="Mongo Express connection URL")
 
     # Service configuration
     SERVICE_NAME: str = Field("CONTENT_SERVICE", description="Service identifier name")
@@ -39,6 +39,26 @@ class Settings(BaseSettings):
     def PATH_ABOUT_JSON(self) -> Path:
         """Path to about.json data file."""
         return self.DATA_PATH / "about.json"
+
+    @property
+    def PATH_TECH_JSON(self) -> Path:
+        """Path to tech.json data file."""
+        return self.DATA_PATH / "tech.json"
+
+    @property
+    def PATH_PROJECTS_JSON(self) -> Path:
+        """Path to projects.json data file."""
+        return self.DATA_PATH / "projects.json"
+
+    @property
+    def PATH_CERTIFICATES_JSON(self) -> Path:
+        """Path to certificates.json data file."""
+        return self.DATA_PATH / "certificates.json"
+
+    @property
+    def PATH_PUBLICATIONS_JSON(self) -> Path:
+        """Path to publications.json data file."""
+        return self.DATA_PATH / "publications.json"
 
     @property
     def MONGO_DB_NAME(self) -> str:
