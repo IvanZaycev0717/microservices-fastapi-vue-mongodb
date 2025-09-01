@@ -1,0 +1,42 @@
+{
+  "backend_kingdom": {
+    "kingdom": "Backend",
+    "items": ["Skill 1", "Skill 2"]
+  },
+  "database_kingdom": {
+    "kingdom": "Databases",
+    "items": ["Skill 1", "Skill 2"]
+  },
+  "frontend_kingdom": {
+    "kingdom": "Frontend",
+    "items": ["Skill 1", "Skill 2"]
+  },
+  "desktop_kingdom": {
+    "kingdom": "Desktop",
+    "items": ["Skill 1", "Skill 2"]
+  },
+  "devops_kingdom": {
+    "kingdom": "DevOps",
+    "items": ["Skill 1", "Skill 2"]
+  },
+  "telegram_kingdom": {
+    "kingdom": "Telegram",
+    "items": ["Skill 1", "Skill 2"]
+  },
+  "parsing_kingdom": {
+    "kingdom": "Parsing",
+    "items": ["Skill 1", "Skill 2"]
+  },
+  "computerscience_kingdom": {
+    "kingdom": "ComputerScience",
+    "items": ["Skill 1", "Skill 2"]
+  },
+  "gamedev_kingdom": {
+    "kingdom": "GameDev",
+    "items": ["Skill 1", "Skill 2"]
+  },
+  "ai_kingdom": {
+    "kingdom": "AI",
+    "items": ["Skill 1", "Skill 2"]
+  }
+}
