@@ -1,34 +1,41 @@
 import os
-from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
-from fastapi.middleware.cors import CORSMiddleware
-from routes import about
-from services.logger import get_logger
-from services.db_connection import MongoDB
-from dotenv import load_dotenv
-from settings import MONGO_DB_NAME
 
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+
+from routes import about
+from services.db_management import (MongoCollectionsManager,
+                                    MongoConnectionManager,
+                                    MongoDatabaseManager)
+from services.logger import get_logger
+from settings import MONGO_DB_NAME
 
 load_dotenv()
 
-logger = get_logger("content_service_main")
+logger = get_logger("main")
 
 MONGODB_HOST = os.getenv("MONGODB_URL")
-
-mongo = MongoDB(host=MONGODB_HOST)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    mongo_connection = MongoConnectionManager(host=MONGODB_HOST)
     try:
-        await mongo.open_client()
-        if not await mongo.check_database_existence(MONGO_DB_NAME):
-            await mongo.create_database(MONGO_DB_NAME)
-            await mongo.initialize_collections()
+        client = await mongo_connection.open_connection()
+        database_manager = MongoDatabaseManager(client)
+        if not await database_manager.check_database_existence(MONGO_DB_NAME):
+            db = await database_manager.create_database(MONGO_DB_NAME)
+        else:
+            db = client[MONGO_DB_NAME]
+        mongo_collections_manager = MongoCollectionsManager(client, db)
+        if not await mongo_collections_manager.collection_exists("about"):
+            await mongo_collections_manager.initialize_collections()
     except Exception:
         logger.error("Failed to connect to MongoDB")
     yield
-    await mongo.close_client()
+    await mongo_connection.close_connection()
     logger.info("Application shutdown complete")
 
 
@@ -54,14 +61,13 @@ async def log_requests(request: Request, call_next):
     try:
         response = await call_next(request)
         logger.info(
-                f"Response: {response.status_code} "
-                f"for {request.method} {request.url}"
-            )
+            f"Response: {response.status_code}"
+            f"for {request.method} {request.url}"
+        )
         return response
     except Exception as e:
         logger.error(
-            f"Error processing request {request.method} {request.url}: {e}"
-            )
+            f"Error processing request {request.method} {request.url}: {e}")
         raise
 
 

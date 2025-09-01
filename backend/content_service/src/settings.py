@@ -1,6 +1,8 @@
 import logging
 from pathlib import Path
 
+SERVICE_NAME = "CONTENT_SERVICE"
+
 # JSON Data Paths
 DATA_PATH = Path("data")
 
