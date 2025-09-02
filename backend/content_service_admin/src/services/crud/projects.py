@@ -1,6 +1,7 @@
-from typing import List, Optional, Dict, Any
-from pymongo.asynchronous.collection import AsyncCollection
+from typing import Any, Dict, List, Optional
+
 from base import BaseCRUD
+from pymongo.asynchronous.collection import AsyncCollection
 
 
 class ProjectsCRUD(BaseCRUD):

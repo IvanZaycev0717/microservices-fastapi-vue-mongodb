@@ -1,102 +1,90 @@
-from typing import Any, Optional
-from base import BaseCRUD
+from typing import Any, Dict, List, Optional
+
+from bson import ObjectId
+from pymongo.asynchronous.collection import AsyncCollection
+from pymongo.asynchronous.database import AsyncDatabase
+
+from services.logger import get_logger
+
+logger = get_logger('about-crud')
 
 
-class AboutCRUD(BaseCRUD):
-    """CRUD operations for about collection."""
+class AboutCRUD:
+    def __init__(self, db: AsyncDatabase):
+        self.collection: AsyncCollection = db.about
 
-    async def get_about_content(
-        self, lang: Optional[str] = None
-    ) -> list[dict[str, Any]]:
-        """Get about content, optionally filtered by language."""
-        if not lang:
-            return await self.get_all()
+    async def fetch(self, lang: Optional[str] = None) -> List[Dict[str, Any]]:
+        try:
+            if not lang or (lang not in ("en", "ru")):
+                cursor = self.collection.find()
+                results = await cursor.to_list(length=None)
+            else:
+                pipeline = [
+                    {
+                        "$project": {
+                            "image": 1,
+                            "title": f"$translations.{lang}.title",
+                            "description": f"$translations.{lang}.description",
+                            "_id": 1,
+                        }
+                    }
+                ]
+                cursor = await self.collection.aggregate(pipeline)
+                results = await cursor.to_list(length=None)
 
-        # Агрегация для фильтрации на уровне MongoDB
-        pipeline = [
-            {
-                "$project": {
-                    "image": 1,
-                    "title": {
-                        "$cond": [
-                            {"$ifNull": [f"$translations.{lang}.title", False]},
-                            f"$translations.{lang}.title",
-                            {
-                                "$cond": [
-                                    {"$ifNull": ["$translations.en.title", False]},
-                                    "$translations.en.title",
-                                    {
-                                        "$arrayElemAt": [
-                                            {"$objectToArray": "$translations.title"},
-                                            1,
-                                        ]
-                                    },
-                                ]
-                            },
-                        ]
+            return self._convert_objectid_to_str(results)
+
+        except Exception as e:
+            logger.error(f"Database error in fetch: {e}")
+            raise
+
+    async def fetch_one(
+        self, document_id: str, lang: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        """Получить один документ по ID"""
+        try:
+            if not lang:
+                result = await self.collection.find_one({"_id": ObjectId(document_id)})
+            else:
+                pipeline = [
+                    {"$match": {"_id": ObjectId(document_id)}},
+                    {
+                        "$project": {
+                            "image": 1,
+                            "title": f"$translations.{lang}.title",
+                            "description": f"$translations.{lang}.description",
+                            "_id": 1,
+                        }
                     },
-                    "description": {
-                        "$cond": [
-                            {"$ifNull": [f"$translations.{lang}.description", False]},
-                            f"$translations.{lang}.description",
-                            {
-                                "$cond": [
-                                    {
-                                        "$ifNull": [
-                                            "$translations.en.description",
-                                            False,
-                                        ]
-                                    },
-                                    "$translations.en.description",
-                                    {
-                                        "$arrayElemAt": [
-                                            {
-                                                "$objectToArray": "$translations.description"
-                                            },
-                                            1,
-                                        ]
-                                    },
-                                ]
-                            },
-                        ]
-                    },
-                }
-            }
-        ]
+                ]
+                cursor = self.collection.aggregate(pipeline)
+                results = await cursor.to_list(length=1)
+                result = results[0] if results else None
 
-        cursor = self.collection.aggregate(pipeline)
-        return await cursor.to_list(length=None)
+            return self._convert_objectid_to_str([result])[0] if result else None
 
-    async def get_about_content_simple(
-        self, lang: Optional[str] = None
-    ) -> list[dict[str, Any]]:
-        """Simple version - get all data and filter in Python."""
-        all_data = await self.get_all()
+        except Exception as e:
+            logger.error(f"Database error in fetch_one: {e}")
+            raise
 
-        if not lang:
-            return all_data
+    def _convert_objectid_to_str(
+        self, data: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Преобразует ObjectId в строки"""
+        if not data:
+            return []
 
-        filtered_data = []
-        for item in all_data:
-            if "translations" in item and lang in item["translations"]:
-                filtered_item = {
-                    "image": item.get("image", ""),
-                    "title": item["translations"][lang].get("title", ""),
-                    "description": item["translations"][lang].get("description", ""),
-                }
-                filtered_data.append(filtered_item)
+        converted_data = []
+        for item in data:
+            if item is None:
+                continue
 
-        return filtered_data
+            converted_item = {}
+            for key, value in item.items():
+                if isinstance(value, ObjectId):
+                    converted_item[key] = str(value)
+                else:
+                    converted_item[key] = value
+            converted_data.append(converted_item)
 
-    async def get_all_languages(self) -> list[str]:
-        """Get list of all available languages in the about content."""
-        pipeline = [
-            {"$project": {"languages": {"$objectToArray": "$translations"}}},
-            {"$unwind": "$languages"},
-            {"$group": {"_id": "$languages.k"}},
-            {"$sort": {"_id": 1}},
-        ]
-
-        cursor = self.collection.aggregate(pipeline)
-        languages = await cursor.to_list(length=None)
-        return [lang["_id"] for lang in languages]
+        return converted_data

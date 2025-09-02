@@ -3,11 +3,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from services.db_management import (
-    MongoCollectionsManager,
-    MongoConnectionManager,
-    MongoDatabaseManager,
-)
+from routes import about
+from services.db_management import (MongoCollectionsManager,
+                                    MongoConnectionManager,
+                                    MongoDatabaseManager)
 from services.logger import get_logger
 from settings import settings
 
@@ -26,6 +25,10 @@ async def lifespan(app: FastAPI):
             db = await database_manager.create_database(settings.MONGO_DB_NAME)
         else:
             db = client[settings.MONGO_DB_NAME]
+
+        app.state.mongo_client = client
+        app.state.mongo_db = db
+
         mongo_collections_manager = MongoCollectionsManager(client, db)
         await mongo_collections_manager.initialize_collections()
     except Exception:
@@ -41,6 +44,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+
+app.include_router(about.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -84,6 +90,5 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-
     logger.info("Starting Uvicorn server...")
-    uvicorn.run(app, host="localhost", port=8000, log_level="info")
+    uvicorn.run(app, host="localhost", port=8000)
