@@ -1,0 +1,28 @@
+[
+  {
+    "image": "image_1.jpg",
+    "translations": {
+      "en": {
+        "title": "Some title 1 EN",
+        "description": "Some description 1 EN"
+      },
+      "ru": {
+        "title": "Название 1 RU",
+        "description": "Описание 1 RU"
+      }
+    }
+  },
+  {
+    "image": "image_2.jpg",
+    "translations": {
+      "en": {
+        "title": "Some title 2 EN",
+        "description": "Some description 2 EN"
+      },
+      "ru": {
+        "title": "Название 2 RU",
+        "description": "Описание 2 RU"
+      }
+    }
+  }
+]
