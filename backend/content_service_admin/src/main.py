@@ -3,8 +3,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import grpc_about
-
 from services.db_management import (
     MongoCollectionsManager,
     MongoConnectionManager,
@@ -43,8 +41,6 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
-
-app.include_router(grpc_about.router)
 
 app.add_middleware(
     CORSMiddleware,
