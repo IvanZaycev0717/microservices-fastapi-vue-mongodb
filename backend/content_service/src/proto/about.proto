@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package about;
+
+service AboutService {
+  rpc GetAbout (AboutRequest) returns (AboutResponse);
+}
+
+message AboutRequest {
+  string lang = 1;
+}
+
+message Translation {
+  string title = 1;
+  string description = 2;
+}
+
+message AboutItem {
+  string image = 1;
+  Translation translation = 2;
+}
+
+message AboutResponse {
+  repeated AboutItem items = 1;
+}

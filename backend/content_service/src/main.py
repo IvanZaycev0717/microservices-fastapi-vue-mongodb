@@ -3,7 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import about
+from routes import grpc_about
+
 from services.db_management import (
     MongoCollectionsManager,
     MongoConnectionManager,
@@ -43,6 +44,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(grpc_about.router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -64,9 +67,6 @@ async def log_requests(request: Request, call_next):
     except Exception as e:
         logger.error(f"Error processing request {request.method} {request.url}: {e}")
         raise
-
-
-app.include_router(about.router)
 
 
 @app.get("/")
