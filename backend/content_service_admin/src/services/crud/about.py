@@ -6,14 +6,14 @@ from pymongo.asynchronous.database import AsyncDatabase
 
 from services.logger import get_logger
 
-logger = get_logger('about-crud')
+logger = get_logger("about-crud")
 
 
 class AboutCRUD:
     def __init__(self, db: AsyncDatabase):
         self.collection: AsyncCollection = db.about
 
-    async def fetch(self, lang: Optional[str] = None) -> List[Dict[str, Any]]:
+    async def read_all(self, lang: Optional[str] = None) -> List[Dict[str, Any]]:
         try:
             if not lang or (lang not in ("en", "ru")):
                 cursor = self.collection.find()
@@ -38,7 +38,7 @@ class AboutCRUD:
             logger.error(f"Database error in fetch: {e}")
             raise
 
-    async def fetch_one(
+    async def read_one(
         self, document_id: str, lang: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """Получить один документ по ID"""
@@ -66,6 +66,10 @@ class AboutCRUD:
         except Exception as e:
             logger.error(f"Database error in fetch_one: {e}")
             raise
+
+    async def create(self, first):
+        result = await self.collection.insert_one(first)
+        return result.inserted_id
 
     def _convert_objectid_to_str(
         self, data: List[Dict[str, Any]]
