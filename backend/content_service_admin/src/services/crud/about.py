@@ -32,7 +32,9 @@ class AboutCRUD:
                 ]
                 cursor = await self.collection.aggregate(pipeline)
                 results = await cursor.to_list(length=None)
-                return [AboutTranslatedResponse(**item).model_dump() for item in results]
+                return [
+                    AboutTranslatedResponse(**item).model_dump() for item in results
+                ]
 
         except Exception as e:
             logger.error(f"Database error in fetch: {e}")
@@ -61,12 +63,19 @@ class AboutCRUD:
                 cursor = self.collection.aggregate(pipeline)
                 results = await cursor.to_list(length=1)
                 result = results[0] if results else None
-                return AboutTranslatedResponse(**result).model_dump() if result else None
+                return (
+                    AboutTranslatedResponse(**result).model_dump() if result else None
+                )
 
         except Exception as e:
             logger.error(f"Database error in fetch_one: {e}")
             raise
 
-    async def create(self, first):
-        result = await self.collection.insert_one(first)
-        return result.inserted_id
+    async def create(self, data: dict[str, Any]) -> str:
+        try:
+            result = await self.collection.insert_one(data)
+            return str(result.inserted_id)
+
+        except Exception as e:
+            logger.error(f"Database error in create: {e}")
+            raise
