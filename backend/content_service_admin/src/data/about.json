@@ -1,6 +1,6 @@
 [
   {
-    "image": "image_1.jpg",
+    "image_url": "image_1.jpg",
     "translations": {
       "en": {
         "title": "Some title 1 EN",
@@ -13,7 +13,7 @@
     }
   },
   {
-    "image": "image_2.jpg",
+    "image_url": "image_2.jpg",
     "translations": {
       "en": {
         "title": "Some title 2 EN",

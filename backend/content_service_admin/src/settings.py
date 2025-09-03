@@ -15,10 +15,21 @@ class Settings(BaseSettings):
     ME_CONFIG_MONGODB_URL: str = Field(description="Mongo Express connection URL")
 
     # Service configuration
-    SERVICE_NAME: str = Field("CONTENT_SERVICE_ADMIN", description="Service identifier name")
+    SERVICE_NAME: str = Field(
+        "CONTENT_SERVICE_ADMIN", description="Service identifier name"
+    )
 
     # Paths configuration
     DATA_PATH: Path = Field(Path("data"), description="Base path for data files")
+    IMAGE_STORAGE_PATH: Path = Path("static/images")
+    ABOUT_STR: str = "about"
+    ABOUT_IMAGES_PATH: Path = IMAGE_STORAGE_PATH / ABOUT_STR
+
+    # Image validation settings
+    ALLOWED_IMAGE_EXTENSIONS: set[str] = {".png", ".webp", ".jpg", ".jpeg", ".avif"}
+    MAX_IMAGE_SIZE_KB: int = 500
+    IMAGE_OUTPUT_WIDTH: int = 1024
+    IMAGE_OUTPUT_HEIGHT: int = 1024
 
     # MongoDB connection settings
     MONGO_DB_CONNECTION_TIMEOUT_MS: int = Field(
@@ -34,6 +45,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file="../.env", env_file_encoding="utf-8", extra="ignore"
     )
+
+    def create_directories(self):
+        """Create necessary directories on startup"""
+        self.ABOUT_IMAGES_PATH.mkdir(parents=True, exist_ok=True)
 
     @property
     def PATH_ABOUT_JSON(self) -> Path:

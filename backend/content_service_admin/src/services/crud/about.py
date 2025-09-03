@@ -1,10 +1,11 @@
 from typing import Any, Dict, List, Optional
+
 from bson import ObjectId
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 
-from services.logger import get_logger
 from models.about import AboutFullResponse, AboutTranslatedResponse
+from services.logger import get_logger
 
 logger = get_logger("about-crud")
 

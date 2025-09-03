@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from routes import about
 from services.db_management import (MongoCollectionsManager,
@@ -13,6 +14,9 @@ from settings import settings
 logger = get_logger("main")
 
 MONGODB_HOST = settings.MONGODB_URL
+
+settings.create_directories()
+logger.info(f"Created image directories: {settings.ABOUT_IMAGES_PATH}")
 
 
 @asynccontextmanager
@@ -45,7 +49,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-
+app.mount("/images", StaticFiles(directory="static/images"), name="images")
 app.include_router(about.router)
 
 app.add_middleware(

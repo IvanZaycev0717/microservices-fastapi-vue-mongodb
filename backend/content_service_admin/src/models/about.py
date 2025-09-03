@@ -1,6 +1,7 @@
 from typing import Literal
+
 from bson import ObjectId
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 AllowedLanguage = Literal["en", "ru"]
 
@@ -13,7 +14,7 @@ class Translation(BaseModel):
 
 class AboutFullResponse(BaseModel):
     id: str = Field(alias="_id")
-    image: str
+    image_url: str
     translations: dict[str, Translation]
     
     @field_validator('id', mode='before')
@@ -31,7 +32,7 @@ class AboutFullResponse(BaseModel):
 
 class AboutTranslatedResponse(BaseModel):
     id: str = Field(alias="_id")
-    image: str
+    image_url: str
     title: str
     description: str
     
@@ -49,7 +50,7 @@ class AboutTranslatedResponse(BaseModel):
 
 
 class CreateAboutRequest(BaseModel):
-    image: str = Field(min_length=3, example="image_1.jpg")
+    image_url: str = Field(min_length=3)
     translations: dict[AllowedLanguage, Translation] = Field(
         example={
             "en": {"title": "Some title EN", "description": "Some description EN"},

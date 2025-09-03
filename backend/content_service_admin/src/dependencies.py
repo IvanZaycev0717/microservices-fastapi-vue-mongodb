@@ -1,4 +1,5 @@
 import logging
+
 from fastapi import Depends, Request
 from pymongo.asynchronous.database import AsyncDatabase
 
