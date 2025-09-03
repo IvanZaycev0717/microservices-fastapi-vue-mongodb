@@ -7,7 +7,8 @@ import colorlog
 from settings import settings
 
 COLOR_FORMAT = (
-    f"{settings.SERVICE_NAME}: %(log_color)s%(levelname)s - %(message)s%(reset)s"
+    f"{settings.SERVICE_NAME}: "
+    "%(log_color)s%(asctime)s - %(levelname)s - %(message)s%(reset)s"
 )
 
 
@@ -48,6 +49,7 @@ class AppLogger:
         console_handler.setFormatter(
             colorlog.ColoredFormatter(
                 COLOR_FORMAT,
+                datefmt="%Y-%m-%d %H:%M:%S",
                 log_colors={
                     "DEBUG": "cyan",
                     "INFO": "green",

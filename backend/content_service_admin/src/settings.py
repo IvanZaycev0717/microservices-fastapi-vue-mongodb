@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     ME_CONFIG_MONGODB_URL: str = Field(description="Mongo Express connection URL")
 
     # Service configuration
-    SERVICE_NAME: str = Field("CONTENT_SERVICE", description="Service identifier name")
+    SERVICE_NAME: str = Field("CONTENT_SERVICE_ADMIN", description="Service identifier name")
 
     # Paths configuration
     DATA_PATH: Path = Field(Path("data"), description="Base path for data files")
