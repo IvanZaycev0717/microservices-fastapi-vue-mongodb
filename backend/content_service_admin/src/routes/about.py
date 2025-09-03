@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status, F
 from services.crud.about import AboutCRUD
 from models.about import CreateAboutRequest, AboutFullResponse, AboutTranslatedResponse
 from dependencies import get_logger_dependency
+from pydantic import ValidationError
 
 router = APIRouter(prefix="/about", tags=["about"])
 
@@ -57,13 +58,25 @@ async def create_about_content(
         json_schema_extra={"example": "Описание 1 RU"},
     ),
     about_crud: AboutCRUD = Depends(get_about_crud),
+    logger: logging.Logger = Depends(get_logger_dependency),
 ):
-    data = CreateAboutRequest(
-        image=image,
-        translations={
-            "en": {"title": title_en, "description": description_en},
-            "ru": {"title": title_ru, "description": description_ru},
-        },
-    )
-    result = await about_crud.create(data.model_dump(exclude_none=True))
-    return f"Document created with _id={result}"
+    try:
+        data = CreateAboutRequest(
+            image=image,
+            translations={
+                "en": {"title": title_en, "description": description_en},
+                "ru": {"title": title_ru, "description": description_ru},
+            },
+        )
+
+        result = await about_crud.create(data.model_dump(exclude_none=True))
+        logger.info(f"Document created with _id={result}")
+        return f"Document created with _id={result}"
+
+    except ValidationError as e:
+        logger.error(f"Validation error: {e}")
+        raise HTTPException(422, detail=e.errors())
+
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        raise HTTPException(500, detail="Internal server error")

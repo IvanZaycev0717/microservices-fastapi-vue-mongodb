@@ -49,7 +49,7 @@ class AboutTranslatedResponse(BaseModel):
 
 
 class CreateAboutRequest(BaseModel):
-    image: str = Field(min_length=1, example="image_1.jpg")
+    image: str = Field(min_length=3, example="image_1.jpg")
     translations: dict[AllowedLanguage, Translation] = Field(
         example={
             "en": {"title": "Some title EN", "description": "Some description EN"},
