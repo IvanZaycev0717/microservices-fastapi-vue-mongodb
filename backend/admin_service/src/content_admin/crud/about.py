@@ -4,7 +4,7 @@ from bson import ObjectId
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 
-from models.about import AboutFullResponse, AboutTranslatedResponse
+from content_admin.models.about import AboutFullResponse, AboutTranslatedResponse
 from services.logger import get_logger
 
 logger = get_logger("about-crud")
@@ -24,7 +24,7 @@ class AboutCRUD:
                 pipeline = [
                     {
                         "$project": {
-                            "image": 1,
+                            "image_url": 1,
                             "title": f"$translations.{lang}.title",
                             "description": f"$translations.{lang}.description",
                             "_id": 1,
@@ -54,7 +54,7 @@ class AboutCRUD:
                     {"$match": {"_id": ObjectId(document_id)}},
                     {
                         "$project": {
-                            "image": 1,
+                            "image_url": 1,
                             "title": f"$translations.{lang}.title",
                             "description": f"$translations.{lang}.description",
                             "_id": 1,

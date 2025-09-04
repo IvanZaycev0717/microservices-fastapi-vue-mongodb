@@ -227,7 +227,9 @@ class MongoCollectionsManager:
                     data = json.load(f)
                     if data:
                         await collection.insert_many(data)
-                        logger.info(f"Data loaded from {file_path.name} ({len(data)} documents)")
+                        logger.info(
+                            f"Data loaded from {file_path.name} ({len(data)} documents)"
+                        )
                     else:
                         logger.warning(f"File {file_path.name} is empty")
             else:

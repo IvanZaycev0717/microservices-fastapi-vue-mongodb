@@ -47,9 +47,7 @@ class CertificatesCRUD(BaseCRUD):
         return certificates
 
     async def get_certificates_by_popularity_range(
-        self, min_popularity: int,
-        max_popularity: int,
-        sort: Optional[str] = None
+        self, min_popularity: int, max_popularity: int, sort: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Get certificates within popularity range.
 
@@ -61,8 +59,7 @@ class CertificatesCRUD(BaseCRUD):
         Returns:
             List[Dict]: Filtered certificates.
         """
-        filter_query = {
-            "popularity": {"$gte": min_popularity, "$lte": max_popularity}}
+        filter_query = {"popularity": {"$gte": min_popularity, "$lte": max_popularity}}
 
         sort_mapping = {
             "date_desc": [("date", -1)],
@@ -147,8 +144,7 @@ class CertificatesCRUD(BaseCRUD):
 
         return certificates
 
-    async def get_recent_certificates(
-            self, limit: int = 5) -> List[Dict[str, Any]]:
+    async def get_recent_certificates(self, limit: int = 5) -> List[Dict[str, Any]]:
         """Get most recent certificates.
 
         Args:

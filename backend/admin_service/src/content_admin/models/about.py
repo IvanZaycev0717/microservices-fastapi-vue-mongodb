@@ -11,23 +11,19 @@ class Translation(BaseModel):
     description: str = Field(min_length=1, max_length=1000, example="Описание на языке")
 
 
-
 class AboutFullResponse(BaseModel):
     id: str = Field(alias="_id")
     image_url: str
     translations: dict[str, Translation]
-    
-    @field_validator('id', mode='before')
+
+    @field_validator("id", mode="before")
     @classmethod
     def convert_objectid_to_str(cls, v):
         if isinstance(v, ObjectId):
             return str(v)
         return v
-    
-    model_config = ConfigDict(
-        populate_by_name=True,
-        json_encoders={ObjectId: str}
-    )
+
+    model_config = ConfigDict(populate_by_name=True, json_encoders={ObjectId: str})
 
 
 class AboutTranslatedResponse(BaseModel):
@@ -35,18 +31,15 @@ class AboutTranslatedResponse(BaseModel):
     image_url: str
     title: str
     description: str
-    
-    @field_validator('id', mode='before')
+
+    @field_validator("id", mode="before")
     @classmethod
     def convert_objectid_to_str(cls, v):
         if isinstance(v, ObjectId):
             return str(v)
         return v
-    
-    model_config = ConfigDict(
-        populate_by_name=True,
-        json_encoders={ObjectId: str}
-    )
+
+    model_config = ConfigDict(populate_by_name=True, json_encoders={ObjectId: str})
 
 
 class CreateAboutRequest(BaseModel):

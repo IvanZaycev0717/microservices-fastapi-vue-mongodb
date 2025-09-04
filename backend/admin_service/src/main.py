@@ -4,16 +4,16 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from routes import about
-from services.db_management import (MongoCollectionsManager,
-                                    MongoConnectionManager,
-                                    MongoDatabaseManager)
+from content_admin.routes import about
+from services.db_management import (
+    MongoCollectionsManager,
+    MongoConnectionManager,
+    MongoDatabaseManager,
+)
 from services.logger import get_logger
 from settings import settings
 
 logger = get_logger("main")
-
-MONGODB_HOST = settings.MONGODB_URL
 
 settings.create_directories()
 logger.info(f"Created image directories: {settings.ABOUT_IMAGES_PATH}")
@@ -21,36 +21,46 @@ logger.info(f"Created image directories: {settings.ABOUT_IMAGES_PATH}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    mongo_connection = MongoConnectionManager(host=MONGODB_HOST)
+    content_admin_mongo_connection = MongoConnectionManager(
+        host=settings.CONTENT_ADMIN_MONGODB_URL
+    )
     try:
-        client = await mongo_connection.open_connection()
-        database_manager = MongoDatabaseManager(client)
-        if not await database_manager.check_database_existence(settings.MONGO_DB_NAME):
-            db = await database_manager.create_database(settings.MONGO_DB_NAME)
+        content_admin_client = await content_admin_mongo_connection.open_connection()
+        content_admin_database_manager = MongoDatabaseManager(content_admin_client)
+        if not await content_admin_database_manager.check_database_existence(
+            settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
+        ):
+            content_admin_db = await content_admin_database_manager.create_database(
+                settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
+            )
         else:
-            db = client[settings.MONGO_DB_NAME]
+            content_admin_db = content_admin_client[
+                settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
+            ]
 
-        app.state.mongo_client = client
-        app.state.mongo_db = db
+        app.state.content_admin_mongo_client = content_admin_client
+        app.state.content_admin_mongo_db = content_admin_db
 
-        mongo_collections_manager = MongoCollectionsManager(client, db)
-        await mongo_collections_manager.initialize_collections()
+        content_admin_mongo_collections_manager = MongoCollectionsManager(
+            content_admin_client, content_admin_db
+        )
+        await content_admin_mongo_collections_manager.initialize_collections()
     except Exception:
         logger.error("Failed to connect to MongoDB")
     yield
-    await mongo_connection.close_connection()
+    await content_admin_mongo_connection.close_connection()
     logger.info("Application shutdown complete")
 
 
 app = FastAPI(
-    title="Content Service",
-    description="Microservice for content management",
+    title="Admin Service",
+    description="Common admin panel for all services",
     version="1.0.0",
     lifespan=lifespan,
 )
 
 app.mount("/images", StaticFiles(directory="static/images"), name="images")
-app.include_router(about.router)
+app.include_router(about.router, tags=["Content Service"])
 
 app.add_middleware(
     CORSMiddleware,
@@ -94,5 +104,6 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
+
     logger.info("Starting Uvicorn server...")
     uvicorn.run(app, host="localhost", port=8000)

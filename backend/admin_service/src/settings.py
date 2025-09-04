@@ -7,22 +7,26 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # From .env file
-    MONGO_ROOT_USERNAME: str = Field(description="MongoDB root username")
-    MONGO_ROOT_PASSWORD: str = Field(description="MongoDB root password")
-    MONGODB_URL: str = Field(description="MongoDB connection URL")
-    MONGO_DATABASE: str = Field(description="MongoDB database name")
-    MONGO_PORT: int = Field(description="MongoDB port")
-    ME_CONFIG_MONGODB_URL: str = Field(description="Mongo Express connection URL")
 
-    # Service configuration
-    SERVICE_NAME: str = Field(
-        "CONTENT_SERVICE_ADMIN", description="Service identifier name"
+    # Content Admin
+    CONTENT_ADMIN_MONGO_ROOT_USERNAME: str = Field(description="MongoDB root username")
+    CONTENT_ADMIN_MONGO_ROOT_PASSWORD: str = Field(description="MongoDB root password")
+    CONTENT_ADMIN_MONGODB_URL: str = Field(description="MongoDB connection URL")
+    CONTENT_ADMIN_MONGO_DATABASE_NAME: str = Field(description="MongoDB database name")
+    CONTENT_ADMIN_MONGO_PORT: int = Field(description="MongoDB port")
+    CONTENT_ADMIN_ME_CONFIG_MONGODB_URL: str = Field(
+        description="Mongo Express connection URL"
     )
 
-    # Paths configuration
-    DATA_PATH: Path = Field(Path("data"), description="Base path for data files")
-    IMAGE_STORAGE_PATH: Path = Path("static/images")
+    # Service configuration
+    SERVICE_NAME: str = Field("ADMIN_SERVICE")
+
+    # Image Directories Names
     ABOUT_STR: str = "about"
+
+    # Paths configuration
+    CONTENT_ADMIN_PATH: Path = Path("content_admin/data")
+    IMAGE_STORAGE_PATH: Path = Path("static/images")
     ABOUT_IMAGES_PATH: Path = IMAGE_STORAGE_PATH / ABOUT_STR
 
     # Image validation settings
@@ -53,32 +57,27 @@ class Settings(BaseSettings):
     @property
     def PATH_ABOUT_JSON(self) -> Path:
         """Path to about.json data file."""
-        return self.DATA_PATH / "about.json"
+        return self.CONTENT_ADMIN_PATH / "about.json"
 
     @property
     def PATH_TECH_JSON(self) -> Path:
         """Path to tech.json data file."""
-        return self.DATA_PATH / "tech.json"
+        return self.CONTENT_ADMIN_PATH / "tech.json"
 
     @property
     def PATH_PROJECTS_JSON(self) -> Path:
         """Path to projects.json data file."""
-        return self.DATA_PATH / "projects.json"
+        return self.CONTENT_ADMIN_PATH / "projects.json"
 
     @property
     def PATH_CERTIFICATES_JSON(self) -> Path:
         """Path to certificates.json data file."""
-        return self.DATA_PATH / "certificates.json"
+        return self.CONTENT_ADMIN_PATH / "certificates.json"
 
     @property
     def PATH_PUBLICATIONS_JSON(self) -> Path:
         """Path to publications.json data file."""
-        return self.DATA_PATH / "publications.json"
-
-    @property
-    def MONGO_DB_NAME(self) -> str:
-        """MongoDB database name (alias for MONGO_DATABASE)."""
-        return self.MONGO_DATABASE
+        return self.CONTENT_ADMIN_PATH / "publications.json"
 
 
 settings = Settings()

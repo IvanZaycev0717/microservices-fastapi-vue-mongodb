@@ -1,32 +1,39 @@
 import logging
-import re
-import uuid
-from pathlib import Path
-from typing import Annotated, Optional
+from typing import Optional
 
-from fastapi import (APIRouter, Depends, File, Form, HTTPException, Query,
-                     Request, UploadFile, status)
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+    status,
+)
 from pydantic import ValidationError
 
-from dependencies import get_logger_dependency
-from models.about import (AboutFullResponse, AboutTranslatedResponse,
-                          CreateAboutRequest)
-from services.crud.about import AboutCRUD
-from services.image_processor import (generate_image_filename,
-                                      has_image_allowed_extention,
-                                      has_image_proper_size_kb, resize_image,
-                                      save_image_as_webp)
+from content_admin.crud.about import AboutCRUD
+from content_admin.dependencies import get_about_crud, get_logger_dependency
+from content_admin.models.about import (
+    AboutFullResponse,
+    AboutTranslatedResponse,
+    CreateAboutRequest,
+)
+from services.image_processor import (
+    generate_image_filename,
+    has_image_allowed_extention,
+    has_image_proper_size_kb,
+    resize_image,
+    save_image_as_webp,
+)
 from settings import settings
 
-router = APIRouter(prefix="/about", tags=["about"])
+router = APIRouter(prefix="/about")
 
 
-async def get_about_crud(request: Request) -> AboutCRUD:
-    db = request.app.state.mongo_db
-    return AboutCRUD(db)
-
-
-@router.get("/", response_model=list[AboutFullResponse] | list[AboutTranslatedResponse])
+@router.get("", response_model=list[AboutFullResponse] | list[AboutTranslatedResponse])
 async def get_about_content(
     lang: Optional[str] = Query(None),
     about_crud: AboutCRUD = Depends(get_about_crud),
