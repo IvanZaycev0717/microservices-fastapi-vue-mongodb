@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from content_admin.routes import about
-from services.db_management import (
+from services.mongo_db_management import (
     MongoCollectionsManager,
     MongoConnectionManager,
     MongoDatabaseManager,
