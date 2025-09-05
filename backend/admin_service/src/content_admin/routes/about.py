@@ -217,10 +217,10 @@ async def update_about_image(
 @router.patch("/{document_id}", status_code=status.HTTP_200_OK)
 async def update_about_content(
     document_id: str,
-    title_en: Optional[str] = Form(None),
-    description_en: Optional[str] = Form(None),
-    title_ru: Optional[str] = Form(None),
-    description_ru: Optional[str] = Form(None),
+    title_en: Optional[str] = Form('Title EN'),
+    description_en: Optional[str] = Form('Description EN'),
+    title_ru: Optional[str] = Form('Заголовок RU'),
+    description_ru: Optional[str] = Form('Описание РУ'),
     about_crud: AboutCRUD = Depends(get_about_crud),
     logger: logging.Logger = Depends(get_logger_dependency),
 ):
