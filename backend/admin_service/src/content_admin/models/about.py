@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from bson import ObjectId
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -50,3 +50,30 @@ class CreateAboutRequest(BaseModel):
             "ru": {"title": "Название RU", "description": "Описание RU"},
         }
     )
+
+
+class AboutUpdateRequest(BaseModel):
+    id: str = Field(description="MongoDB ObjectId of the document to update")
+    image_url: Optional[str] = Field(None, description="New image URL")
+    translations: Optional[dict[str, dict[str, str]]] = Field(
+        None, 
+        description="Translations object with language keys"
+    )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": "68badb9576603121bb49626d",
+                "image_url": "http://localhost:9000/about/new_image.webp",
+                "translations": {
+                    "en": {
+                        "title": "Updated title EN",
+                        "description": "Updated description EN"
+                    },
+                    "ru": {
+                        "title": "Обновленное название RU",
+                        "description": "Обновленное описание RU"
+                    }
+                }
+            }
+        }

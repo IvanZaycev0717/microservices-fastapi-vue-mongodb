@@ -173,6 +173,105 @@ async def create_about_content(
         raise HTTPException(500, detail="Internal server error")
 
 
+@router.patch("/{document_id}/image", status_code=status.HTTP_200_OK)
+async def update_about_image(
+    document_id: str,
+    image: UploadFile = File(description="Новое изображение для замены"),
+    about_crud: AboutCRUD = Depends(get_about_crud),
+    minio_crud: MinioCRUD = Depends(get_minio_crud),
+    logger: logging.Logger = Depends(get_logger_dependency),
+):
+    """Replace image for existing about content document."""
+    try:
+        current_document = await about_crud.read_one(document_id)
+        if not current_document:
+            raise HTTPException(status_code=404, detail="Document not found")
+
+        if not await has_image_allowed_extention(image):
+            raise HTTPException(400, detail="Invalid image format")
+        if not await has_image_proper_size_kb(image):
+            raise HTTPException(400, detail="Image size exceeds limit")
+
+        resized_image = await resize_image(image)
+        webp_image, filename = await convert_image_to_webp(resized_image)
+
+        bucket_name = settings.ABOUT_STR
+        new_image_url = await minio_crud.upload_file(bucket_name, filename, webp_image)
+
+        old_image_url = current_document["image_url"]
+        old_bucket, old_object = extract_bucket_and_object_from_url(old_image_url)
+        await minio_crud.delete_file(old_bucket, old_object)
+
+
+        update_data = {"image_url": new_image_url}
+        await about_crud.update(document_id, update_data)
+
+        logger.info(f"Image updated for document {document_id}")
+        return {"message": "Image updated successfully", "image_url": new_image_url}
+
+    except Exception as e:
+        logger.error(f"Error updating image: {e}")
+        raise HTTPException(500, detail="Failed to update image")
+
+
+@router.patch("/{document_id}", status_code=status.HTTP_200_OK)
+async def update_about_content(
+    document_id: str,
+    title_en: Optional[str] = Form(None),
+    description_en: Optional[str] = Form(None),
+    title_ru: Optional[str] = Form(None),
+    description_ru: Optional[str] = Form(None),
+    about_crud: AboutCRUD = Depends(get_about_crud),
+    logger: logging.Logger = Depends(get_logger_dependency),
+):
+    """Update about content document with partial data."""
+    try:
+        update_data = {}
+        translations_update = {}
+
+        if title_en is not None or description_en is not None:
+            translations_update["en"] = {}
+            if title_en is not None:
+                translations_update["en"]["title"] = title_en
+            if description_en is not None:
+                translations_update["en"]["description"] = description_en
+
+        if title_ru is not None or description_ru is not None:
+            translations_update["ru"] = {}
+            if title_ru is not None:
+                translations_update["ru"]["title"] = title_ru
+            if description_ru is not None:
+                translations_update["ru"]["description"] = description_ru
+
+        if translations_update:
+            update_data["translations"] = translations_update
+
+        if not update_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No data provided for update",
+            )
+
+        result = await about_crud.update(document_id, update_data)
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document with id {document_id} not found",
+            )
+
+        logger.info(f"Document {document_id} updated successfully")
+        return {"message": "Document updated successfully", "document_id": document_id}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during update",
+        )
+
+
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_about_content(
     document_id: str,

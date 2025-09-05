@@ -97,6 +97,42 @@ class AboutCRUD:
             logger.error(f"Database error in create: {e}")
             raise
 
+    async def update(self, document_id: str, update_data: Dict[str, Any]) -> bool:
+        """Update a document by its ID with provided data.
+
+        Args:
+            document_id: The string representation of the document's ObjectId.
+            update_data: Dictionary with fields to update.
+
+        Returns:
+            bool: True if document was successfully updated, False if document not found.
+
+        Raises:
+            ValueError: If the provided document_id is not a valid ObjectId.
+            Exception: For any other database errors during update.
+        """
+        try:
+            if not ObjectId.is_valid(document_id):
+                raise ValueError(f"Invalid ObjectId format: {document_id}")
+
+            result = await self.collection.update_one(
+                {"_id": ObjectId(document_id)}, {"$set": update_data}
+            )
+
+            if result.modified_count == 0:
+                logger.warning(f"Document with id {document_id} not found for update")
+                return False
+
+            logger.info(f"Successfully updated document with id {document_id}")
+            return True
+
+        except ValueError as e:
+            logger.error(f"Validation error in update: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Database error in update: {e}")
+            raise
+
     async def delete(self, document_id: str) -> bool:
         """Delete a document by its ID from the collection.
 
