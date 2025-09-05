@@ -1,0 +1,365 @@
+{
+	"info": {
+		"_postman_id": "55ffda5d-4ee7-442a-bd3c-0a63b29b9296",
+		"name": "Content Admin API",
+		"description": "Тесты для микросервиса админки контента",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24875435"
+	},
+	"item": [
+		{
+			"name": "1. Happy Paths",
+			"item": [
+				{
+					"name": "GET All Documents",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/about",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"about"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CREATE New Document",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));\r",
+									"pm.test(\"Returns document ID\", () => {\r",
+									"    const response = pm.response.text();\r",
+									"    pm.expect(response).to.include(\"Document created with _id=\");\r",
+									"});\r",
+									"const raw = pm.response.text().split(\"_id=\")[1];\r",
+									"const docId = raw.substring(0, raw.length - 1);\r",
+									"pm.collectionVariables.set(\"document_id\", docId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "test-image.jpg"
+								},
+								{
+									"key": "title_en",
+									"value": "Test Title EN",
+									"type": "text"
+								},
+								{
+									"key": "description_en",
+									"value": "Test Description EN",
+									"type": "text"
+								},
+								{
+									"key": "title_ru",
+									"value": "Тест заголовок RU",
+									"type": "text"
+								},
+								{
+									"key": "description_ru",
+									"value": "Тест описание RU",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/about",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"about"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Created Document",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"Has image_url\", () => {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.image_url).to.be.a('string');\r",
+									"    pm.collectionVariables.set(\"image_url\", jsonData.image_url);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/about/{{document_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"about",
+								"{{document_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE Text Content (PATCH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"Update successful\", () => {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.message).to.eql(\"Document updated successfully\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title_en",
+									"value": "Updated Title EN",
+									"type": "text"
+								},
+								{
+									"key": "description_ru",
+									"value": "Обновленное описание RU",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/about/{{document_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"about",
+								"{{document_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPDATE Image (PATCH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"Image updated\", () => {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.image_url).to.be.a('string');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "test-image2.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/about/{{document_id}}/image",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"about",
+								"{{document_id}}",
+								"image"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Document",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 204 No Content\", () => pm.response.to.have.status(204));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/about/{{document_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"about",
+								"{{document_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000"
+		},
+		{
+			"key": "document_id",
+			"value": ""
+		},
+		{
+			"key": "image_url",
+			"value": ""
+		}
+	]
+}
