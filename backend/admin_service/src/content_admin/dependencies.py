@@ -5,15 +5,46 @@ from pymongo.asynchronous.database import AsyncDatabase
 
 from content_admin.crud.about import AboutCRUD
 from services.logger import get_logger
+from services.minio_management import MinioCRUD
 
 
 def get_logger_dependency() -> logging.Logger:
+    """Get configured logger instance for dependency injection.
+
+    Returns:
+        logging.Logger: Pre-configured logger instance.
+    """
     return get_logger()
 
 
+def get_minio_crud() -> MinioCRUD:
+    """Get MinIO CRUD manager instance for dependency injection.
+
+    Returns:
+        MinioCRUD: Initialized MinIO CRUD operations manager.
+    """
+    return MinioCRUD()
+
+
 async def get_db(request: Request) -> AsyncDatabase:
+    """Get MongoDB database connection from application state.
+
+    Args:
+        request: FastAPI request object containing application state.
+
+    Returns:
+        AsyncDatabase: Asynchronous MongoDB database connection.
+    """
     return request.app.state.content_admin_mongo_db
 
 
 async def get_about_crud(db: AsyncDatabase = Depends(get_db)) -> AboutCRUD:
+    """Get AboutCRUD instance with database dependency.
+
+    Args:
+        db: AsyncDatabase connection injected as dependency.
+
+    Returns:
+        AboutCRUD: Initialized About content CRUD operations manager.
+    """
     return AboutCRUD(db)

@@ -18,6 +18,12 @@ class Settings(BaseSettings):
         description="Mongo Express connection URL"
     )
 
+    # Object Storage
+    MINIO_ROOT_USER: str = Field(description="MinIO user name")
+    MINIO_ROOT_PASSWORD: str = Field(description="MinIO password")
+    MINIO_HOST: str = Field(description="MinIO host")
+    MINIO_PORT: str = Field(description="MinIO port")
+
     # Service configuration
     SERVICE_NAME: str = Field("ADMIN_SERVICE")
 

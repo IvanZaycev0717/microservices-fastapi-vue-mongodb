@@ -12,23 +12,29 @@ from fastapi import (
     UploadFile,
     status,
 )
+import minio
 from pydantic import ValidationError
 
 from content_admin.crud.about import AboutCRUD
-from content_admin.dependencies import get_about_crud, get_logger_dependency
+from content_admin.dependencies import (
+    get_about_crud,
+    get_logger_dependency,
+    get_minio_crud,
+)
 from content_admin.models.about import (
     AboutFullResponse,
     AboutTranslatedResponse,
     CreateAboutRequest,
 )
 from services.image_processor import (
-    generate_image_filename,
+    convert_image_to_webp,
     has_image_allowed_extention,
     has_image_proper_size_kb,
     resize_image,
-    save_image_as_webp,
 )
+from services.utils import extract_bucket_and_object_from_url
 from settings import settings
+from services.minio_management import MinioCRUD
 
 router = APIRouter(prefix="/about")
 
@@ -52,7 +58,53 @@ async def get_about_content(
         )
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.get(
+    "/{document_id}", response_model=AboutFullResponse | AboutTranslatedResponse
+)
+async def get_about_content_by_id(
+    document_id: str,
+    lang: Optional[str] = Query(None),
+    about_crud: AboutCRUD = Depends(get_about_crud),
+    logger: logging.Logger = Depends(get_logger_dependency),
+):
+    """Get specific about content document by ID with optional language filtering.
+
+    Args:
+        document_id: MongoDB ObjectId of the document to retrieve.
+        lang: Optional language code ('en' or 'ru') for translated response.
+
+    Returns:
+        AboutFullResponse if no language specified, AboutTranslatedResponse otherwise.
+
+    Raises:
+        HTTPException 404: If document with specified ID is not found.
+        HTTPException 400: If invalid document ID format provided.
+        HTTPException 500: If internal server error occurs.
+    """
+    try:
+        result = await about_crud.read_one(document_id, lang)
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document with id {document_id} not found",
+            )
+        logger.info(f"About document {document_id} fetched successfully")
+        return result
+
+    except ValueError as e:
+        logger.error(f"Invalid document ID format: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid document ID format"
+        )
+    except Exception as e:
+        logger.error(f"Database error fetching document {document_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while fetching about content",
+        )
+
+
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_about_content(
     image: UploadFile = File(description="Изображение для загрузки"),
     title_en: str = Form(
@@ -72,6 +124,7 @@ async def create_about_content(
         json_schema_extra={"example": "Описание 1 RU"},
     ),
     about_crud: AboutCRUD = Depends(get_about_crud),
+    minio_crud: MinioCRUD = Depends(get_minio_crud),
     logger: logging.Logger = Depends(get_logger_dependency),
 ):
     try:
@@ -83,11 +136,15 @@ async def create_about_content(
             error_message = "Image size exceeds 500KB"
             logger.error(error_message)
             raise HTTPException(400, error_message)
+
         resized_image = await resize_image(image)
-        filename = await generate_image_filename(resized_image)
-        image_url = await save_image_as_webp(
-            resized_image, settings.ABOUT_IMAGES_PATH, settings.ABOUT_STR, filename
-        )
+        webp_image, filename = await convert_image_to_webp(resized_image)
+
+        bucket_name = settings.ABOUT_STR
+        image_url = await minio_crud.upload_file(bucket_name, filename, webp_image)
+
+        logger.info(f"Image uploaded to MinIO: {image_url}")
+
         data = CreateAboutRequest(
             image_url=image_url,
             translations={
@@ -107,6 +164,64 @@ async def create_about_content(
         logger.error(f"Validation error: {e}")
         raise HTTPException(422, detail=e.errors())
 
+    except minio.error.S3Error as e:
+        logger.error(f"MinIO error: {e}")
+        raise HTTPException(500, detail="Failed to upload image to storage")
+
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(500, detail="Internal server error")
+
+
+@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_about_content(
+    document_id: str,
+    about_crud: AboutCRUD = Depends(get_about_crud),
+    minio_crud: MinioCRUD = Depends(get_minio_crud),
+    logger: logging.Logger = Depends(get_logger_dependency),
+):
+    """Delete about content document by ID and associated image from MinIO.
+
+    Args:
+        document_id: MongoDB ObjectId of the document to delete.
+
+    Raises:
+        HTTPException 404: If document with specified ID is not found.
+        HTTPException 400: If invalid document ID format provided.
+        HTTPException 500: If internal server error occurs during deletion.
+    """
+    try:
+        document = await about_crud.read_one(document_id)
+        if not document:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document with id {document_id} not found",
+            )
+        image_url = document["image_url"]
+        bucket_name, object_name = extract_bucket_and_object_from_url(image_url)
+
+        await minio_crud.delete_file(bucket_name, object_name)
+        logger.info(
+            f"Deleted image from MinIO: {object_name} from bucket {bucket_name}"
+        )
+
+        deleted = await about_crud.delete(document_id)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document with id {document_id} not found after image deletion",
+            )
+
+    except ValueError as e:
+        logger.error(f"Invalid document ID: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid document ID format"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting document or image: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete document and associated image",
+        )

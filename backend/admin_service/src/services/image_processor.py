@@ -9,22 +9,6 @@ from PIL import Image
 from settings import settings
 
 
-async def generate_image_filename(image: UploadFile) -> str:
-    """Generate unique filename for uploaded image using UUID.
-
-    Args:
-        image: Uploaded file object to extract extension from.
-
-    Returns:
-        str: Unique filename in format 'uuidhex.extension'.
-
-    Example:
-        'a1b2c3d4e5f67890123456789abcdef0.jpg'
-    """
-    file_ext = Path(image.filename).suffix.lower()
-    return f"{uuid.uuid4().hex}{file_ext}"
-
-
 async def has_image_allowed_extention(image: UploadFile) -> bool:
     """Check if the uploaded image has an allowed file extension.
 
@@ -104,31 +88,32 @@ async def resize_image(image: UploadFile) -> UploadFile:
     )
 
 
-async def save_image_as_webp(
-    image: UploadFile, filepath: str, subfolder: str, filename: str
-) -> str:
-    """Convert and save uploaded image as WEBP format with absolute URL.
+async def convert_image_to_webp(image: UploadFile) -> tuple[bytes, str]:
+    """Convert uploaded image to WEBP format with UUID filename.
 
     Args:
-        image: Uploaded image file.
-        filename: Generated filename for the image (without extension).
+        image: Uploaded image file in any supported format.
 
     Returns:
-        str: Absolute URL to access the saved WEBP image.
+        tuple: WEBP image bytes and generated filename in format 'uuid.webp'.
+
+    Example:
+        (b'webp_data', 'a1b2c3d4e5f67890123456789abcdef0.webp')
     """
-    import io
-
     from PIL import Image
+    import io
+    import uuid
 
-    # Read and convert to WEBP
     image_data = await image.read()
     img = Image.open(io.BytesIO(image_data))
 
-    # Save as WEBP
-    filename_without_ext = Path(filename).stem
-    webp_filename = f"{filename_without_ext}.webp"
-    webp_path = filepath / webp_filename
+    if img.mode in ("RGBA", "LA"):
+        background = Image.new("RGB", img.size, (255, 255, 255))
+        background.paste(img, mask=img.split()[-1])
+        img = background
 
-    img.save(webp_path, "WEBP", quality=80)
+    webp_buffer = io.BytesIO()
+    img.save(webp_buffer, "WEBP", quality=80)
 
-    return f"http://localhost:8000/images/{subfolder}/{webp_filename}"
+    filename = f"{uuid.uuid4().hex}.webp"
+    return webp_buffer.getvalue(), filename

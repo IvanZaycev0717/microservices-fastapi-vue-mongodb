@@ -44,8 +44,24 @@ class AboutCRUD:
     async def read_one(
         self, document_id: str, lang: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
-        """Получить один документ по ID"""
+        """Get a single document by ID with optional language filtering.
+
+        Args:
+            document_id: String representation of the document's ObjectId.
+            lang: Optional language code ('en' or 'ru') for translated response.
+
+        Returns:
+            Dict representation of AboutFullResponse or AboutTranslatedResponse if found,
+            None otherwise.
+
+        Raises:
+            ValueError: If the provided document_id is not a valid ObjectId.
+            Exception: For any other database errors during fetch operation.
+        """
         try:
+            if not ObjectId.is_valid(document_id):
+                raise ValueError(f"Invalid ObjectId format: {document_id}")
+
             if not lang:
                 result = await self.collection.find_one({"_id": ObjectId(document_id)})
                 return AboutFullResponse(**result).model_dump() if result else None
@@ -69,7 +85,7 @@ class AboutCRUD:
                 )
 
         except Exception as e:
-            logger.error(f"Database error in fetch_one: {e}")
+            logger.error(f"Database error in read_one: {e}")
             raise
 
     async def create(self, data: dict[str, Any]) -> str:
@@ -79,4 +95,37 @@ class AboutCRUD:
 
         except Exception as e:
             logger.error(f"Database error in create: {e}")
+            raise
+
+    async def delete(self, document_id: str) -> bool:
+        """Delete a document by its ID from the collection.
+
+        Args:
+            document_id: The string representation of the document's ObjectId.
+
+        Returns:
+            bool: True if document was successfully deleted, False if document not found.
+
+        Raises:
+            ValueError: If the provided document_id is not a valid ObjectId.
+            Exception: For any other database errors during deletion.
+        """
+        try:
+            if not ObjectId.is_valid(document_id):
+                raise ValueError(f"Invalid ObjectId format: {document_id}")
+
+            result = await self.collection.delete_one({"_id": ObjectId(document_id)})
+
+            if result.deleted_count == 0:
+                logger.warning(f"Document with id {document_id} not found for deletion")
+                return False
+
+            logger.info(f"Successfully deleted document with id {document_id}")
+            return True
+
+        except ValueError as e:
+            logger.error(f"Validation error in delete: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Database error in delete: {e}")
             raise
