@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from bson import ObjectId
 from fastapi import (
     APIRouter,
     Depends,
@@ -90,6 +91,9 @@ async def get_about_content_by_id(
             )
         logger.info(f"About document {document_id} fetched successfully")
         return result
+    
+    except HTTPException:
+        raise
 
     except ValueError as e:
         logger.error(f"Invalid document ID format: {e}")
@@ -183,6 +187,8 @@ async def update_about_image(
 ):
     """Replace image for existing about content document."""
     try:
+        if not ObjectId.is_valid(document_id):
+            raise ValueError(f"Invalid ObjectId format: {document_id}")
         current_document = await about_crud.read_one(document_id)
         if not current_document:
             raise HTTPException(status_code=404, detail="Document not found")
@@ -208,6 +214,16 @@ async def update_about_image(
 
         logger.info(f"Image updated for document {document_id}")
         return {"message": "Image updated successfully", "image_url": new_image_url}
+    
+    except ValueError as e:
+        logger.error(f"Invalid document ID: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid document ID format"
+        )
+    
+    except HTTPException:
+        raise
 
     except Exception as e:
         logger.error(f"Error updating image: {e}")
@@ -226,6 +242,8 @@ async def update_about_content(
 ):
     """Update about content document with partial data."""
     try:
+        if not ObjectId.is_valid(document_id):
+            raise ValueError(f"Invalid ObjectId format: {document_id}")
         update_data = {}
         translations_update = {}
 
@@ -262,8 +280,16 @@ async def update_about_content(
         logger.info(f"Document {document_id} updated successfully")
         return {"message": "Document updated successfully", "document_id": document_id}
 
+    except ValueError as e:
+        logger.error(f"Invalid document ID: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid document ID format"
+        )
+
     except HTTPException:
         raise
+
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         raise HTTPException(
@@ -290,6 +316,8 @@ async def delete_about_content(
         HTTPException 500: If internal server error occurs during deletion.
     """
     try:
+        if not ObjectId.is_valid(document_id):
+            raise ValueError(f"Invalid ObjectId format: {document_id}")
         document = await about_crud.read_one(document_id)
         if not document:
             raise HTTPException(

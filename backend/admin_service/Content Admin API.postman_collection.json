@@ -8,320 +8,525 @@
 	},
 	"item": [
 		{
-			"name": "1. Happy Paths",
+			"name": "Happy Paths",
 			"item": [
 				{
-					"name": "GET All Documents",
-					"event": [
+					"name": "About Endpoints",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/about",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"about"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "CREATE New Document",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));\r",
-									"pm.test(\"Returns document ID\", () => {\r",
-									"    const response = pm.response.text();\r",
-									"    pm.expect(response).to.include(\"Document created with _id=\");\r",
-									"});\r",
-									"const raw = pm.response.text().split(\"_id=\")[1];\r",
-									"const docId = raw.substring(0, raw.length - 1);\r",
-									"pm.collectionVariables.set(\"document_id\", docId);"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
+							"name": "/about - 200 (Get all documents)",
+							"event": [
 								{
-									"key": "image",
-									"type": "file",
-									"src": "test-image.jpg"
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
 								},
 								{
-									"key": "title_en",
-									"value": "Test Title EN",
-									"type": "text"
-								},
-								{
-									"key": "description_en",
-									"value": "Test Description EN",
-									"type": "text"
-								},
-								{
-									"key": "title_ru",
-									"value": "Тест заголовок RU",
-									"type": "text"
-								},
-								{
-									"key": "description_ru",
-									"value": "Тест описание RU",
-									"type": "text"
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
+									}
 								}
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/about",
-							"host": [
-								"{{base_url}}"
 							],
-							"path": [
-								"about"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "GET Created Document",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
-									"pm.test(\"Has image_url\", () => {\r",
-									"    const jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.image_url).to.be.a('string');\r",
-									"    pm.collectionVariables.set(\"image_url\", jsonData.image_url);\r",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about"
+									]
+								}
+							},
+							"response": []
 						},
 						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/about/{{document_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"about",
-								"{{document_id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "UPDATE Text Content (PATCH)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
-									"pm.test(\"Update successful\", () => {\r",
-									"    const jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.message).to.eql(\"Document updated successfully\");\r",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
+							"name": "/about - 200 (Wrong Query-param)",
+							"event": [
 								{
-									"key": "title_en",
-									"value": "Updated Title EN",
-									"type": "text"
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 even with invalid lang\", () => pm.response.to.have.status(200));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about?lang=invalid",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "invalid"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about - 201 (Create new document)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 201 Created\", () => pm.response.to.have.status(201));\r",
+											"pm.test(\"Returns document ID\", () => {\r",
+											"    const response = pm.response.text();\r",
+											"    pm.expect(response).to.include(\"Document created with _id=\");\r",
+											"});\r",
+											"const raw = pm.response.text().split(\"_id=\")[1];\r",
+											"const docId = raw.substring(0, raw.length - 1);\r",
+											"pm.collectionVariables.set(\"document_id\", docId);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
 								},
 								{
-									"key": "description_ru",
-									"value": "Обновленное описание RU",
-									"type": "text"
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
 								}
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/about/{{document_id}}",
-							"host": [
-								"{{base_url}}"
 							],
-							"path": [
-								"about",
-								"{{document_id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "UPDATE Image (PATCH)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
-									"pm.test(\"Image updated\", () => {\r",
-									"    const jsonData = pm.response.json();\r",
-									"    pm.expect(jsonData.image_url).to.be.a('string');\r",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-image.jpg"
+										},
+										{
+											"key": "title_en",
+											"value": "Test Title EN",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "Test Description EN",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Тест заголовок RU",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Тест описание RU",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/about",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about"
+									]
+								}
+							},
+							"response": []
 						},
 						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
+							"name": "/about/docId - 200 (Get created document)",
+							"event": [
 								{
-									"key": "image",
-									"type": "file",
-									"src": "test-image2.jpg"
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Has image_url\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.image_url).to.be.a('string');\r",
+											"    pm.collectionVariables.set(\"image_url\", jsonData.image_url);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
 								}
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/about/{{document_id}}/image",
-							"host": [
-								"{{base_url}}"
 							],
-							"path": [
-								"about",
-								"{{document_id}}",
-								"image"
-							]
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about/{{document_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"{{document_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/docId - 200 (Update String Fields)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Update successful\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.message).to.eql(\"Document updated successfully\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title_en",
+											"value": "Updated Title EN",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Обновленное описание RU",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/about/{{document_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"{{document_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/docId - 200 (Update Image)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Image updated\", () => {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.image_url).to.be.a('string');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-image2.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/about/{{document_id}}/image",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"{{document_id}}",
+										"image"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/docId - 204 (Delete Document)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 204 No Content\", () => pm.response.to.have.status(204));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about/{{document_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"{{document_id}}"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
 				},
 				{
-					"name": "DELETE Document",
-					"event": [
+					"name": "Tech Endpoints",
+					"item": []
+				}
+			]
+		},
+		{
+			"name": "Negative Tests",
+			"item": [
+				{
+					"name": "About Endpoints",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status 204 No Content\", () => pm.response.to.have.status(204));"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
+							"name": "/about - 422 (Missing Image)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 422 for unable process\", () => pm.response.to.have.status(422));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "Test Description EN",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Тест описание RU",
+											"type": "text"
+										},
+										{
+											"key": "title_en",
+											"value": "Test Title EN",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Тест заголовок RU",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/about",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about"
+									]
+								}
+							},
+							"response": []
 						},
 						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/about/{{document_id}}",
-							"host": [
-								"{{base_url}}"
+							"name": "/about - 400 (Wrong Image Format)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 400 for invalid file format\", () => pm.response.to.have.status(400));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
 							],
-							"path": [
-								"about",
-								"{{document_id}}"
-							]
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "wrong-format.txt"
+										},
+										{
+											"key": "description_en",
+											"value": "Test Description EN",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Тест описание RU",
+											"type": "text"
+										},
+										{
+											"key": "title_en",
+											"value": "Test Title EN",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Тест заголовок RU",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/about",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/wrong_id - 400 (Not MongoDB ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 400 for invalid ObjectId\", () => pm.response.to.have.status(400));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about/wrong-id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"wrong-id"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
 				}
 			]
 		}
@@ -360,6 +565,14 @@
 		{
 			"key": "image_url",
 			"value": ""
+		},
+		{
+			"key": "unexisted_document_id",
+			"value": "507f1f77bcf86cd799439011",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			}
 		}
 	]
 }
