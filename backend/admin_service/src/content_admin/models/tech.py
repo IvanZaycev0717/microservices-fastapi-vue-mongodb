@@ -7,6 +7,9 @@ class Kingdom(BaseModel):
     kingdom: str
     items: List[str]
 
+class SkillsUpdate(BaseModel):
+    skills: str = ""
+
 
 class TechResponse(BaseModel):
     id: str = Field(alias="_id")
