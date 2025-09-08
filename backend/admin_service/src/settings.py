@@ -24,22 +24,34 @@ class Settings(BaseSettings):
     MINIO_HOST: str = Field(description="MinIO host")
     MINIO_PORT: str = Field(description="MinIO port")
 
+
     # Service configuration
     SERVICE_NAME: str = Field("ADMIN_SERVICE")
 
     # Image Directories Names
-    ABOUT_STR: str = "about"
+    ABOUT_BUCKET_NAME: str = "about"
 
     # Paths configuration
     CONTENT_ADMIN_PATH: Path = Path("content_admin/data")
     IMAGE_STORAGE_PATH: Path = Path("static/images")
-    ABOUT_IMAGES_PATH: Path = IMAGE_STORAGE_PATH / ABOUT_STR
+    ABOUT_IMAGES_PATH: Path = IMAGE_STORAGE_PATH / ABOUT_BUCKET_NAME
+
+    # Initial Data Loading Files
+    INITIAL_DATA_LOADING_FILES: set[str] = {
+        'about.json',
+        'certificates.json',
+        'projects.json',
+        'publications.json',
+        'tech.json',
+        'image1.webp',
+        'image2.webp'}
 
     # Image validation settings
     ALLOWED_IMAGE_EXTENSIONS: set[str] = {".png", ".webp", ".jpg", ".jpeg", ".avif"}
     MAX_IMAGE_SIZE_KB: int = 500
     IMAGE_OUTPUT_WIDTH: int = 1024
     IMAGE_OUTPUT_HEIGHT: int = 1024
+    
 
     # MongoDB connection settings
     MONGO_DB_CONNECTION_TIMEOUT_MS: int = Field(

@@ -144,7 +144,7 @@ async def create_about_content(
         resized_image = await resize_image(image)
         webp_image, filename = await convert_image_to_webp(resized_image)
 
-        bucket_name = settings.ABOUT_STR
+        bucket_name = settings.ABOUT_BUCKET_NAME
         image_url = await minio_crud.upload_file(bucket_name, filename, webp_image)
 
         logger.info(f"Image uploaded to MinIO: {image_url}")
@@ -201,7 +201,7 @@ async def update_about_image(
         resized_image = await resize_image(image)
         webp_image, filename = await convert_image_to_webp(resized_image)
 
-        bucket_name = settings.ABOUT_STR
+        bucket_name = settings.ABOUT_BUCKET_NAME
         new_image_url = await minio_crud.upload_file(bucket_name, filename, webp_image)
 
         old_image_url = current_document["image_url"]

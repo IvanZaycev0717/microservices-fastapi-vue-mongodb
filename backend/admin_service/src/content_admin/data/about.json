@@ -1,6 +1,6 @@
 [
   {
-    "image_url": "image_1.jpg",
+    "image_url": "http://localhost:9000/about/image1.webp",
     "translations": {
       "en": {
         "title": "Some title 1 EN",
@@ -13,7 +13,7 @@
     }
   },
   {
-    "image_url": "image_2.jpg",
+    "image_url": "http://localhost:9000/about/image2.webp",
     "translations": {
       "en": {
         "title": "Some title 2 EN",
