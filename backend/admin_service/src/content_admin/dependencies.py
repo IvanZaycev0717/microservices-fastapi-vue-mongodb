@@ -4,6 +4,7 @@ from fastapi import Depends, Request
 from pymongo.asynchronous.database import AsyncDatabase
 
 from content_admin.crud.about import AboutCRUD
+from content_admin.crud.tech import TechCRUD
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
 
@@ -48,3 +49,17 @@ async def get_about_crud(db: AsyncDatabase = Depends(get_db)) -> AboutCRUD:
         AboutCRUD: Initialized About content CRUD operations manager.
     """
     return AboutCRUD(db)
+
+
+async def get_tech_crud(db: AsyncDatabase = Depends(get_db)) -> TechCRUD:
+    """Get AboutCRUD instance with database dependency.
+
+    Args:
+        db: AsyncDatabase connection injected as dependency.
+
+    Returns:
+        AboutCRUD: Initialized About content CRUD operations manager.
+    """
+    return TechCRUD(db)
+
+

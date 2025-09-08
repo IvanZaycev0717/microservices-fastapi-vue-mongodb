@@ -2,10 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from content_admin.routes import about
+from content_admin.routes import about, tech
 from services.mongo_db_management import (
     MongoCollectionsManager,
     MongoConnectionManager,
@@ -84,6 +82,7 @@ app = FastAPI(
 )
 
 app.include_router(about.router, tags=["Content Service"])
+app.include_router(tech.router, tags=["Content Service"])
 
 app.add_middleware(
     CORSMiddleware,
