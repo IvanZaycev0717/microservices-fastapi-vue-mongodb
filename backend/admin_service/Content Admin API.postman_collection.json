@@ -14,44 +14,6 @@
 					"name": "About Endpoints",
 					"item": [
 						{
-							"name": "/about - 200 (Get all documents)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {\r",
-											"    pm.response.to.have.status(200);\r",
-											"});"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{base_url}}/about",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"about"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "/about - 200 (Wrong Query-param)",
 							"event": [
 								{
@@ -62,6 +24,13 @@
 										],
 										"type": "text/javascript",
 										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
 									}
 								}
 							],
@@ -365,7 +334,562 @@
 				},
 				{
 					"name": "Tech Endpoints",
-					"item": []
+					"item": [
+						{
+							"name": "/technologies - 200 (Get all documents)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/technologies",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/technologies/backend_kingdom - 200",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/backend_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"backend_kingdom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/technologies/database_kingdom - 200 (Get all documents) Copy 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/database_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"database_kingdom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/technologies/frontend_kingdom - 200 (Get all documents) Copy 3",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/frontend_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"frontend_kingdom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/technologies/desktop_kingdom - 200 (Get all documents) Copy 4",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/desktop_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"desktop_kingdom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/technologies/devops_kingdom - 200 (Get all documents) Copy 4",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/devops_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"devops_kingdom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/technologies/telegram_kingdom - 200 (Get all documents) Copy 4",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/telegram_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"telegram_kingdom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/technologies/parsing_kingdom - 200 (Get all documents) Copy 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/parsing_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"parsing_kingdom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/technologies/computerscience_kingdom - 200 (Get all documents) Copy 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/computerscience_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"computerscience_kingdom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/technologies/gamedev_kingdom - 200 (Get all documents) Copy 3",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/gamedev_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"gamedev_kingdom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/technologies/ai_kingdom - 200 (Get all documents) Copy 4",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/ai_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"ai_kingdom"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
@@ -387,6 +911,13 @@
 										],
 										"type": "text/javascript",
 										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
 									}
 								}
 							],
@@ -448,6 +979,13 @@
 										"type": "text/javascript",
 										"packages": {}
 									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
+									}
 								}
 							],
 							"request": {
@@ -496,6 +1034,76 @@
 							"response": []
 						},
 						{
+							"name": "/about - 400 (Too Large Image)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 400 for too big image\", () => pm.response.to.have.status(400));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "too-big-image.jpg"
+										},
+										{
+											"key": "description_en",
+											"value": "Test Description EN",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Тест описание RU",
+											"type": "text"
+										},
+										{
+											"key": "title_en",
+											"value": "Test Title EN",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Тест заголовок RU",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/about",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "/about/wrong_id - 400 (Not MongoDB ID)",
 							"event": [
 								{
@@ -507,6 +1115,13 @@
 										],
 										"type": "text/javascript",
 										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
 									}
 								}
 							],
@@ -521,6 +1136,396 @@
 									"path": [
 										"about",
 										"wrong-id"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/unexisted_id - 404 (Document not found)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 404 for non-existent document\", () => pm.response.to.have.status(404));\r",
+											"\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about/{{unexisted_document_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"{{unexisted_document_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/wrong-id - 400 (Invalid MongoDB ID) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 400 for invalid ObjectId\", () => pm.response.to.have.status(400));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title_en",
+											"value": "Updated Title EN",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Обновленное описание RU",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/about/wrong-id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"wrong-id"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/unexisted-id - 400 (Unexisted Document ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 404 for non-existent document\", () => pm.response.to.have.status(404));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title_en",
+											"value": "Updated Title EN",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Обновленное описание RU",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/about/{{unexisted_document_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"{{unexisted_document_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/invalid_object_id/image- 400 (Invalid Document Id)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 400 for invalid ObjectId\", () => pm.response.to.have.status(400));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-image2.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/about/invalid_object_id/image",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"invalid_object_id",
+										"image"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/unexisted_id/image- 400 (Unexisted MongoDB ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 404 for non-existent document\", () => pm.response.to.have.status(404));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-image2.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/about/{{unexisted_document_id}}/image",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"{{unexisted_document_id}}",
+										"image"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/invalid_object_id- 400 (Invalid MongoDB ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 400 for invalid ObjectId\", () => pm.response.to.have.status(400));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about/invalid_object_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"invalid_object_id"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about/unexisted_id- 400 (Unexisted MongoDB ID) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 404 for non-existent document\", () => pm.response.to.have.status(404));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about/{{unexisted_document_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about",
+										"{{unexisted_document_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Tech Endpoints",
+					"item": [
+						{
+							"name": "/technologies/unexisted_kingdom - 422",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422\", function () {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{skills_data}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/technologies/unexisted_kingdom",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"technologies",
+										"unexisted_kingdom"
 									]
 								}
 							},
@@ -568,11 +1573,11 @@
 		},
 		{
 			"key": "unexisted_document_id",
-			"value": "507f1f77bcf86cd799439011",
-			"description": {
-				"content": "",
-				"type": "text/plain"
-			}
+			"value": "507f1f77bcf86cd799439011"
+		},
+		{
+			"key": "skills_data",
+			"value": ""
 		}
 	]
 }
