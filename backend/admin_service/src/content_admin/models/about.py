@@ -52,6 +52,12 @@ class CreateAboutRequest(BaseModel):
     )
 
 
+class AboutUpdateForm(BaseModel):
+    title_en: Optional[str] = Field('Title EN')
+    description_en: Optional[str] = Field('Description EN')
+    title_ru: Optional[str] = Field('Заголовок РУ')
+    description_ru: Optional[str] = Field('Описание РУ')
+
 class AboutUpdateRequest(BaseModel):
     id: str = Field(description="MongoDB ObjectId of the document to update")
     image_url: Optional[str] = Field(None, description="New image URL")

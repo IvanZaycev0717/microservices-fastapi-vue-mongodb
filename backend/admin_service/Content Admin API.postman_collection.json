@@ -208,8 +208,8 @@
 								"method": "PATCH",
 								"header": [],
 								"body": {
-									"mode": "formdata",
-									"formdata": [
+									"mode": "urlencoded",
+									"urlencoded": [
 										{
 											"key": "title_en",
 											"value": "Updated Title EN",
@@ -218,6 +218,16 @@
 										{
 											"key": "description_ru",
 											"value": "Обновленное описание RU",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Updated Title RU",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "Description EN",
 											"type": "text"
 										}
 									]
@@ -1211,16 +1221,11 @@
 								"method": "PATCH",
 								"header": [],
 								"body": {
-									"mode": "formdata",
-									"formdata": [
+									"mode": "urlencoded",
+									"urlencoded": [
 										{
 											"key": "title_en",
 											"value": "Updated Title EN",
-											"type": "text"
-										},
-										{
-											"key": "description_ru",
-											"value": "Обновленное описание RU",
 											"type": "text"
 										}
 									]
@@ -1266,19 +1271,8 @@
 								"method": "PATCH",
 								"header": [],
 								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "title_en",
-											"value": "Updated Title EN",
-											"type": "text"
-										},
-										{
-											"key": "description_ru",
-											"value": "Обновленное описание RU",
-											"type": "text"
-										}
-									]
+									"mode": "urlencoded",
+									"urlencoded": []
 								},
 								"url": {
 									"raw": "{{base_url}}/about/{{unexisted_document_id}}",

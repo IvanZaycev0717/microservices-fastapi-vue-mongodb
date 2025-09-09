@@ -81,8 +81,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(about.router, tags=["Content Service"])
-app.include_router(tech.router, tags=["Content Service"])
+app.include_router(about.router, tags=["Content Service - About"])
+app.include_router(tech.router, tags=["Content Service - Tech"])
 
 app.add_middleware(
     CORSMiddleware,
@@ -107,13 +107,13 @@ async def log_requests(request: Request, call_next):
         raise
 
 
-@app.get("/")
+@app.get("/", tags=["Admin Service Maintenance"])
 async def root():
     logger.info("Root endpoint accessed")
     return {"message": "Content Service is running"}
 
 
-@app.get("/health")
+@app.get("/health", tags=["Admin Service Maintenance"])
 async def health_check():
     logger.debug("Health check endpoint accessed")
     try:

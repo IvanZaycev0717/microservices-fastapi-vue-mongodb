@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Annotated, Optional
 
 from bson import ObjectId
 from fastapi import (
@@ -25,6 +25,7 @@ from content_admin.dependencies import (
 from content_admin.models.about import (
     AboutFullResponse,
     AboutTranslatedResponse,
+    AboutUpdateForm,
     CreateAboutRequest,
 )
 from services.image_processor import (
@@ -233,10 +234,7 @@ async def update_about_image(
 @router.patch("/{document_id}", status_code=status.HTTP_200_OK)
 async def update_about_content(
     document_id: str,
-    title_en: Optional[str] = Form('Title EN'),
-    description_en: Optional[str] = Form('Description EN'),
-    title_ru: Optional[str] = Form('Заголовок RU'),
-    description_ru: Optional[str] = Form('Описание РУ'),
+    form_data: Annotated[AboutUpdateForm, Form()],
     about_crud: AboutCRUD = Depends(get_about_crud),
     logger: logging.Logger = Depends(get_logger_dependency),
 ):
@@ -244,25 +242,33 @@ async def update_about_content(
     try:
         if not ObjectId.is_valid(document_id):
             raise ValueError(f"Invalid ObjectId format: {document_id}")
-        update_data = {}
-        translations_update = {}
+        
+        document = await about_crud.read_one(document_id)
 
-        if title_en is not None or description_en is not None:
-            translations_update["en"] = {}
-            if title_en is not None:
-                translations_update["en"]["title"] = title_en
-            if description_en is not None:
-                translations_update["en"]["description"] = description_en
+        if not document:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document with id {document_id} not found",
+            )
+        
 
-        if title_ru is not None or description_ru is not None:
-            translations_update["ru"] = {}
-            if title_ru is not None:
-                translations_update["ru"]["title"] = title_ru
-            if description_ru is not None:
-                translations_update["ru"]["description"] = description_ru
+        if not form_data.title_en:
+            form_data.title_en = document['translations']['en']['title']
+        
+        if not form_data.description_en:
+            form_data.description_en = document['translations']['en']['description']
+        
+        if not form_data.title_ru:
+            form_data.title_ru = document['translations']['ru']['title']
+        
+        if not form_data.description_ru:
+            form_data.description_ru = document['translations']['ru']['title']
+        
 
-        if translations_update:
-            update_data["translations"] = translations_update
+        update_data = {'translations': {
+            'en': {"title": form_data.title_en, "description": form_data.description_en},
+            'ru': {"title": form_data.title_ru, "description": form_data.description_ru}
+        }}
 
         if not update_data:
             raise HTTPException(
