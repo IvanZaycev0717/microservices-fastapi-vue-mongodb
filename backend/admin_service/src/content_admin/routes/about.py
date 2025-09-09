@@ -43,9 +43,9 @@ router = APIRouter(prefix="/about")
 
 @router.get("", response_model=list[AboutFullResponse] | list[AboutTranslatedResponse])
 async def get_about_content(
-    lang: Optional[str] = Query(None),
-    about_crud: AboutCRUD = Depends(get_about_crud),
-    logger: logging.Logger = Depends(get_logger_dependency),
+    about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
+    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    lang: Annotated[Optional[str], Query()] = None
 ):
     try:
         result = await about_crud.read_all(lang)
@@ -65,9 +65,9 @@ async def get_about_content(
 )
 async def get_about_content_by_id(
     document_id: str,
-    lang: Optional[str] = Query(None),
-    about_crud: AboutCRUD = Depends(get_about_crud),
-    logger: logging.Logger = Depends(get_logger_dependency),
+    about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
+    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    lang: Annotated[Optional[str],  Query()] = None
 ):
     """Get specific about content document by ID with optional language filtering.
 
@@ -111,6 +111,9 @@ async def get_about_content_by_id(
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_about_content(
+    about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
+    minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
+    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
     image: UploadFile = File(description="Изображение для загрузки"),
     title_en: str = Form(
         description="Заголовок на английском",
@@ -128,9 +131,7 @@ async def create_about_content(
         description="Описание на русском",
         json_schema_extra={"example": "Описание 1 RU"},
     ),
-    about_crud: AboutCRUD = Depends(get_about_crud),
-    minio_crud: MinioCRUD = Depends(get_minio_crud),
-    logger: logging.Logger = Depends(get_logger_dependency),
+    
 ):
     try:
         if not await has_image_allowed_extention(image):
@@ -181,10 +182,10 @@ async def create_about_content(
 @router.patch("/{document_id}/image", status_code=status.HTTP_200_OK)
 async def update_about_image(
     document_id: str,
-    image: UploadFile = File(description="Новое изображение для замены"),
-    about_crud: AboutCRUD = Depends(get_about_crud),
-    minio_crud: MinioCRUD = Depends(get_minio_crud),
-    logger: logging.Logger = Depends(get_logger_dependency),
+    image: Annotated[UploadFile, File(description="Новое изображение для замены")],
+    about_crud: Annotated[AboutCRUD,  Depends(get_about_crud)],
+    minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
+    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
 ):
     """Replace image for existing about content document."""
     try:
@@ -235,8 +236,8 @@ async def update_about_image(
 async def update_about_content(
     document_id: str,
     form_data: Annotated[AboutUpdateForm, Form()],
-    about_crud: AboutCRUD = Depends(get_about_crud),
-    logger: logging.Logger = Depends(get_logger_dependency),
+    about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
+    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
 ):
     """Update about content document with partial data."""
     try:
@@ -307,9 +308,9 @@ async def update_about_content(
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_about_content(
     document_id: str,
-    about_crud: AboutCRUD = Depends(get_about_crud),
-    minio_crud: MinioCRUD = Depends(get_minio_crud),
-    logger: logging.Logger = Depends(get_logger_dependency),
+    about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
+    minio_crud: Annotated[MinioCRUD,  Depends(get_minio_crud)],
+    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
 ):
     """Delete about content document by ID and associated image from MinIO.
 
