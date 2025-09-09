@@ -4,15 +4,13 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from content_admin.routes import about, tech
-from services.mongo_db_management import (
-    MongoCollectionsManager,
-    MongoConnectionManager,
-    MongoDatabaseManager,
-)
-from services.logger import get_logger
-from settings import settings
 from services.data_loader import DataLoader
+from services.logger import get_logger
 from services.minio_management import MinioCRUD
+from services.mongo_db_management import (MongoCollectionsManager,
+                                          MongoConnectionManager,
+                                          MongoDatabaseManager)
+from settings import settings
 
 logger = get_logger("main")
 

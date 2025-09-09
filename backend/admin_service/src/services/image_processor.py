@@ -100,9 +100,10 @@ async def convert_image_to_webp(image: UploadFile) -> tuple[bytes, str]:
     Example:
         (b'webp_data', 'a1b2c3d4e5f67890123456789abcdef0.webp')
     """
-    from PIL import Image
     import io
     import uuid
+
+    from PIL import Image
 
     image_data = await image.read()
     img = Image.open(io.BytesIO(image_data))

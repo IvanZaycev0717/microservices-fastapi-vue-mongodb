@@ -1,42 +1,24 @@
 import logging
 from typing import Annotated, Optional
 
-from bson import ObjectId
-from fastapi import (
-    APIRouter,
-    Depends,
-    File,
-    Form,
-    HTTPException,
-    Query,
-    Request,
-    UploadFile,
-    status,
-)
 import minio
+from bson import ObjectId
+from fastapi import (APIRouter, Depends, File, Form, HTTPException, Query,
+                     UploadFile, status)
 from pydantic import ValidationError
 
 from content_admin.crud.about import AboutCRUD
-from content_admin.dependencies import (
-    get_about_crud,
-    get_logger_dependency,
-    get_minio_crud,
-)
-from content_admin.models.about import (
-    AboutFullResponse,
-    AboutTranslatedResponse,
-    AboutUpdateForm,
-    CreateAboutRequest,
-)
-from services.image_processor import (
-    convert_image_to_webp,
-    has_image_allowed_extention,
-    has_image_proper_size_kb,
-    resize_image,
-)
+from content_admin.dependencies import (get_about_crud, get_logger_dependency,
+                                        get_minio_crud)
+from content_admin.models.about import (AboutCreateForm, AboutFullResponse,
+                                        AboutTranslatedResponse,
+                                        AboutUpdateForm, CreateAboutRequest)
+from services.image_processor import (convert_image_to_webp,
+                                      has_image_allowed_extention,
+                                      has_image_proper_size_kb, resize_image)
+from services.minio_management import MinioCRUD
 from services.utils import extract_bucket_and_object_from_url
 from settings import settings
-from services.minio_management import MinioCRUD
 
 router = APIRouter(prefix="/about")
 
@@ -45,8 +27,26 @@ router = APIRouter(prefix="/about")
 async def get_about_content(
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
-    lang: Annotated[Optional[str], Query()] = None
+    lang: Annotated[Optional[str], Query()] = None,
 ):
+    """Retrieves about content from database with optional language filtering.
+
+    Returns full content with all languages if no lang parameter provided,
+    or translated content for specific language if lang parameter is specified.
+
+    Args:
+        about_crud: Dependency injection for AboutCRUD database operations.
+        logger: Dependency injection for logging instance.
+        lang: Optional language code to filter content (e.g., 'en', 'ru').
+
+    Returns:
+        list[AboutFullResponse] | list[AboutTranslatedResponse]:
+            List of about content items. Returns full responses if no language
+            specified, or translated responses for specific language.
+
+    Raises:
+        HTTPException: 404 if no content found, 500 on database error.
+    """
     try:
         result = await about_crud.read_all(lang)
         if not result:
@@ -67,7 +67,7 @@ async def get_about_content_by_id(
     document_id: str,
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
-    lang: Annotated[Optional[str],  Query()] = None
+    lang: Annotated[Optional[str], Query()] = None,
 ):
     """Get specific about content document by ID with optional language filtering.
 
@@ -92,7 +92,7 @@ async def get_about_content_by_id(
             )
         logger.info(f"About document {document_id} fetched successfully")
         return result
-    
+
     except HTTPException:
         raise
 
@@ -111,28 +111,32 @@ async def get_about_content_by_id(
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_about_content(
+    form_data: Annotated[AboutCreateForm, Depends(AboutCreateForm.as_form)],
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
     image: UploadFile = File(description="Изображение для загрузки"),
-    title_en: str = Form(
-        description="Заголовок на английском",
-        json_schema_extra={"example": "Some title 1 EN"},
-    ),
-    description_en: str = Form(
-        description="Описание на английском",
-        json_schema_extra={"example": "Some description 1 EN"},
-    ),
-    title_ru: str = Form(
-        description="Заголовок на русском",
-        json_schema_extra={"example": "Название 1 RU"},
-    ),
-    description_ru: str = Form(
-        description="Описание на русском",
-        json_schema_extra={"example": "Описание 1 RU"},
-    ),
-    
 ):
+    """Creates new about content entry with image upload and translations.
+
+    Processes multipart form data containing image file and text fields in multiple languages.
+    Validates image format and size, converts to WEBP format, uploads to MinIO storage,
+    and creates database entry with structured translations.
+
+    Args:
+        form_data: Form data containing title and description in multiple languages.
+        about_crud: Dependency injection for AboutCRUD database operations.
+        minio_crud: Dependency injection for MinIO file storage operations.
+        logger: Dependency injection for logging instance.
+        image: Image file to upload with validation for format and size.
+
+    Returns:
+        str: Success message containing ID of created document.
+
+    Raises:
+        HTTPException: 400 for invalid image format or size, 422 for validation errors,
+                      500 for MinIO upload failures or unexpected errors.
+    """
     try:
         if not await has_image_allowed_extention(image):
             error_message = "Image invalid format"
@@ -154,8 +158,14 @@ async def create_about_content(
         data = CreateAboutRequest(
             image_url=image_url,
             translations={
-                "en": {"title": title_en, "description": description_en},
-                "ru": {"title": title_ru, "description": description_ru},
+                "en": {
+                    "title": form_data.title_en,
+                    "description": form_data.description_en,
+                },
+                "ru": {
+                    "title": form_data.title_ru,
+                    "description": form_data.description_ru,
+                },
             },
         )
 
@@ -183,11 +193,30 @@ async def create_about_content(
 async def update_about_image(
     document_id: str,
     image: Annotated[UploadFile, File(description="Новое изображение для замены")],
-    about_crud: Annotated[AboutCRUD,  Depends(get_about_crud)],
+    about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
 ):
-    """Replace image for existing about content document."""
+    """Updates the image for an existing about content document.
+
+    Replaces the current image with a new uploaded image. Validates document existence,
+    processes image (validation, resizing, WEBP conversion), uploads to MinIO storage,
+    and deletes the old image from storage.
+
+    Args:
+        document_id: MongoDB ObjectId of the document to update.
+        image: New image file to replace the existing one.
+        about_crud: Dependency injection for AboutCRUD database operations.
+        minio_crud: Dependency injection for MinIO file storage operations.
+        logger: Dependency injection for logging instance.
+
+    Returns:
+        dict: Success message and URL of the new image.
+
+    Raises:
+        HTTPException: 400 for invalid document ID or image validation errors,
+                      404 if document not found, 500 for unexpected errors.
+    """
     try:
         if not ObjectId.is_valid(document_id):
             raise ValueError(f"Invalid ObjectId format: {document_id}")
@@ -210,20 +239,18 @@ async def update_about_image(
         old_bucket, old_object = extract_bucket_and_object_from_url(old_image_url)
         await minio_crud.delete_file(old_bucket, old_object)
 
-
         update_data = {"image_url": new_image_url}
         await about_crud.update(document_id, update_data)
 
         logger.info(f"Image updated for document {document_id}")
         return {"message": "Image updated successfully", "image_url": new_image_url}
-    
+
     except ValueError as e:
         logger.error(f"Invalid document ID: {e}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid document ID format"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid document ID format"
         )
-    
+
     except HTTPException:
         raise
 
@@ -239,11 +266,29 @@ async def update_about_content(
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
 ):
-    """Update about content document with partial data."""
+    """Updates translations for an existing about content document.
+
+    Modifies title and description fields for English and Russian translations.
+    If any field is not provided in the form data, retains the existing value from the document.
+    Validates document existence and ObjectId format before performing update.
+
+    Args:
+        document_id: MongoDB ObjectId of the document to update.
+        form_data: Form data containing optional title and description fields for both languages.
+        about_crud: Dependency injection for AboutCRUD database operations.
+        logger: Dependency injection for logging instance.
+
+    Returns:
+        dict: Success message and ID of the updated document.
+
+    Raises:
+        HTTPException: 400 for invalid document ID or empty update data,
+                      404 if document not found, 500 for unexpected errors.
+    """
     try:
         if not ObjectId.is_valid(document_id):
             raise ValueError(f"Invalid ObjectId format: {document_id}")
-        
+
         document = await about_crud.read_one(document_id)
 
         if not document:
@@ -251,25 +296,31 @@ async def update_about_content(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Document with id {document_id} not found",
             )
-        
 
         if not form_data.title_en:
-            form_data.title_en = document['translations']['en']['title']
-        
-        if not form_data.description_en:
-            form_data.description_en = document['translations']['en']['description']
-        
-        if not form_data.title_ru:
-            form_data.title_ru = document['translations']['ru']['title']
-        
-        if not form_data.description_ru:
-            form_data.description_ru = document['translations']['ru']['title']
-        
+            form_data.title_en = document["translations"]["en"]["title"]
 
-        update_data = {'translations': {
-            'en': {"title": form_data.title_en, "description": form_data.description_en},
-            'ru': {"title": form_data.title_ru, "description": form_data.description_ru}
-        }}
+        if not form_data.description_en:
+            form_data.description_en = document["translations"]["en"]["description"]
+
+        if not form_data.title_ru:
+            form_data.title_ru = document["translations"]["ru"]["title"]
+
+        if not form_data.description_ru:
+            form_data.description_ru = document["translations"]["ru"]["title"]
+
+        update_data = {
+            "translations": {
+                "en": {
+                    "title": form_data.title_en,
+                    "description": form_data.description_en,
+                },
+                "ru": {
+                    "title": form_data.title_ru,
+                    "description": form_data.description_ru,
+                },
+            }
+        }
 
         if not update_data:
             raise HTTPException(
@@ -290,8 +341,7 @@ async def update_about_content(
     except ValueError as e:
         logger.error(f"Invalid document ID: {e}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid document ID format"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid document ID format"
         )
 
     except HTTPException:
@@ -309,7 +359,7 @@ async def update_about_content(
 async def delete_about_content(
     document_id: str,
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
-    minio_crud: Annotated[MinioCRUD,  Depends(get_minio_crud)],
+    minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
 ):
     """Delete about content document by ID and associated image from MinIO.

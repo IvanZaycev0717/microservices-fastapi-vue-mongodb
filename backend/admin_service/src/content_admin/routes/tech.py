@@ -1,10 +1,11 @@
-from enum import StrEnum
 import logging
+from enum import StrEnum
+
 from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends
 
-from content_admin.dependencies import get_tech_crud, get_logger_dependency
 from content_admin.crud.tech import TechCRUD
+from content_admin.dependencies import get_logger_dependency, get_tech_crud
 from content_admin.models.tech import SkillsUpdate, TechResponse
 
 router = APIRouter(prefix="/technologies")

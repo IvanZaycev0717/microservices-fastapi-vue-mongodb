@@ -1,6 +1,7 @@
 from typing import Literal, Optional
 
 from bson import ObjectId
+from fastapi import Form
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 AllowedLanguage = Literal["en", "ru"]
@@ -57,6 +58,28 @@ class AboutUpdateForm(BaseModel):
     description_en: Optional[str] = Field('Description EN')
     title_ru: Optional[str] = Field('Заголовок РУ')
     description_ru: Optional[str] = Field('Описание РУ')
+
+
+class AboutCreateForm(BaseModel):
+    title_en: str = Field('Title EN')
+    description_en: str = Field('Description EN')
+    title_ru: str = Field('Заголовок РУ')
+    description_ru: str = Field('Описание РУ')
+
+    @classmethod
+    def as_form(
+        cls,
+        title_en: str = Form(...),
+        description_en: str = Form(...),
+        title_ru: str = Form(...),
+        description_ru: str = Form(...),
+    ):
+        return cls(
+            title_en=title_en,
+            description_en=description_en,
+            title_ru=title_ru,
+            description_ru=description_ru
+        )
 
 class AboutUpdateRequest(BaseModel):
     id: str = Field(description="MongoDB ObjectId of the document to update")

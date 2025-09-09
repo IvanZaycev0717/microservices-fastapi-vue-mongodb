@@ -1,9 +1,11 @@
 import io
 import json
+from urllib.parse import urlparse
+
 from minio import Minio
 from starlette.concurrency import run_in_threadpool
+
 from settings import settings
-from urllib.parse import urlparse
 
 
 class MinioManager:

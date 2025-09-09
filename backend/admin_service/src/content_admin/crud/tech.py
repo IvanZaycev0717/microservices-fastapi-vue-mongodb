@@ -1,7 +1,8 @@
-from pymongo.asynchronous.database import AsyncDatabase
 from pymongo.asynchronous.collection import AsyncCollection
-from services.logger import get_logger
+from pymongo.asynchronous.database import AsyncDatabase
+
 from content_admin.models.tech import TechResponse
+from services.logger import get_logger
 
 logger = get_logger("tech-crud")
 

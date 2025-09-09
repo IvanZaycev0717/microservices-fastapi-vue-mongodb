@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import List
+
 from bson import ObjectId
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Kingdom(BaseModel):

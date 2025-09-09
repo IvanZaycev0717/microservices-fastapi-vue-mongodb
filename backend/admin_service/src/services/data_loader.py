@@ -3,14 +3,12 @@ from pathlib import Path
 
 import aiofiles
 from fastapi.concurrency import run_in_threadpool
-
-from settings import settings
+from pymongo.errors import OperationFailure
 
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
 from services.mongo_db_management import MongoDatabaseManager
-from pymongo.errors import OperationFailure
-
+from settings import settings
 
 logger = get_logger("data_loader")
 
