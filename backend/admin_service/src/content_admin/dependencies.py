@@ -61,5 +61,3 @@ async def get_tech_crud(db: AsyncDatabase = Depends(get_db)) -> TechCRUD:
         AboutCRUD: Initialized About content CRUD operations manager.
     """
     return TechCRUD(db)
-
-

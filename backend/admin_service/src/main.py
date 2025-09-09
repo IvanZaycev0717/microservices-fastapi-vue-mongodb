@@ -23,13 +23,19 @@ async def lifespan(app: FastAPI):
 
     minio_crud = MinioCRUD()
     try:
-        content_admin_client = await content_admin_mongo_connection.open_connection()
-        content_admin_database_manager = MongoDatabaseManager(content_admin_client)
+        content_admin_client = (
+            await content_admin_mongo_connection.open_connection()
+        )
+        content_admin_database_manager = MongoDatabaseManager(
+            content_admin_client
+        )
         if not await content_admin_database_manager.check_database_existence(
             settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
         ):
-            content_admin_db = await content_admin_database_manager.create_database(
-                settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
+            content_admin_db = (
+                await content_admin_database_manager.create_database(
+                    settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
+                )
             )
         else:
             content_admin_db = content_admin_client[
@@ -101,7 +107,9 @@ async def log_requests(request: Request, call_next):
         )
         return response
     except Exception as e:
-        logger.error(f"Error processing request {request.method} {request.url}: {e}")
+        logger.error(
+            f"Error processing request {request.method} {request.url}: {e}"
+        )
         raise
 
 
@@ -119,7 +127,11 @@ async def health_check():
         return {"status": "healthy", "database": "connected"}
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        return {"status": "unhealthy", "database": "disconnected", "error": str(e)}
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e),
+        }
 
 
 if __name__ == "__main__":

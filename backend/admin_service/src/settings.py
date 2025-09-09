@@ -9,10 +9,18 @@ class Settings(BaseSettings):
     # From .env file
 
     # Content Admin
-    CONTENT_ADMIN_MONGO_ROOT_USERNAME: str = Field(description="MongoDB root username")
-    CONTENT_ADMIN_MONGO_ROOT_PASSWORD: str = Field(description="MongoDB root password")
-    CONTENT_ADMIN_MONGODB_URL: str = Field(description="MongoDB connection URL")
-    CONTENT_ADMIN_MONGO_DATABASE_NAME: str = Field(description="MongoDB database name")
+    CONTENT_ADMIN_MONGO_ROOT_USERNAME: str = Field(
+        description="MongoDB root username"
+    )
+    CONTENT_ADMIN_MONGO_ROOT_PASSWORD: str = Field(
+        description="MongoDB root password"
+    )
+    CONTENT_ADMIN_MONGODB_URL: str = Field(
+        description="MongoDB connection URL"
+    )
+    CONTENT_ADMIN_MONGO_DATABASE_NAME: str = Field(
+        description="MongoDB database name"
+    )
     CONTENT_ADMIN_MONGO_PORT: int = Field(description="MongoDB port")
     CONTENT_ADMIN_ME_CONFIG_MONGODB_URL: str = Field(
         description="Mongo Express connection URL"
@@ -23,7 +31,6 @@ class Settings(BaseSettings):
     MINIO_ROOT_PASSWORD: str = Field(description="MinIO password")
     MINIO_HOST: str = Field(description="MinIO host")
     MINIO_PORT: str = Field(description="MinIO port")
-
 
     # Service configuration
     SERVICE_NAME: str = Field("ADMIN_SERVICE")
@@ -38,20 +45,26 @@ class Settings(BaseSettings):
 
     # Initial Data Loading Files
     INITIAL_DATA_LOADING_FILES: set[str] = {
-        'about.json',
-        'certificates.json',
-        'projects.json',
-        'publications.json',
-        'tech.json',
-        'image1.webp',
-        'image2.webp'}
+        "about.json",
+        "certificates.json",
+        "projects.json",
+        "publications.json",
+        "tech.json",
+        "image1.webp",
+        "image2.webp",
+    }
 
     # Image validation settings
-    ALLOWED_IMAGE_EXTENSIONS: set[str] = {".png", ".webp", ".jpg", ".jpeg", ".avif"}
+    ALLOWED_IMAGE_EXTENSIONS: set[str] = {
+        ".png",
+        ".webp",
+        ".jpg",
+        ".jpeg",
+        ".avif",
+    }
     MAX_IMAGE_SIZE_KB: int = 500
     IMAGE_OUTPUT_WIDTH: int = 1024
     IMAGE_OUTPUT_HEIGHT: int = 1024
-    
 
     # MongoDB connection settings
     MONGO_DB_CONNECTION_TIMEOUT_MS: int = Field(

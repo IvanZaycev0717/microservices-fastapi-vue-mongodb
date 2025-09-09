@@ -14,6 +14,45 @@
 					"name": "About Endpoints",
 					"item": [
 						{
+							"name": "/about - 200 (Empty Query-param)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 even with invalid lang\", () => pm.response.to.have.status(200));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "/about - 200 (Wrong Query-param)",
 							"event": [
 								{
@@ -49,6 +88,96 @@
 										{
 											"key": "lang",
 											"value": "invalid"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about - 200 (En Query-param)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 even with invalid lang\", () => pm.response.to.have.status(200));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about?lang=en",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "en"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/about - 200 (Ru Query-param)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 even with invalid lang\", () => pm.response.to.have.status(200));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/about?lang=ru",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"about"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "ru"
 										}
 									]
 								}
