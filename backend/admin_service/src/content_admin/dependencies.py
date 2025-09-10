@@ -7,6 +7,7 @@ from content_admin.crud.about import AboutCRUD
 from content_admin.crud.tech import TechCRUD
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
+from content_admin.crud.projects import ProjectsCRUD
 
 
 def get_logger_dependency() -> logging.Logger:
@@ -52,12 +53,16 @@ async def get_about_crud(db: AsyncDatabase = Depends(get_db)) -> AboutCRUD:
 
 
 async def get_tech_crud(db: AsyncDatabase = Depends(get_db)) -> TechCRUD:
-    """Get AboutCRUD instance with database dependency.
+    """Get TechCRUD instance with database dependency.
 
     Args:
         db: AsyncDatabase connection injected as dependency.
 
     Returns:
-        AboutCRUD: Initialized About content CRUD operations manager.
+        TechCRUD: Initialized Tech content CRUD operations manager.
     """
     return TechCRUD(db)
+
+
+async def get_projects_crud(db: AsyncDatabase = Depends(get_db)) -> ProjectsCRUD:
+    return ProjectsCRUD(db)
