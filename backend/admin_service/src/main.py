@@ -59,6 +59,12 @@ async def lifespan(app: FastAPI):
             logger.info(f"{uploaded_files} was upload to MinIO")
         else:
             logger.info("MinIO already has required files")
+        
+        if not await data_loader.check_minio_files_existence(
+            minio_crud, settings.PROJECTS_BUCKET_NAME
+        ):
+            logger.warning("Files not found in MinIO")
+            logger.info("Starting image upload to MinIO...")
 
         app.state.content_admin_mongo_client = content_admin_client
         app.state.content_admin_mongo_db = content_admin_db

@@ -29,7 +29,7 @@ router = APIRouter(prefix="/about")
 async def get_about_content(
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
-    lang: Annotated[Optional[str], Query()] = None,
+    lang: Annotated[str | None, Query()] = None,
 ):
     """Retrieves about content from database with optional language filtering.
 
@@ -73,7 +73,7 @@ async def get_about_content_by_id(
     document_id: str,
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
-    lang: Annotated[Optional[str], Query()] = None,
+    lang: Annotated[str | None, Query()] = None,
 ):
     """Get specific about
     content document by ID with optional language filtering.
@@ -160,7 +160,7 @@ async def create_about_content(
             logger.error(error_message)
             raise HTTPException(400, error_message)
 
-        resized_image = await resize_image(image)
+        resized_image = await resize_image(image, settings.ABOUT_IMAGE_OUTPUT_WIDTH, settings.ABOUT_IMAGE_OUTPUT_HEIGHT)
         webp_image, filename = await convert_image_to_webp(resized_image)
 
         bucket_name = settings.ABOUT_BUCKET_NAME
@@ -248,7 +248,7 @@ async def update_about_image(
         if not await has_image_proper_size_kb(image):
             raise HTTPException(400, detail="Image size exceeds limit")
 
-        resized_image = await resize_image(image)
+        resized_image = await resize_image(image, settings.ABOUT_IMAGE_OUTPUT_WIDTH, settings.ABOUT_IMAGE_OUTPUT_HEIGHT)
         webp_image, filename = await convert_image_to_webp(resized_image)
 
         bucket_name = settings.ABOUT_BUCKET_NAME

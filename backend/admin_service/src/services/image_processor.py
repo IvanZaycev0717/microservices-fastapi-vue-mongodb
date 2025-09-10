@@ -1,6 +1,4 @@
 import io
-import shutil
-import uuid
 from pathlib import Path
 
 from fastapi import UploadFile
@@ -50,7 +48,7 @@ async def has_image_proper_size_kb(image: UploadFile) -> bool:
     return True
 
 
-async def resize_image(image: UploadFile) -> UploadFile:
+async def resize_image(image: UploadFile, width: int, height: int) -> UploadFile:
     """Resize image to square format with dimensions from settings.
 
     Args:
@@ -59,9 +57,6 @@ async def resize_image(image: UploadFile) -> UploadFile:
     Returns:
         UploadFile: Resized image file in square format.
     """
-    width = settings.IMAGE_OUTPUT_WIDTH
-    height = settings.IMAGE_OUTPUT_HEIGHT
-
     # Pillow handling
     image_data = await image.read()
     img = Image.open(io.BytesIO(image_data))
@@ -100,11 +95,6 @@ async def convert_image_to_webp(image: UploadFile) -> tuple[bytes, str]:
     Example:
         (b'webp_data', 'a1b2c3d4e5f67890123456789abcdef0.webp')
     """
-    import io
-    import uuid
-
-    from PIL import Image
-
     image_data = await image.read()
     img = Image.open(io.BytesIO(image_data))
 

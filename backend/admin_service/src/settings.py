@@ -37,6 +37,7 @@ class Settings(BaseSettings):
 
     # Image Directories Names
     ABOUT_BUCKET_NAME: str = "about"
+    PROJECTS_BUCKET_NAME: str = "projects"
 
     # Paths configuration
     CONTENT_ADMIN_PATH: Path = Path("content_admin/data")
@@ -61,10 +62,17 @@ class Settings(BaseSettings):
         ".jpg",
         ".jpeg",
         ".avif",
+        ".gif"
     }
     MAX_IMAGE_SIZE_KB: int = 500
-    IMAGE_OUTPUT_WIDTH: int = 1024
-    IMAGE_OUTPUT_HEIGHT: int = 1024
+
+    # About Images Sizes
+    ABOUT_IMAGE_OUTPUT_WIDTH: int = 1024
+    ABOUT_IMAGE_OUTPUT_HEIGHT: int = 1024
+
+    # Projects Images Sizes
+    PROJECTS_IMAGE_THUMB_OUTPUT_WIDTH: int = 300
+    PROJECTS_IMAGE_THUMB_OUTPUT_HEIGHT: int = 169
 
     # MongoDB connection settings
     MONGO_DB_CONNECTION_TIMEOUT_MS: int = Field(
