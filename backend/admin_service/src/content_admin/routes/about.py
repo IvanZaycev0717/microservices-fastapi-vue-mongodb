@@ -155,7 +155,7 @@ async def create_about_content(
             error_message = "Image invalid format"
             logger.error(error_message)
             raise HTTPException(400, error_message)
-        if not await has_image_proper_size_kb(image):
+        if not await has_image_proper_size_kb(image, settings.ABOUT_MAX_IMAGE_SIZE_KB):
             error_message = "Image size exceeds 500KB"
             logger.error(error_message)
             raise HTTPException(400, error_message)
@@ -245,7 +245,7 @@ async def update_about_image(
 
         if not await has_image_allowed_extention(image):
             raise HTTPException(400, detail="Invalid image format")
-        if not await has_image_proper_size_kb(image):
+        if not await has_image_proper_size_kb(image, settings.ABOUT_MAX_IMAGE_SIZE_KB):
             raise HTTPException(400, detail="Image size exceeds limit")
 
         resized_image = await resize_image(image, settings.ABOUT_IMAGE_OUTPUT_WIDTH, settings.ABOUT_IMAGE_OUTPUT_HEIGHT)

@@ -4,10 +4,10 @@ from fastapi import Depends, Request
 from pymongo.asynchronous.database import AsyncDatabase
 
 from content_admin.crud.about import AboutCRUD
+from content_admin.crud.projects import ProjectsCRUD
 from content_admin.crud.tech import TechCRUD
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
-from content_admin.crud.projects import ProjectsCRUD
 
 
 def get_logger_dependency() -> logging.Logger:

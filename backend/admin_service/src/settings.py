@@ -64,7 +64,13 @@ class Settings(BaseSettings):
         ".avif",
         ".gif"
     }
-    MAX_IMAGE_SIZE_KB: int = 500
+    ABOUT_MAX_IMAGE_SIZE_KB: int = 500 * 1024  # 500KB
+    PROJECT_MAX_IMAGE_SIZE_KB: int = 12_000 * 1024  # 12MB
+
+    # Forms Validation Settings
+    MAX_TITLE_LENGTH: int = 63
+    MAX_DESCRIPTION_LENGTH: int = 255
+
 
     # About Images Sizes
     ABOUT_IMAGE_OUTPUT_WIDTH: int = 1024

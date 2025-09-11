@@ -1,10 +1,27 @@
 import io
+import uuid
 from pathlib import Path
+from typing import NamedTuple
 
-from fastapi import UploadFile
-from PIL import Image
+from fastapi import HTTPException, UploadFile
+from PIL import Image, UnidentifiedImageError
+
+from services.logger import get_logger
+
+logger = get_logger("projects-crud")
 
 from settings import settings
+
+
+class WebpResult(NamedTuple):
+    """Container for converted WEBP image data.
+    
+    Attributes:
+        image_bytes: Binary data of the converted WEBP image.
+        filename: Generated filename in format 'uuid.webp'.
+    """
+    image_bytes: bytes
+    filename: str
 
 
 async def has_image_allowed_extention(image: UploadFile) -> bool:
@@ -27,7 +44,7 @@ async def has_image_allowed_extention(image: UploadFile) -> bool:
     return True
 
 
-async def has_image_proper_size_kb(image: UploadFile) -> bool:
+async def has_image_proper_size_kb(image: UploadFile, max_size: int) -> bool:
     """Check if the uploaded image size is within allowed limits.
 
     Args:
@@ -40,7 +57,6 @@ async def has_image_proper_size_kb(image: UploadFile) -> bool:
         Reads the file content to determine size, then resets the file pointer to position 0.
         Uses MAX_IMAGE_SIZE_KB from settings to determine maximum allowed size in kilobytes.
     """
-    max_size = settings.MAX_IMAGE_SIZE_KB * 1024
     content = await image.read()
     if len(content) > max_size:
         return False
@@ -48,7 +64,7 @@ async def has_image_proper_size_kb(image: UploadFile) -> bool:
     return True
 
 
-async def resize_image(image: UploadFile, width: int, height: int) -> UploadFile:
+async def resize_image(image: UploadFile, width: int, height: int, is_gif: bool = False) -> UploadFile:
     """Resize image to square format with dimensions from settings.
 
     Args:
@@ -57,33 +73,39 @@ async def resize_image(image: UploadFile, width: int, height: int) -> UploadFile
     Returns:
         UploadFile: Resized image file in square format.
     """
-    # Pillow handling
     image_data = await image.read()
-    img = Image.open(io.BytesIO(image_data))
+    try:
+        if is_gif:
+            with Image.open(io.BytesIO(image_data)) as img:
+                img.seek(0)
+                frame = img.copy()
+                img = frame.convert('RGB')
+        else:
+            img = Image.open(io.BytesIO(image_data))
 
-    orig_width, orig_height = img.size
-    min_dimension = min(orig_width, orig_height)
-    left = (orig_width - min_dimension) // 2
-    top = (orig_height - min_dimension) // 2
-    img_cropped = img.crop((left, top, left + min_dimension, top + min_dimension))
+        orig_width, orig_height = img.size
+        min_dimension = min(orig_width, orig_height)
+        left = (orig_width - min_dimension) // 2
+        top = (orig_height - min_dimension) // 2
+        img_cropped = img.crop((left, top, left + min_dimension, top + min_dimension))
 
-    # Resize to target dimensions
-    img_resized = img_cropped.resize((width, height), Image.Resampling.LANCZOS)
+        img_resized = img_cropped.resize((width, height), Image.Resampling.LANCZOS)
 
-    # Convert back to bytes
-    output_buffer = io.BytesIO()
-    img_format = img.format or "JPEG"
-    img_resized.save(output_buffer, format=img_format)
-    output_buffer.seek(0)
+        output_buffer = io.BytesIO()
+        img_resized.save(output_buffer, format="WEBP")
+        output_buffer.seek(0)
 
-    return UploadFile(
-        filename=image.filename,
-        file=output_buffer,
-        headers={"content-type": image.content_type},
-    )
+        return UploadFile(
+            filename=image.filename.replace('.gif', '.webp'),
+            file=output_buffer,
+            headers={"content-type": image.content_type}
+        )
+    except UnidentifiedImageError:
+        logger.error(f"Cannot identify image: {image.filename}")
+        raise HTTPException(400, "Invalid image format")
 
 
-async def convert_image_to_webp(image: UploadFile) -> tuple[bytes, str]:
+async def convert_image_to_webp(image: UploadFile) -> WebpResult:
     """Convert uploaded image to WEBP format with UUID filename.
 
     Args:
@@ -97,6 +119,11 @@ async def convert_image_to_webp(image: UploadFile) -> tuple[bytes, str]:
     """
     image_data = await image.read()
     img = Image.open(io.BytesIO(image_data))
+
+    if hasattr(img, 'is_animated') and img.is_animated:
+        img.seek(0)
+        frame = img.copy()
+        img = frame.convert('RGB')
 
     if img.mode in ("RGBA", "LA"):
         background = Image.new("RGB", img.size, (255, 255, 255))
