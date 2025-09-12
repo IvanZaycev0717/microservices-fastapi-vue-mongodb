@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from pydantic import ValidationError
 
 from content_admin.crud.projects import ProjectsCRUD
 from content_admin.dependencies import (
@@ -135,7 +136,6 @@ async def create_project(
 
         result = await projects_crud.create(project_data)
         return f"Project created with _id={result}"
-
     except HTTPException:
         raise
     except Exception as e:
@@ -234,17 +234,14 @@ async def update_project(
 
         update_data = {"title": {}, "description": {}}
 
-        if not form_data.title_en:
-            form_data.title_en = document["title"]["en"]
-
-        if not form_data.title_ru:
-            form_data.title_en = document["title"]["ru"]
-
-        if not form_data.description_en:
-            form_data.title_en = document["description"]["en"]
-
-        if not form_data.description_ru:
-            form_data.title_en = document["description"]["ru"]
+        if form_data.title_en is None or form_data.title_en == "":
+            form_data.title_en = document["title"].get("en", "")
+        if form_data.title_ru is None or form_data.title_ru == "":
+            form_data.title_ru = document["title"].get("ru", "")
+        if form_data.description_en is None or form_data.description_en == "":
+            form_data.description_en = document["description"].get("en", "")
+        if form_data.description_ru is None or form_data.description_ru == "":
+            form_data.description_ru = document["description"].get("ru", "")
 
         if not form_data.link:
             form_data.link = str(document["link"])

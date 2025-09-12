@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Annotated, Optional
 
-from fastapi import Form
-from pydantic import BaseModel, Field, HttpUrl
+from fastapi import Form, HTTPException
+from pydantic import BaseModel, Field, HttpUrl, ValidationError
 
 from settings import settings
 
@@ -47,14 +47,42 @@ class ProjectCreateForm(BaseModel):
             json_schema_extra={"example": "Описание проекта РУ"}
         ),
         link: str = Form(json_schema_extra={"example": "https://example.com"}),
+        popularity: int = Form(json_schema_extra={"example": 0}),
     ):
-        return cls(
-            title_en=title_en,
-            description_en=description_en,
-            title_ru=title_ru,
-            description_ru=description_ru,
-            link=link,
-        )
+        try:
+            if link:
+                HttpUrl(link)
+
+            if len(title_en) > settings.MAX_TITLE_LENGTH:
+                raise HTTPException(
+                    422,
+                    detail=f"Title EN too long, max {settings.MAX_TITLE_LENGTH} chars",
+                )
+            if len(description_en) > settings.MAX_DESCRIPTION_LENGTH:
+                raise HTTPException(
+                    422,
+                    detail=f"Description EN too long, max {settings.MAX_DESCRIPTION_LENGTH} chars",
+                )
+            if len(title_ru) > settings.MAX_TITLE_LENGTH:
+                raise HTTPException(
+                    422,
+                    detail=f"Title RU too long, max {settings.MAX_TITLE_LENGTH} chars",
+                )
+            if len(description_ru) > settings.MAX_DESCRIPTION_LENGTH:
+                raise HTTPException(
+                    422,
+                    detail=f"Description RU too long, max {settings.MAX_DESCRIPTION_LENGTH} chars",
+                )
+            return cls(
+                title_en=title_en,
+                description_en=description_en,
+                title_ru=title_ru,
+                description_ru=description_ru,
+                link=link,
+                popularity=popularity,
+            )
+        except ValidationError:
+            raise HTTPException(422, detail="Invalid URL format")
 
 
 class ProjectUpdateRequest(BaseModel):

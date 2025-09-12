@@ -1029,6 +1029,841 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "Projects Endpoints",
+					"item": [
+						{
+							"name": "/projects - 201 (Valid data)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Tests for POST /projects\r",
+											"pm.test(\"Status 201 Created\", () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Returns success message with ID\", () => {\r",
+											"    const response = pm.response.text();\r",
+											"    pm.expect(response).to.include(\"Project created with _id=\");\r",
+											"});\r",
+											"\r",
+											"// Extract and validate ID\r",
+											"const responseText = pm.response.text();\r",
+											"const projectId = responseText.split(\"_id=\")[1].replace(/[\"']/g, '').trim();\r",
+											"\r",
+											"pm.test(\"ID is valid ObjectId\", () => {\r",
+											"    pm.expect(projectId).to.match(/^[0-9a-fA-F]{24}$/);\r",
+											"});\r",
+											"\r",
+											"// Save to collection variables for later use\r",
+											"pm.collectionVariables.set(\"projects_id\", projectId);\r",
+											"pm.test(\"ID saved to collection variables\", () => {\r",
+											"    pm.expect(pm.collectionVariables.get(\"projects_id\")).to.equal(projectId);\r",
+											"});\r",
+											"\r",
+											"// Correct content type check\r",
+											"pm.test(\"Response is JSON\", () => {\r",
+											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-gif.gif"
+										},
+										{
+											"key": "title_en",
+											"value": "Project Title EN",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "Project Description EN",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Заголовок проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Описание проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://example.com",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "13",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 200 (Without Query-params)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Returns array\", () => pm.expect(pm.response.json()).to.be.an('array'));\r",
+											"pm.test(\"Has multilingual fields\", () => {\r",
+											"    const firstItem = pm.response.json()[0];\r",
+											"    pm.expect(firstItem.title).to.be.an('object');\r",
+											"    pm.expect(firstItem.description).to.be.an('object');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 200 (en-param)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"English titles only\", () => {\r",
+											"    const items = pm.response.json();\r",
+											"    items.forEach(item => {\r",
+											"        pm.expect(item.title).to.be.a('string');\r",
+											"        pm.expect(item.description).to.be.a('string');\r",
+											"    });\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects?lang=en",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "en"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 200 (ru-param)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Russian titles only\", () => {\r",
+											"    const items = pm.response.json();\r",
+											"    items.forEach(item => {\r",
+											"        pm.expect(item.title).to.be.a('string');\r",
+											"        pm.expect(item.description).to.be.a('string');\r",
+											"    });\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects?lang=ru",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "ru"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 200 (sort-asc)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Sorted by date ascending\", () => {\r",
+											"    const items = pm.response.json();\r",
+											"    for (let i = 1; i < items.length; i++) {\r",
+											"        const prevDate = new Date(items[i-1].date);\r",
+											"        const currDate = new Date(items[i].date);\r",
+											"        pm.expect(prevDate <= currDate).to.be.true;\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects?sort=date_asc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									],
+									"query": [
+										{
+											"key": "sort",
+											"value": "date_asc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 200 (sort-desc)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Sorted by date descending\", () => {\r",
+											"    const items = pm.response.json();\r",
+											"    for (let i = 1; i < items.length; i++) {\r",
+											"        const prevDate = new Date(items[i-1].date);\r",
+											"        const currDate = new Date(items[i].date);\r",
+											"        pm.expect(prevDate >= currDate).to.be.true; // ← DESC: предыдущая дата >= текущей\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects?sort=date_desc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									],
+									"query": [
+										{
+											"key": "sort",
+											"value": "date_desc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 200 (sort-popularity)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Sorted by popularity desc\", () => {\r",
+											"    const items = pm.response.json();\r",
+											"    for (let i = 1; i < items.length; i++) {\r",
+											"        pm.expect(items[i-1].popularity >= items[i].popularity).to.be.true;\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects?sort=popularity",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									],
+									"query": [
+										{
+											"key": "sort",
+											"value": "popularity"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 200 (lang + sort)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Russian titles only with popularity sort\", () => {\r",
+											"    const items = pm.response.json();\r",
+											"\r",
+											"    items.forEach(item => {\r",
+											"        pm.expect(item.title).to.be.a('string');\r",
+											"        pm.expect(item.description).to.be.a('string');\r",
+											"    });\r",
+											"    for (let i = 1; i < items.length; i++) {\r",
+											"        pm.expect(items[i-1].popularity >= items[i].popularity).to.be.true;\r",
+											"    }\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Has data\", () => {\r",
+											"    pm.expect(pm.response.json().length).to.be.greaterThan(0);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects?sort=popularity&lang=ru",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									],
+									"query": [
+										{
+											"key": "sort",
+											"value": "popularity"
+										},
+										{
+											"key": "lang",
+											"value": "ru"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/document_id - 200 (Without Query)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+											"pm.test(\"Returns JSON object\", () => {\r",
+											"    pm.expect(pm.response.json()).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Contains correct project ID\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.id).to.equal(pm.collectionVariables.get(\"projects_id\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Has multilingual structure\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.title).to.be.an('object');\r",
+											"    pm.expect(response.description).to.be.an('object');\r",
+											"    pm.expect(response.title.en).to.be.a('string');\r",
+											"    pm.expect(response.title.ru).to.be.a('string');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Has required fields\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.all.keys(\r",
+											"        'id', 'title', 'description', 'thumbnail', \r",
+											"        'image', 'link', 'date', 'popularity'\r",
+											"    );\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Image URLs are valid\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.image).to.include('http://');\r",
+											"    pm.expect(response.thumbnail).to.include('http://');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/document_id - 200 (Lang = en)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Returns English only\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.title).to.be.a('string');\r",
+											"    pm.expect(response.description).to.be.a('string');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}?lang=en",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "en"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/document_id - 200 (Lang = ru)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Returns Russian only\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.title).to.be.a('string');\r",
+											"    pm.expect(response.description).to.be.a('string');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}?lang=ru",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									],
+									"query": [
+										{
+											"key": "lang",
+											"value": "ru"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/document_id - 200 (Lang = ru) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Happy Path Tests for PATCH /projects/{{projects_id}}/image\r",
+											"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"pm.test(\"Returns success message\", () => {\r",
+											"    const response = pm.response.text();\r",
+											"    const cleanResponse = response.replace(/\"/g, '');\r",
+											"    pm.expect(cleanResponse).to.equal(\"Project image updated successfully\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response is JSON\", () => {\r",
+											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Contains success text\", () => {\r",
+											"    const response = pm.response.text();\r",
+											"    pm.expect(response).to.include(\"Project image updated successfully\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-gif.gif"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}/image",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}",
+										"image"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/document_id - 200 (Lang = ru) Copy 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Fixed syntax and structure in tests\r",
+											"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+											"\r",
+											"pm.test(\"Returns JSON success message\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.message).to.equal(\"Project updated successfully\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response contains updated fields\", async () => {\r",
+											"    const getUrl = `http://localhost:8000/projects/${pm.collectionVariables.get(\"projects_id\")}`;\r",
+											"    const getResponse = await pm.sendRequest(getUrl);\r",
+											"    \r",
+											"    pm.expect(getResponse.code).to.equal(200);\r",
+											"    const updatedProject = getResponse.json();\r",
+											"    \r",
+											"    // Получаем реально переданные данные из формы\r",
+											"    const formData = pm.request.body.formdata;\r",
+											"    \r",
+											"    // Проверяем только те поля, которые были переданы\r",
+											"    if (formData.has(\"title_en\")) {\r",
+											"        pm.expect(updatedProject.title.en).to.equal(formData.get(\"title_en\"));\r",
+											"    }\r",
+											"    if (formData.has(\"title_ru\")) {\r",
+											"        pm.expect(updatedProject.title.ru).to.equal(formData.get(\"title_ru\"));\r",
+											"    }\r",
+											"    if (formData.has(\"description_en\")) {\r",
+											"        pm.expect(updatedProject.description.en).to.equal(formData.get(\"description_en\"));\r",
+											"    }\r",
+											"    if (formData.has(\"description_ru\")) {\r",
+											"        pm.expect(updatedProject.description.ru).to.equal(formData.get(\"description_ru\"));\r",
+											"    }\r",
+											"    if (formData.has(\"link\")) {\r",
+											"        pm.expect(updatedProject.link).to.equal(formData.get(\"link\"));\r",
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/document_id - 200 (Lang = ru) Copy 3",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 204 No Content\", () => pm.response.to.have.status(204));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
@@ -1655,6 +2490,10 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "Projects Endpoints",
+					"item": []
 				}
 			]
 		}
@@ -1700,6 +2539,10 @@
 		},
 		{
 			"key": "skills_data",
+			"value": ""
+		},
+		{
+			"key": "projects_id",
 			"value": ""
 		}
 	]
