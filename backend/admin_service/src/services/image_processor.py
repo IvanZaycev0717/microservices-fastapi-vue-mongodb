@@ -15,11 +15,12 @@ from settings import settings
 
 class WebpResult(NamedTuple):
     """Container for converted WEBP image data.
-    
+
     Attributes:
         image_bytes: Binary data of the converted WEBP image.
         filename: Generated filename in format 'uuid.webp'.
     """
+
     image_bytes: bytes
     filename: str
 
@@ -64,7 +65,9 @@ async def has_image_proper_size_kb(image: UploadFile, max_size: int) -> bool:
     return True
 
 
-async def resize_image(image: UploadFile, width: int, height: int, is_gif: bool = False) -> UploadFile:
+async def resize_image(
+    image: UploadFile, width: int, height: int, is_gif: bool = False
+) -> UploadFile:
     """Resize image to square format with dimensions from settings.
 
     Args:
@@ -79,7 +82,7 @@ async def resize_image(image: UploadFile, width: int, height: int, is_gif: bool 
             with Image.open(io.BytesIO(image_data)) as img:
                 img.seek(0)
                 frame = img.copy()
-                img = frame.convert('RGB')
+                img = frame.convert("RGB")
         else:
             img = Image.open(io.BytesIO(image_data))
 
@@ -96,9 +99,9 @@ async def resize_image(image: UploadFile, width: int, height: int, is_gif: bool 
         output_buffer.seek(0)
 
         return UploadFile(
-            filename=image.filename.replace('.gif', '.webp'),
+            filename=image.filename.replace(".gif", ".webp"),
             file=output_buffer,
-            headers={"content-type": image.content_type}
+            headers={"content-type": image.content_type},
         )
     except UnidentifiedImageError:
         logger.error(f"Cannot identify image: {image.filename}")
@@ -120,10 +123,10 @@ async def convert_image_to_webp(image: UploadFile) -> WebpResult:
     image_data = await image.read()
     img = Image.open(io.BytesIO(image_data))
 
-    if hasattr(img, 'is_animated') and img.is_animated:
+    if hasattr(img, "is_animated") and img.is_animated:
         img.seek(0)
         frame = img.copy()
-        img = frame.convert('RGB')
+        img = frame.convert("RGB")
 
     if img.mode in ("RGBA", "LA"):
         background = Image.new("RGB", img.size, (255, 255, 255))

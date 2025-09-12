@@ -7,9 +7,11 @@ from content_admin.routes import about, projects, tech
 from services.data_loader import DataLoader
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
-from services.mongo_db_management import (MongoCollectionsManager,
-                                          MongoConnectionManager,
-                                          MongoDatabaseManager)
+from services.mongo_db_management import (
+    MongoCollectionsManager,
+    MongoConnectionManager,
+    MongoDatabaseManager,
+)
 from settings import settings
 
 logger = get_logger("main")
@@ -59,7 +61,7 @@ async def lifespan(app: FastAPI):
             logger.info(f"{uploaded_files} was upload to MinIO")
         else:
             logger.info("MinIO already has required files")
-        
+
         if not await data_loader.check_minio_files_existence(
             minio_crud, settings.PROJECTS_BUCKET_NAME
         ):

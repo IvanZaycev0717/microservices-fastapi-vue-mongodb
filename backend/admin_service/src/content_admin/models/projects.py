@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Optional
 
-from bson import ObjectId
 from fastapi import Form
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import BaseModel, Field, HttpUrl
 
 from settings import settings
 
@@ -34,19 +33,16 @@ class ProjectCreateForm(BaseModel):
     ] = "Описание проекта РУ"
     link: HttpUrl = "https://example.com"
     date: datetime = Field(default_factory=datetime.now)
+    popularity: int = Field(0, ge=0, le=1000)
 
     @classmethod
     def as_form(
         cls,
-        title_en: str = Form(
-            json_schema_extra={"example": "Project Title EN"}
-        ),
+        title_en: str = Form(json_schema_extra={"example": "Project Title EN"}),
         description_en: str = Form(
             json_schema_extra={"example": "Project Description EN"}
         ),
-        title_ru: str = Form(
-            json_schema_extra={"example": "Заголовок проекта РУ"}
-        ),
+        title_ru: str = Form(json_schema_extra={"example": "Заголовок проекта РУ"}),
         description_ru: str = Form(
             json_schema_extra={"example": "Описание проекта РУ"}
         ),
@@ -59,3 +55,18 @@ class ProjectCreateForm(BaseModel):
             description_ru=description_ru,
             link=link,
         )
+
+
+class ProjectUpdateRequest(BaseModel):
+    """Model for updating project text fields via JSON."""
+
+    title_en: Optional[str] = Field(None, max_length=settings.MAX_TITLE_LENGTH)
+    description_en: Optional[str] = Field(
+        None, max_length=settings.MAX_DESCRIPTION_LENGTH
+    )
+    title_ru: Optional[str] = Field(None, max_length=settings.MAX_TITLE_LENGTH)
+    description_ru: Optional[str] = Field(
+        None, max_length=settings.MAX_DESCRIPTION_LENGTH
+    )
+    link: Optional[HttpUrl] = Field(None)
+    popularity: Optional[int] = Field(0)

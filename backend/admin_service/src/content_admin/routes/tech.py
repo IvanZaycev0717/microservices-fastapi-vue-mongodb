@@ -107,13 +107,9 @@ async def update_kingdom_items(
     """
     try:
         items_list = [
-            skill.strip()
-            for skill in skills_data.skills.split(",")
-            if skill.strip()
+            skill.strip() for skill in skills_data.skills.split(",") if skill.strip()
         ]
-        success = await tech_crud.update_kingdom_items(
-            kingdom_name.value, items_list
-        )
+        success = await tech_crud.update_kingdom_items(kingdom_name.value, items_list)
 
         if success:
             logger.info(f"Updated {kingdom_name.value} kingdom skills")

@@ -4,6 +4,8 @@ from bson import ObjectId
 from fastapi import Form
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from settings import settings
+
 AllowedLanguage = Literal["en", "ru"]
 
 
@@ -20,10 +22,14 @@ class Translation(BaseModel):
     """
 
     title: str = Field(
-        min_length=1, max_length=255, example="Заголовок на языке"
+        min_length=1,
+        max_length=settings.MAX_TITLE_LENGTH,
+        example="Заголовок на языке",
     )
     description: str = Field(
-        min_length=1, max_length=1000, example="Описание на языке"
+        min_length=1,
+        max_length=settings.MAX_DESCRIPTION_LENGTH,
+        example="Описание на языке",
     )
 
 
@@ -55,9 +61,7 @@ class AboutFullResponse(BaseModel):
             return str(v)
         return v
 
-    model_config = ConfigDict(
-        populate_by_name=True, json_encoders={ObjectId: str}
-    )
+    model_config = ConfigDict(populate_by_name=True, json_encoders={ObjectId: str})
 
 
 class AboutTranslatedResponse(BaseModel):
@@ -90,9 +94,7 @@ class AboutTranslatedResponse(BaseModel):
             return str(v)
         return v
 
-    model_config = ConfigDict(
-        populate_by_name=True, json_encoders={ObjectId: str}
-    )
+    model_config = ConfigDict(populate_by_name=True, json_encoders={ObjectId: str})
 
 
 class CreateAboutRequest(BaseModel):
@@ -124,10 +126,16 @@ class AboutUpdateForm(BaseModel):
         Provides structured example with both English and Russian translations.
     """
 
-    title_en: Optional[str] = Field("Title EN")
-    description_en: Optional[str] = Field("Description EN")
-    title_ru: Optional[str] = Field("Заголовок РУ")
-    description_ru: Optional[str] = Field("Описание РУ")
+    title_en: Optional[str] = Field("Title EN", max_length=settings.MAX_TITLE_LENGTH)
+    description_en: Optional[str] = Field(
+        "Description EN", max_length=settings.MAX_DESCRIPTION_LENGTH
+    )
+    title_ru: Optional[str] = Field(
+        "Заголовок РУ", max_length=settings.MAX_TITLE_LENGTH
+    )
+    description_ru: Optional[str] = Field(
+        "Описание РУ", max_length=settings.MAX_DESCRIPTION_LENGTH
+    )
 
 
 class AboutCreateForm(BaseModel):
@@ -147,10 +155,14 @@ class AboutCreateForm(BaseModel):
         as_form: Class method to transform Form parameters into model instance.
     """
 
-    title_en: str = Field("Title EN")
-    description_en: str = Field("Description EN")
-    title_ru: str = Field("Заголовок РУ")
-    description_ru: str = Field("Описание РУ")
+    title_en: str = Field("Title EN", max_length=settings.MAX_DESCRIPTION_LENGTH)
+    description_en: str = Field(
+        "Description EN", max_length=settings.MAX_DESCRIPTION_LENGTH
+    )
+    title_ru: str = Field("Заголовок РУ", max_length=settings.MAX_DESCRIPTION_LENGTH)
+    description_ru: str = Field(
+        "Описание РУ", max_length=settings.MAX_DESCRIPTION_LENGTH
+    )
 
     @classmethod
     def as_form(

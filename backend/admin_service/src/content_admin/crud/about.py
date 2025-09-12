@@ -4,8 +4,7 @@ from bson import ObjectId
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 
-from content_admin.models.about import (AboutFullResponse,
-                                        AboutTranslatedResponse)
+from content_admin.models.about import AboutFullResponse, AboutTranslatedResponse
 from services.logger import get_logger
 
 logger = get_logger("about-crud")
