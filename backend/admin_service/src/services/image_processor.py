@@ -68,16 +68,10 @@ async def has_image_proper_size_kb(image: UploadFile, max_size: int) -> bool:
 async def resize_image(
     image: UploadFile, width: int, height: int, is_gif: bool = False
 ) -> UploadFile:
-    """Resize image to square format with dimensions from settings.
-
-    Args:
-        image: Uploaded image file that passed validation.
-
-    Returns:
-        UploadFile: Resized image file in square format.
-    """
+    """Resize image with aspect ratio preservation and padding."""
     image_data = await image.read()
     await image.seek(0)
+
     try:
         if is_gif:
             with Image.open(io.BytesIO(image_data)) as img:
@@ -88,22 +82,58 @@ async def resize_image(
             img = Image.open(io.BytesIO(image_data))
 
         orig_width, orig_height = img.size
-        min_dimension = min(orig_width, orig_height)
-        left = (orig_width - min_dimension) // 2
-        top = (orig_height - min_dimension) // 2
-        img_cropped = img.crop((left, top, left + min_dimension, top + min_dimension))
 
-        img_resized = img_cropped.resize((width, height), Image.Resampling.LANCZOS)
+        if width == height:
+            min_dimension = min(orig_width, orig_height)
+            left = (orig_width - min_dimension) // 2
+            top = (orig_height - min_dimension) // 2
+            img_cropped = img.crop(
+                (left, top, left + min_dimension, top + min_dimension)
+            )
 
-        output_buffer = io.BytesIO()
-        img_resized.save(output_buffer, format="WEBP")
+            img_resized = img_cropped.resize(
+                (width, height), Image.Resampling.LANCZOS
+            )
+
+            output_buffer = io.BytesIO()
+            img_resized.save(output_buffer, format="WEBP")
+
+        else:
+            is_vertical = orig_height > orig_width
+            if is_vertical:
+                target_width, target_height = width, height
+            else:
+                target_width, target_height = height, width
+
+            width_ratio = target_width / orig_width
+            height_ratio = target_height / orig_height
+            ratio = min(width_ratio, height_ratio)
+
+            new_width = int(orig_width * ratio)
+            new_height = int(orig_height * ratio)
+
+            img_resized = img.resize(
+                (new_width, new_height), Image.Resampling.LANCZOS
+            )
+
+            background = Image.new(
+                "RGB", (target_width, target_height), (255, 255, 255)
+            )
+
+            x = (target_width - new_width) // 2
+            y = (target_height - new_height) // 2
+            background.paste(img_resized, (x, y))
+
+            output_buffer = io.BytesIO()
+            background.save(output_buffer, format="WEBP")
+
         output_buffer.seek(0)
-
         return UploadFile(
             filename=image.filename.replace(".gif", ".webp"),
             file=output_buffer,
-            headers={"content-type": image.content_type},
+            headers={"content-type": "image/webp"},
         )
+
     except UnidentifiedImageError:
         logger.exception(f"Cannot identify image: {image.filename}")
         raise HTTPException(400, "Invalid image format")
