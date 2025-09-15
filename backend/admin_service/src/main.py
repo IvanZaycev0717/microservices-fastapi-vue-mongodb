@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from content_admin.routes import about, projects, tech
+from content_admin.routes import about, projects, tech, certificates
 from services.data_loader import DataLoader
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
@@ -90,6 +90,7 @@ app = FastAPI(
 app.include_router(about.router, tags=[settings.CONTENT_SERVICE_ABOUT_NAME])
 app.include_router(tech.router, tags=[settings.CONTENT_SERVICE_TECH_NAME])
 app.include_router(projects.router, tags=[settings.CONTENT_SERVICE_PROJECTS_NAME])
+app.include_router(certificates.router, tags=[settings.CONTENT_SERVICE_CERTIFICATES_NAME])
 
 app.add_middleware(
     CORSMiddleware,

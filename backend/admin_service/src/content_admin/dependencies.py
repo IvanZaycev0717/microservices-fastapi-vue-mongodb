@@ -1,3 +1,4 @@
+from enum import StrEnum
 import logging
 from typing import Callable
 
@@ -9,6 +10,19 @@ from content_admin.crud.projects import ProjectsCRUD
 from content_admin.crud.tech import TechCRUD
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
+from content_admin.crud.certificates import CertificatesCRUD
+
+
+class Language(StrEnum):
+    EACH = "Each lang"
+    EN = "en"
+    RU = "ru"
+
+
+class SortOrder(StrEnum):
+    DATE_DESC = "date_desc"
+    DATE_ASC = "date_asc"
+    POPULARITY = "popularity"
 
 
 def get_logger_dependency() -> logging.Logger:
@@ -76,3 +90,6 @@ async def get_tech_crud(db: AsyncDatabase = Depends(get_db)) -> TechCRUD:
 
 async def get_projects_crud(db: AsyncDatabase = Depends(get_db)) -> ProjectsCRUD:
     return ProjectsCRUD(db)
+
+async def get_certificates_crud(db: AsyncDatabase = Depends(get_db)) -> CertificatesCRUD:
+    return CertificatesCRUD(db)

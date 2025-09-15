@@ -1,5 +1,4 @@
 import logging
-from enum import StrEnum
 from typing import Annotated
 from urllib.parse import urlparse
 
@@ -22,20 +21,9 @@ from services.image_processor import (
 from services.minio_management import MinioCRUD
 from services.utils import extract_bucket_and_object_from_url
 from settings import settings
+from content_admin.dependencies import Language, SortOrder
 
 router = APIRouter(prefix="/projects")
-
-
-class Language(StrEnum):
-    EACH = "Each lang"
-    EN = "en"
-    RU = "ru"
-
-
-class SortOrder(StrEnum):
-    DATE_DESC = "date_desc"
-    DATE_ASC = "date_asc"
-    POPULARITY = "popularity"
 
 
 @router.get("")
