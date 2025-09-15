@@ -8,7 +8,7 @@ from PIL import Image, UnidentifiedImageError
 
 from services.logger import get_logger
 
-logger = get_logger("projects-crud")
+logger = get_logger("image-processor")
 
 from settings import settings
 

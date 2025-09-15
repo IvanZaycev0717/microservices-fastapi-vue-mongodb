@@ -64,6 +64,7 @@ class Settings(BaseSettings):
     ABOUT_MAX_IMAGE_SIZE_KB: int = 500 * 1024  # 500KB
     PROJECT_MAX_IMAGE_SIZE_KB: int = 12_000 * 1024  # 12MB
     CERTIFICATE_MAX_IMAGE_SIZE_KB: int = 1024 * 1024 # 1MB
+    CERTIFICATE_MAX_PDF_SIZE_KB: int = 5_000 * 1024 # 5MB
 
     # Forms Validation Settings
     MAX_TITLE_LENGTH: int = 63
