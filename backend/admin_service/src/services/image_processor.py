@@ -77,6 +77,7 @@ async def resize_image(
         UploadFile: Resized image file in square format.
     """
     image_data = await image.read()
+    await image.seek(0)
     try:
         if is_gif:
             with Image.open(io.BytesIO(image_data)) as img:

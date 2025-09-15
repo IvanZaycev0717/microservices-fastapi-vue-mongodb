@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     # Image Directories Names
     ABOUT_BUCKET_NAME: str = "about"
     PROJECTS_BUCKET_NAME: str = "projects"
+    CERTIFICATES_BUCKET_NAME: str = "certificates"
 
     # Paths configuration
     CONTENT_ADMIN_PATH: Path = Path("content_admin/data")
@@ -62,10 +63,15 @@ class Settings(BaseSettings):
     }
     ABOUT_MAX_IMAGE_SIZE_KB: int = 500 * 1024  # 500KB
     PROJECT_MAX_IMAGE_SIZE_KB: int = 12_000 * 1024  # 12MB
+    CERTIFICATE_MAX_IMAGE_SIZE_KB: int = 1024 * 1024 # 1MB
 
     # Forms Validation Settings
     MAX_TITLE_LENGTH: int = 63
     MAX_DESCRIPTION_LENGTH: int = 255
+    MIN_HTML_IMAGE_ALT_LENGTH: int = 1
+    MAX_HTML_IMAGE_ALT_LENGTH: int = 255
+    MIN_POPULARITY_BOUNDARY: int = 0
+    MAX_POPULARITY_BOUNDARY: int = 1000
 
     # About Images Sizes
     ABOUT_IMAGE_OUTPUT_WIDTH: int = 1024
@@ -74,6 +80,12 @@ class Settings(BaseSettings):
     # Projects Images Sizes
     PROJECTS_IMAGE_THUMB_OUTPUT_WIDTH: int = 300
     PROJECTS_IMAGE_THUMB_OUTPUT_HEIGHT: int = 169
+
+    # Certificates Images Sizes
+    CERTIFICATES_IMAGE_OUTPUT_WIDTH: int = 594
+    CERTIFICATES_IMAGE_OUTPUT_HEIGHT: int = 841
+    CERTIFICATES_IMAGE_THUMB_OUTPUT_WIDTH: int = 206
+    CERTIFICATES_IMAGE_THUMB_OUTPUT_HEIGHT: int = 300
 
     # MongoDB connection settings
     MONGO_DB_CONNECTION_TIMEOUT_MS: int = Field(

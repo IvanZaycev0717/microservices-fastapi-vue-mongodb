@@ -1,10 +1,15 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from typing import Annotated, List, Dict, Any
-from content_admin.dependencies import SortOrder, get_logger_factory
+from content_admin.dependencies import SortOrder, get_logger_factory, get_minio_crud
 from content_admin.crud.certificates import CertificatesCRUD
 from content_admin.dependencies import get_certificates_crud
 from settings import settings
+from fastapi import status
+
+from content_admin.models.certificates import CertificateCreateForm
+from services.minio_management import MinioCRUD
+from services.image_processor import convert_image_to_webp, has_image_allowed_extention, has_image_proper_size_kb, resize_image
 
 router = APIRouter(prefix="/certificates")
 
@@ -33,3 +38,61 @@ async def get_certificates(
     except Exception as e:
         logger.exception(f"Database error: {e}")
         raise HTTPException(500, detail="Internal server error")
+
+
+@router.post("", status_code=status.HTTP_201_CREATED)
+async def create_certificate(
+    form_data: Annotated[CertificateCreateForm, Depends(CertificateCreateForm.as_form)],
+    certificates_crud: Annotated[CertificatesCRUD, Depends(get_certificates_crud)],
+    minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
+    logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_CERTIFICATES_NAME))],
+    image: UploadFile = File(description="Certificate image"),
+):
+    try:
+        if not await has_image_allowed_extention(image):
+            raise HTTPException(400, "Invalid image format")
+        if not await has_image_proper_size_kb(image, settings.CERTIFICATE_MAX_IMAGE_SIZE_KB):
+            raise HTTPException(400, "Image size exceeds limit")
+        
+        main_image_resized = await resize_image(
+            image,
+            settings.CERTIFICATES_IMAGE_OUTPUT_WIDTH,
+            settings.CERTIFICATES_IMAGE_OUTPUT_HEIGHT,
+        )
+        main_image, main_image_filename = await convert_image_to_webp(main_image_resized)
+
+        thumb_image_resized = await resize_image(
+            image,
+            settings.CERTIFICATES_IMAGE_THUMB_OUTPUT_WIDTH,
+            settings.CERTIFICATES_IMAGE_THUMB_OUTPUT_HEIGHT
+        )
+        thumb_image, _ = await convert_image_to_webp(thumb_image_resized)
+
+
+        main_image_url = await minio_crud.upload_file(
+            settings.CERTIFICATES_BUCKET_NAME, main_image_filename, main_image
+        )
+        thumb_image_url = await minio_crud.upload_file(
+            settings.CERTIFICATES_BUCKET_NAME,
+            f"thumbnail/{main_image_filename}",
+            thumb_image,
+        )
+
+        alt_text = f"certificate_{main_image_filename.replace('.webp', '')}"
+
+        certificate_data = {
+            "src": str(main_image_url),
+            "thumb": str(thumb_image_url),
+            "alt": alt_text,
+            "date": form_data.date,
+            "popularity": form_data.popularity,
+        }
+
+        result = await certificates_crud.create(certificate_data)
+        return f"Certificate created with _id={result}"
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Unexpected error: {e}")
+        raise HTTPException(500, "Internal server error")

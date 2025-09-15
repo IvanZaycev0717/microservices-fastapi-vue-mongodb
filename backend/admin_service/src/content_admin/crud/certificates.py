@@ -44,3 +44,22 @@ class CertificatesCRUD:
         except Exception as e:
             logger.exception(f"Database error in read_all: {e}")
             raise
+    
+    async def create(self, certificate_data: dict[str, Any]) -> str:
+        """Create new certificate document in MongoDB collection.
+
+        Args:
+            certificate_data: Dictionary with certificate data.
+
+        Returns:
+            str: String representation of inserted document's ObjectId.
+
+        Raises:
+            Exception: If database operation fails.
+        """
+        try:
+            result = await self.collection.insert_one(certificate_data)
+            return str(result.inserted_id)
+        except Exception as e:
+            logger.exception(f"Database error in create: {e}")
+            raise
