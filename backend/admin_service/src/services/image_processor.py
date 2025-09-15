@@ -104,7 +104,7 @@ async def resize_image(
             headers={"content-type": image.content_type},
         )
     except UnidentifiedImageError:
-        logger.error(f"Cannot identify image: {image.filename}")
+        logger.exception(f"Cannot identify image: {image.filename}")
         raise HTTPException(400, "Invalid image format")
 
 

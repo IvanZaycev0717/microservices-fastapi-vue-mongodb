@@ -5,11 +5,10 @@ from urllib.parse import urlparse
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
-from pydantic import ValidationError
 
 from content_admin.crud.projects import ProjectsCRUD
 from content_admin.dependencies import (
-    get_logger_dependency,
+    get_logger_factory,
     get_minio_crud,
     get_projects_crud,
 )
@@ -42,7 +41,10 @@ class SortOrder(StrEnum):
 @router.get("")
 async def get_projects(
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+    ],
     lang: Language = Language.EACH,
     sort: SortOrder = SortOrder.DATE_DESC,
 ):
@@ -53,9 +55,9 @@ async def get_projects(
         logger.info("Projects data fetched successfully")
         return result
     except HTTPException as e:
-        logger.error(e)
+        logger.exception(e)
     except Exception as e:
-        logger.error(f"Database error: {e}")
+        logger.exception(f"Database error: {e}")
         raise HTTPException(500, detail="Internal server error")
 
 
@@ -63,7 +65,10 @@ async def get_projects(
 async def get_project_by_id(
     document_id: str,
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+    ],
     lang: Language = Language.EACH,
 ):
     try:
@@ -75,7 +80,7 @@ async def get_project_by_id(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Database error: {e}")
+        logger.exception(f"Database error: {e}")
         raise HTTPException(500, detail="Internal server error")
 
 
@@ -84,7 +89,10 @@ async def create_project(
     form_data: Annotated[ProjectCreateForm, Depends(ProjectCreateForm.as_form)],
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+    ],
     image: UploadFile = File(description="Project image"),
 ):
     try:
@@ -139,7 +147,7 @@ async def create_project(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.exception(f"Unexpected error: {e}")
         raise HTTPException(500, "Internal server error")
 
 
@@ -148,7 +156,10 @@ async def update_project_image(
     document_id: str,
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+    ],
     image: UploadFile = File(description="New project image"),
 ):
     """Update project image and thumbnail in MinIO and database."""
@@ -213,7 +224,7 @@ async def update_project_image(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.exception(f"Unexpected error: {e}")
         raise HTTPException(500, "Internal server error")
 
 
@@ -222,7 +233,10 @@ async def update_project(
     document_id: str,
     form_data: Annotated[ProjectUpdateRequest, Form()],
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+    ],
 ):
     try:
         if not ObjectId.is_valid(document_id):
@@ -265,7 +279,7 @@ async def update_project(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.exception(f"Unexpected error: {e}")
         raise HTTPException(500, "Internal server error")
 
 
@@ -274,7 +288,10 @@ async def delete_about_content(
     document_id: str,
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+    ],
 ):
     try:
         document = await projects_crud.read_by_id(document_id, Language.EN)
@@ -303,7 +320,7 @@ async def delete_about_content(
                 detail=f"Document with id {document_id} not found after image deletion",
             )
     except ValueError as e:
-        logger.error(f"Invalid document ID: {e}")
+        logger.exception(f"Invalid document ID: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid document ID format",
@@ -311,7 +328,7 @@ async def delete_about_content(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error deleting document or image: {e}")
+        logger.exception(f"Error deleting document or image: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to delete document and associated image",

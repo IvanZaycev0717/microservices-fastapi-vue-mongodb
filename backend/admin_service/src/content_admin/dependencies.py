@@ -1,4 +1,5 @@
 import logging
+from typing import Callable
 
 from fastapi import Depends, Request
 from pymongo.asynchronous.database import AsyncDatabase
@@ -17,6 +18,15 @@ def get_logger_dependency() -> logging.Logger:
         logging.Logger: Pre-configured logger instance.
     """
     return get_logger()
+
+
+def get_logger_factory(name: str) -> Callable[[], logging.Logger]:
+    """Factory function that returns a callable to inject named logger into dependencies."""
+
+    def inner():
+        return get_logger(name=name)
+
+    return inner
 
 
 def get_minio_crud() -> MinioCRUD:

@@ -6,8 +6,9 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends
 
 from content_admin.crud.tech import TechCRUD
-from content_admin.dependencies import get_logger_dependency, get_tech_crud
+from content_admin.dependencies import get_logger_factory, get_tech_crud
 from content_admin.models.tech import SkillsUpdate, TechResponse
+from settings import settings
 
 router = APIRouter(prefix="/technologies")
 
@@ -47,7 +48,9 @@ class KingdomName(StrEnum):
 @router.get("", response_model=list[TechResponse])
 async def get_all_tech(
     tech_crud: Annotated[TechCRUD, Depends(get_tech_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_TECH_NAME))
+    ],
 ):
     """Retrieves all technical skills from the database.
 
@@ -71,7 +74,7 @@ async def get_all_tech(
         return tech_data
     except Exception as e:
         error_message = f"Failed to fetch technical skills: {str(e)}"
-        logger.error(error_message)
+        logger.exception(error_message)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=error_message,
@@ -83,7 +86,9 @@ async def update_kingdom_items(
     kingdom_name: KingdomName,
     skills_data: SkillsUpdate,
     tech_crud: Annotated[TechCRUD, Depends(get_tech_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_TECH_NAME))
+    ],
 ):
     """Updates technical skills for a specific kingdom.
 
@@ -121,7 +126,7 @@ async def update_kingdom_items(
             )
 
     except Exception as e:
-        logger.error(f"Failed to update {kingdom_name.value}: {str(e)}")
+        logger.exception(f"Failed to update {kingdom_name.value}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )

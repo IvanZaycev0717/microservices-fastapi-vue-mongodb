@@ -56,12 +56,14 @@ class MongoConnectionManager:
 
         except OperationFailure as e:
             if "Authentication failed" in str(e):
-                logger.error("MongoDB authentication failed: invalid login or password")
+                logger.exception(
+                    "MongoDB authentication failed: invalid login or password"
+                )
             else:
-                logger.error(f"MongoDB operation failed: {e}")
+                logger.exception(f"MongoDB operation failed: {e}")
             raise
         except (ConnectionFailure, ServerSelectionTimeoutError) as e:
-            logger.error(f"MongoDB connection failed: {e}")
+            logger.exception(f"MongoDB connection failed: {e}")
             raise
 
     async def close_connection(self):
@@ -109,10 +111,10 @@ class MongoDatabaseManager:
                 return False
 
         except OperationFailure as e:
-            logger.error(f"Database check failed: {e}")
+            logger.exception(f"Database check failed: {e}")
             return False
         except Exception as e:
-            logger.error(f"Unexpected error during database check: {e}")
+            logger.exception(f"Unexpected error during database check: {e}")
             return False
 
     async def create_database(self, db_name: str) -> AsyncDatabase:
@@ -137,10 +139,10 @@ class MongoDatabaseManager:
             return self.db
 
         except OperationFailure as e:
-            logger.error(f"Failed to create database: {e}")
+            logger.exception(f"Failed to create database: {e}")
             return False
         except Exception as e:
-            logger.error(f"Unexpected error creating database: {e}")
+            logger.exception(f"Unexpected error creating database: {e}")
             return False
 
 
@@ -203,7 +205,7 @@ class MongoCollectionsManager:
             logger.info("All collections initialized successfully")
 
         except Exception as e:
-            logger.error(f"Failed to initialize collections: {e}")
+            logger.exception(f"Failed to initialize collections: {e}")
             raise
 
     @staticmethod
@@ -235,8 +237,8 @@ class MongoCollectionsManager:
             else:
                 logger.warning(f"File {file_path} not found")
         except json.JSONDecodeError as e:
-            logger.error(f"Invalid JSON in {file_path}: {e}")
+            logger.exception(f"Invalid JSON in {file_path}: {e}")
             raise
         except Exception as e:
-            logger.error(f"Error loading {file_path}: {e}")
+            logger.exception(f"Error loading {file_path}: {e}")
             raise

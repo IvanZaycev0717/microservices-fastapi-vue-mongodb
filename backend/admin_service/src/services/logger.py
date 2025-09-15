@@ -7,39 +7,35 @@ import colorlog
 from settings import settings
 
 COLOR_FORMAT = (
-    f"{settings.SERVICE_NAME}: "
+    f"{settings.SERVICE_NAME}: [%(name)s]"
     "%(log_color)s%(asctime)s - %(levelname)s - %(message)s%(reset)s"
 )
 
 
 class AppLogger:
-    """Singleton logger class with colored console output configuration."""
-
-    _logger: Optional[logging.Logger] = None
+    """Class for creating separate logger instances with customized logging."""
 
     @classmethod
     def get_logger(cls, name: str = "app") -> logging.Logger:
-        """Retrieves or creates a configured logger instance.
+        """Creates and returns a new logger instance each time it's called.
 
         Args:
             name (str): Name of the logger. Defaults to "app".
 
         Returns:
-            logging.Logger: Configured logger instance with colored output.
+            logging.Logger: Newly created logger instance with proper configuration.
         """
-        if cls._logger is None:
-            cls._setup_logger(name)
-        return cls._logger
+        return cls._setup_logger(name)
 
     @classmethod
     def _setup_logger(cls, name: str):
-        """Configures a colored console logger with custom formatting.
-
-        Sets up a logger with colored output, clears existing handlers,
-        and configures log levels and formatting.
+        """Sets up a new logger instance with specific configurations.
 
         Args:
-            name (str): Name of the logger to configure.
+            name (str): The name of the logger being set up.
+
+        Returns:
+            logging.Logger: A newly initialized logger object.
         """
         logger = logging.getLogger(name)
         logger.setLevel(settings.LOGGING_LEVEL)
@@ -62,16 +58,16 @@ class AppLogger:
 
         logger.addHandler(console_handler)
         logger.propagate = False
-        cls._logger = logger
+        return logger
 
 
 def get_logger(name: str = "app") -> logging.Logger:
-    """Convenience function to retrieve a configured logger instance.
+    """Utility method to create and obtain a new logger instance.
 
     Args:
         name (str): Name of the logger. Defaults to "app".
 
     Returns:
-        logging.Logger: Configured logger instance from AppLogger.
+        logging.Logger: Newly created logger instance via AppLogger.
     """
     return AppLogger.get_logger(name)

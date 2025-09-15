@@ -6,8 +6,9 @@ from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 
 from services.logger import get_logger
+from settings import settings
 
-logger = get_logger("projects-crud")
+logger = get_logger(settings.CONTENT_SERVICE_PROJECTS_NAME)
 
 
 class ProjectsCRUD:
@@ -115,7 +116,7 @@ class ProjectsCRUD:
             result = await self.collection.insert_one(project_data)
             return str(result.inserted_id)
         except Exception as e:
-            logger.error(f"Database error in create: {e}")
+            logger.exception(f"Database error in create: {e}")
             raise
 
     async def update(self, project_id: str, update_data: Dict[str, Any]) -> None:
@@ -150,8 +151,8 @@ class ProjectsCRUD:
             return True
 
         except ValueError as e:
-            logger.error(f"Validation error in delete: {e}")
+            logger.exception(f"Validation error in delete: {e}")
             raise
         except Exception as e:
-            logger.error(f"Database error in delete: {e}")
+            logger.exception(f"Database error in delete: {e}")
             raise

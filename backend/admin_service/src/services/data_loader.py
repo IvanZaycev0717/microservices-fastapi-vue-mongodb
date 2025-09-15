@@ -29,13 +29,13 @@ class DataLoader:
             raise DataLoaderError("Required files set is empty")
         try:
             if not await self._path_exists(self.content_admin_path):
-                logger.error(f"Directory {self.content_admin_path} does not exist")
+                logger.exception(f"Directory {self.content_admin_path} does not exist")
                 raise FileNotFoundError(
                     f"Directory {self.content_admin_path} does not exist"
                 )
 
             if not await self._is_directory(self.content_admin_path):
-                logger.error(f"{self.content_admin_path} is not a directory")
+                logger.exception(f"{self.content_admin_path} is not a directory")
                 raise NotADirectoryError(
                     f"{self.content_admin_path} is not a directory"
                 )
@@ -51,7 +51,7 @@ class DataLoader:
             logger.info("All required files are present")
             return True
         except Exception as e:
-            logger.error(f"Error checking files: {e}")
+            logger.exception(f"Error checking files: {e}")
             return False
 
     async def upload_images_to_minio(
@@ -75,7 +75,7 @@ class DataLoader:
             ]
             for filename, result in zip(image_files, results):
                 if isinstance(result, Exception):
-                    logger.error(f"Failed to upload {filename}: {result}")
+                    logger.exception(f"Failed to upload {filename}: {result}")
                     raise DataLoaderError(f"Failed to upload {filename}: {result}")
                 else:
                     upload_results[filename] = result
@@ -84,7 +84,7 @@ class DataLoader:
             return upload_results
 
         except Exception as e:
-            logger.error(f"Error during MinIO upload process: {e}")
+            logger.exception(f"Error during MinIO upload process: {e}")
             raise DataLoaderError(f"MinIO upload failed: {e}")
 
     async def check_minio_files_existence(
@@ -108,7 +108,7 @@ class DataLoader:
             return len(image_files) > 1
 
         except Exception as e:
-            logger.error(f"Error checking MinIO files: {e}")
+            logger.exception(f"Error checking MinIO files: {e}")
             return False
 
     async def save_content_to_mongodb(
@@ -149,12 +149,12 @@ class DataLoader:
             return inserted_count
 
         except OperationFailure as e:
-            logger.error(
+            logger.exception(
                 f"MongoDB operation failed for collection '{collection_name}': {e}"
             )
             raise DataLoaderError(f"Database operation failed: {e}")
         except Exception as e:
-            logger.error(f"Unexpected error saving to MongoDB: {e}")
+            logger.exception(f"Unexpected error saving to MongoDB: {e}")
             raise DataLoaderError(f"Failed to save content: {e}")
 
     async def _upload_single_file(

@@ -6,8 +6,9 @@ from pymongo.asynchronous.database import AsyncDatabase
 
 from content_admin.models.about import AboutFullResponse, AboutTranslatedResponse
 from services.logger import get_logger
+from settings import settings
 
-logger = get_logger("about-crud")
+logger = get_logger(settings.CONTENT_SERVICE_ABOUT_NAME)
 
 
 class AboutCRUD:
@@ -38,7 +39,7 @@ class AboutCRUD:
                 ]
 
         except Exception as e:
-            logger.error(f"Database error in fetch: {e}")
+            logger.exception(f"Database error in fetch: {e}")
             raise
 
     async def read_one(
@@ -84,8 +85,12 @@ class AboutCRUD:
                     AboutTranslatedResponse(**result).model_dump() if result else None
                 )
 
+        except ValueError as e:
+            logger.exception(e)
+            raise
+
         except Exception as e:
-            logger.error(f"Database error in read_one: {e}")
+            logger.exception(f"Database error in read_one: {e}")
             raise
 
     async def create(self, data: dict[str, Any]) -> str:
@@ -94,7 +99,7 @@ class AboutCRUD:
             return str(result.inserted_id)
 
         except Exception as e:
-            logger.error(f"Database error in create: {e}")
+            logger.exception(f"Database error in create: {e}")
             raise
 
     async def update(self, document_id: str, update_data: Dict[str, Any]) -> bool:
@@ -127,10 +132,10 @@ class AboutCRUD:
             return True
 
         except ValueError as e:
-            logger.error(f"Validation error in update: {e}")
+            logger.exception(f"Validation error in update: {e}")
             raise
         except Exception as e:
-            logger.error(f"Database error in update: {e}")
+            logger.exception(f"Database error in update: {e}")
             raise
 
     async def delete(self, document_id: str) -> bool:
@@ -160,8 +165,8 @@ class AboutCRUD:
             return True
 
         except ValueError as e:
-            logger.error(f"Validation error in delete: {e}")
+            logger.exception(f"Validation error in delete: {e}")
             raise
         except Exception as e:
-            logger.error(f"Database error in delete: {e}")
+            logger.exception(f"Database error in delete: {e}")
             raise

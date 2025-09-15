@@ -1,5 +1,5 @@
 import logging
-from typing import Annotated, Optional
+from typing import Annotated
 
 import minio
 from bson import ObjectId
@@ -18,7 +18,7 @@ from pydantic import ValidationError
 from content_admin.crud.about import AboutCRUD
 from content_admin.dependencies import (
     get_about_crud,
-    get_logger_dependency,
+    get_logger_factory,
     get_minio_crud,
 )
 from content_admin.models.about import (
@@ -44,7 +44,9 @@ router = APIRouter(prefix="/about")
 @router.get("", response_model=list[AboutFullResponse] | list[AboutTranslatedResponse])
 async def get_about_content(
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+    ],
     lang: Annotated[str | None, Query()] = None,
 ):
     """Retrieves about content from database with optional language filtering.
@@ -72,7 +74,7 @@ async def get_about_content(
         logger.info("About collection fetched successfully")
         return result
     except Exception as e:
-        logger.error(f"Database error: {e}")
+        logger.exception(f"Database error: {e}")
         raise HTTPException(
             status_code=500,
             detail="Internal server error while fetching about content",
@@ -86,7 +88,9 @@ async def get_about_content(
 async def get_about_content_by_id(
     document_id: str,
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+    ],
     lang: Annotated[str | None, Query()] = None,
 ):
     """Get specific about
@@ -119,13 +123,13 @@ async def get_about_content_by_id(
         raise
 
     except ValueError as e:
-        logger.error(f"Invalid document ID format: {e}")
+        logger.exception(f"Invalid document ID format: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid document ID format",
         )
     except Exception as e:
-        logger.error(f"Database error fetching document {document_id}: {e}")
+        logger.exception(f"Database error fetching document {document_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while fetching about content",
@@ -137,7 +141,9 @@ async def create_about_content(
     form_data: Annotated[AboutCreateForm, Depends(AboutCreateForm.as_form)],
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+    ],
     image: UploadFile = File(description="Изображение для загрузки"),
 ):
     """Creates new about content entry with image upload and translations.
@@ -167,11 +173,11 @@ async def create_about_content(
     try:
         if not await has_image_allowed_extention(image):
             error_message = "Image invalid format"
-            logger.error(error_message)
+            logger.exception(error_message)
             raise HTTPException(400, error_message)
         if not await has_image_proper_size_kb(image, settings.ABOUT_MAX_IMAGE_SIZE_KB):
             error_message = "Image size exceeds 500KB"
-            logger.error(error_message)
+            logger.exception(error_message)
             raise HTTPException(400, error_message)
 
         resized_image = await resize_image(
@@ -208,15 +214,15 @@ async def create_about_content(
         raise
 
     except ValidationError as e:
-        logger.error(f"Validation error: {e}")
+        logger.exception(f"Validation error: {e}")
         raise HTTPException(422, detail=e.errors())
 
     except minio.error.S3Error as e:
-        logger.error(f"MinIO error: {e}")
+        logger.exception(f"MinIO error: {e}")
         raise HTTPException(500, detail="Failed to upload image to storage")
 
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.exception(f"Unexpected error: {e}")
         raise HTTPException(500, detail="Internal server error")
 
 
@@ -226,7 +232,9 @@ async def update_about_image(
     image: Annotated[UploadFile, File(description="Новое изображение для замены")],
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+    ],
 ):
     """Updates the image for an existing about content document.
 
@@ -286,7 +294,7 @@ async def update_about_image(
         }
 
     except ValueError as e:
-        logger.error(f"Invalid document ID: {e}")
+        logger.exception(f"Invalid document ID: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid document ID format",
@@ -296,7 +304,7 @@ async def update_about_image(
         raise
 
     except Exception as e:
-        logger.error(f"Error updating image: {e}")
+        logger.exception(f"Error updating image: {e}")
         raise HTTPException(500, detail="Failed to update image")
 
 
@@ -305,7 +313,9 @@ async def update_about_content(
     document_id: str,
     form_data: Annotated[AboutUpdateForm, Form()],
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+    ],
 ):
     """Updates translations for an existing about content document.
 
@@ -385,7 +395,7 @@ async def update_about_content(
         }
 
     except ValueError as e:
-        logger.error(f"Invalid document ID: {e}")
+        logger.exception(f"Invalid document ID: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid document ID format",
@@ -395,7 +405,7 @@ async def update_about_content(
         raise
 
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.exception(f"Unexpected error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error during update",
@@ -407,7 +417,9 @@ async def delete_about_content(
     document_id: str,
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
-    logger: Annotated[logging.Logger, Depends(get_logger_dependency)],
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+    ],
 ):
     """Delete about content document by ID and associated image from MinIO.
 
@@ -444,7 +456,7 @@ async def delete_about_content(
             )
 
     except ValueError as e:
-        logger.error(f"Invalid document ID: {e}")
+        logger.exception(f"Invalid document ID: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid document ID format",
@@ -452,7 +464,7 @@ async def delete_about_content(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error deleting document or image: {e}")
+        logger.exception(f"Error deleting document or image: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to delete document and associated image",

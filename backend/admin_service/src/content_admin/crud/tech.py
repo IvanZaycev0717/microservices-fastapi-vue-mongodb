@@ -3,8 +3,9 @@ from pymongo.asynchronous.database import AsyncDatabase
 
 from content_admin.models.tech import TechResponse
 from services.logger import get_logger
+from settings import settings
 
-logger = get_logger("tech-crud")
+logger = get_logger(settings.CONTENT_SERVICE_TECH_NAME)
 
 
 class TechCRUD:
@@ -17,7 +18,7 @@ class TechCRUD:
             results = await cursor.to_list(length=None)
             return [TechResponse(**doc) for doc in results]
         except Exception as e:
-            logger.error(f"Database error: {e}")
+            logger.exception(f"Database error: {e}")
             raise
 
     async def update_kingdom_items(self, kingdom_name: str, items: list[str]) -> bool:

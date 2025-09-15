@@ -72,9 +72,9 @@ async def lifespan(app: FastAPI):
         await content_admin_mongo_collections_manager.initialize_collections()
 
     except FileNotFoundError as e:
-        logger.error(e)
+        logger.exception(e)
     except Exception:
-        logger.error("Failed to connect to MongoDB")
+        logger.exception("Failed to connect to MongoDB")
     yield
     await content_admin_mongo_connection.close_connection()
     logger.info("Application shutdown complete")
@@ -87,9 +87,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(about.router, tags=["Content Service - About"])
-app.include_router(tech.router, tags=["Content Service - Tech"])
-app.include_router(projects.router, tags=["Content Service - Projects"])
+app.include_router(about.router, tags=[settings.CONTENT_SERVICE_ABOUT_NAME])
+app.include_router(tech.router, tags=[settings.CONTENT_SERVICE_TECH_NAME])
+app.include_router(projects.router, tags=[settings.CONTENT_SERVICE_PROJECTS_NAME])
 
 app.add_middleware(
     CORSMiddleware,
@@ -110,7 +110,9 @@ async def log_requests(request: Request, call_next):
         )
         return response
     except Exception as e:
-        logger.error(f"Error processing request {request.method} {request.url}: {e}")
+        logger.exception(
+            f"Error processing request {request.method} {request.url}: {e}"
+        )
         raise
 
 
@@ -127,7 +129,7 @@ async def health_check():
         logger.info("Health check: MongoDB connection OK")
         return {"status": "healthy", "database": "connected"}
     except Exception as e:
-        logger.error(f"Health check failed: {e}")
+        logger.exception(f"Health check failed: {e}")
         return {
             "status": "unhealthy",
             "database": "disconnected",

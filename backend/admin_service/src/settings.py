@@ -25,7 +25,10 @@ class Settings(BaseSettings):
     MINIO_PORT: str = Field(description="MinIO port")
 
     # Service configuration
-    SERVICE_NAME: str = Field("ADMIN_SERVICE")
+    SERVICE_NAME: str = "ADMIN_SERVICE"
+    CONTENT_SERVICE_ABOUT_NAME: str = "Content Service - About"
+    CONTENT_SERVICE_TECH_NAME: str = "Content Service - Tech"
+    CONTENT_SERVICE_PROJECTS_NAME: str = "Content Service - Projects"
 
     # Image Directories Names
     ABOUT_BUCKET_NAME: str = "about"
