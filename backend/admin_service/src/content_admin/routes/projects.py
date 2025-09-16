@@ -3,7 +3,7 @@ from typing import Annotated
 from urllib.parse import urlparse
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
 
 from content_admin.crud.projects import ProjectsCRUD
 from content_admin.dependencies import (
@@ -219,6 +219,7 @@ async def update_project_image(
 @router.patch("/{document_id}")
 async def update_project(
     document_id: str,
+    request: Request,
     form_data: Annotated[ProjectUpdateRequest, Form()],
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     logger: Annotated[
@@ -227,8 +228,14 @@ async def update_project(
     ],
 ):
     try:
+        content_type = request.headers.get("content-type", "")
+        if "application/x-www-form-urlencoded" not in content_type:
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail="Only application/x-www-form-urlencoded data is supported"
+            )
         if not ObjectId.is_valid(document_id):
-            raise ValueError(f"Invalid ObjectId format: {document_id}")
+            raise HTTPException(404, f"Invalid Document ID': {document_id}")
 
         document = await projects_crud.read_by_id(document_id, "all")
         if not document:
@@ -272,7 +279,7 @@ async def update_project(
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_about_content(
+async def delete_project(
     document_id: str,
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
@@ -282,6 +289,9 @@ async def delete_about_content(
     ],
 ):
     try:
+        if not ObjectId.is_valid(document_id):
+            raise HTTPException(400, "Invalid document ID format")
+        
         document = await projects_crud.read_by_id(document_id, Language.EN)
 
         if not document:

@@ -1,5 +1,7 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 
@@ -44,7 +46,7 @@ class CertificatesCRUD:
         except Exception as e:
             logger.exception(f"Database error in read_all: {e}")
             raise
-    
+
     async def create(self, certificate_data: dict[str, Any]) -> str:
         """Create new certificate document in MongoDB collection.
 
@@ -62,4 +64,93 @@ class CertificatesCRUD:
             return str(result.inserted_id)
         except Exception as e:
             logger.exception(f"Database error in create: {e}")
+            raise
+
+    async def read_one_by_id(
+        self, certificate_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Get single certificate by ID.
+
+        Args:
+            certificate_id: MongoDB document ID as string.
+
+        Returns:
+            Optional[Dict]: Certificate data if found, None otherwise.
+
+        Raises:
+            InvalidId: If certificate_id is not a valid ObjectId.
+        """
+        try:
+            object_id = ObjectId(certificate_id)
+            item = await self.collection.find_one({"_id": object_id})
+
+            if not item:
+                return None
+
+            return {
+                "id": str(item["_id"]),
+                "src": item["src"],
+                "thumb": item["thumb"],
+                "date": item["date"].isoformat()
+                if hasattr(item["date"], "isoformat")
+                else item["date"],
+                "popularity": item["popularity"],
+                "alt": item["alt"],
+            }
+
+        except Exception as e:
+            logger.exception(f"Database error in read_one_by_id: {e}")
+            raise
+
+    async def update(
+        self, certificate_id: str, update_data: Dict[str, Any]
+    ) -> bool:
+        """Update certificate document by ID.
+
+        Args:
+            certificate_id: MongoDB document ID as string.
+            update_data: Dictionary with fields to update.
+
+        Returns:
+            bool: True if document was updated, False if not found.
+
+        Raises:
+            InvalidId: If certificate_id is not a valid ObjectId.
+        """
+        try:
+            object_id = ObjectId(certificate_id)
+            result = await self.collection.update_one(
+                {"_id": object_id}, {"$set": update_data}
+            )
+            return result.modified_count > 0
+
+        except InvalidId:
+            logger.warning(f"Invalid certificate ID format: {certificate_id}")
+            return False
+        except Exception as e:
+            logger.exception(f"Database error in update: {e}")
+            raise
+
+    async def delete(self, certificate_id: str) -> bool:
+        """Delete certificate document by ID.
+
+        Args:
+            certificate_id: MongoDB document ID as string.
+
+        Returns:
+            bool: True if document was deleted, False if not found.
+
+        Raises:
+            InvalidId: If certificate_id is not a valid ObjectId.
+        """
+        try:
+            object_id = ObjectId(certificate_id)
+            result = await self.collection.delete_one({"_id": object_id})
+            return result.deleted_count > 0
+
+        except InvalidId:
+            logger.warning(f"Invalid certificate ID format: {certificate_id}")
+            return False
+        except Exception as e:
+            logger.exception(f"Database error in delete: {e}")
             raise

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from fastapi import status
 
 from fastapi import Form, HTTPException
@@ -39,3 +40,27 @@ class CertificateCreateForm(BaseModel):
             raise HTTPException(
                 status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
             )
+
+
+class CertificateUpdateForm(BaseModel):
+    """Form model for updating certificate via multipart/form-data.
+    
+    Attributes:
+        popularity: Optional popularity score update.
+    """
+    popularity: Optional[int] = Field(
+        None,
+        ge=settings.MIN_POPULARITY_BOUNDARY,
+        le=settings.MAX_POPULARITY_BOUNDARY,
+        json_schema_extra={"example": 10}
+    )
+
+    @classmethod
+    def as_form(
+        cls,
+        popularity: Optional[int] = Form(
+            None,
+            json_schema_extra={"example": 10}
+        ),
+    ):
+        return cls(popularity=popularity)

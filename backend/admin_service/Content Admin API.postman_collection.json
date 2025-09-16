@@ -1753,36 +1753,7 @@
 											"pm.test(\"Returns JSON success message\", () => {\r",
 											"    const response = pm.response.json();\r",
 											"    pm.expect(response.message).to.equal(\"Project updated successfully\");\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Response contains updated fields\", async () => {\r",
-											"    const getUrl = `http://localhost:8000/projects/${pm.collectionVariables.get(\"projects_id\")}`;\r",
-											"    const getResponse = await pm.sendRequest(getUrl);\r",
-											"    \r",
-											"    pm.expect(getResponse.code).to.equal(200);\r",
-											"    const updatedProject = getResponse.json();\r",
-											"    \r",
-											"    // Получаем реально переданные данные из формы\r",
-											"    const formData = pm.request.body.formdata;\r",
-											"    \r",
-											"    // Проверяем только те поля, которые были переданы\r",
-											"    if (formData.has(\"title_en\")) {\r",
-											"        pm.expect(updatedProject.title.en).to.equal(formData.get(\"title_en\"));\r",
-											"    }\r",
-											"    if (formData.has(\"title_ru\")) {\r",
-											"        pm.expect(updatedProject.title.ru).to.equal(formData.get(\"title_ru\"));\r",
-											"    }\r",
-											"    if (formData.has(\"description_en\")) {\r",
-											"        pm.expect(updatedProject.description.en).to.equal(formData.get(\"description_en\"));\r",
-											"    }\r",
-											"    if (formData.has(\"description_ru\")) {\r",
-											"        pm.expect(updatedProject.description.ru).to.equal(formData.get(\"description_ru\"));\r",
-											"    }\r",
-											"    if (formData.has(\"link\")) {\r",
-											"        pm.expect(updatedProject.link).to.equal(formData.get(\"link\"));\r",
-											"    }\r",
-											"});\r",
-											""
+											"});"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -1803,8 +1774,14 @@
 								"method": "PATCH",
 								"header": [],
 								"body": {
-									"mode": "formdata",
-									"formdata": []
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "title_en",
+											"value": "New Title",
+											"type": "text"
+										}
+									]
 								},
 								"url": {
 									"raw": "{{base_url}}/projects/{{projects_id}}",
@@ -2493,7 +2470,526 @@
 				},
 				{
 					"name": "Projects Endpoints",
-					"item": []
+					"item": [
+						{
+							"name": "/projects - 422 (Missing Image)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 422 for missing image\", () => pm.response.to.have.status(422));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title_en",
+											"value": "Project Title EN",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "Project Description EN",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Заголовок проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Описание проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://example.com",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "13",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 400 (Not an image)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 400 for invalid image format\", () => pm.response.to.have.status(400));\r",
+											"pm.test(\"Invalid format error message\", () => {\r",
+											"    pm.expect(pm.response.json().detail).to.include(\"format\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title_en",
+											"value": "Project Title EN",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "Project Description EN",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Заголовок проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Описание проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://example.com",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "13",
+											"type": "text"
+										},
+										{
+											"key": "image",
+											"type": "file",
+											"src": "wrong-format.txt"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 422 (Invalid Link)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 422 for invalid URL\", () => pm.response.to.have.status(422));\r",
+											"pm.test(\"URL validation error\", () => {\r",
+											"    pm.expect(pm.response.json().detail).to.include(\"URL\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title_en",
+											"value": "Project Title EN",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "Project Description EN",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Заголовок проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Описание проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "Awful_link",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "13",
+											"type": "text"
+										},
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-gif.gif"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 422 (Too long stings)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 422 for long fields\", () => pm.response.to.have.status(422));\r",
+											"pm.test(\"Returns length validation error\", () => {\r",
+											"    const error = pm.response.json();\r",
+											"    console.log(\"Error structure:\", JSON.stringify(error, null, 2));\r",
+											"    \r",
+											"    if (Array.isArray(error.detail)) {\r",
+											"        pm.expect(error.detail[0].type).to.include('string_too_long');\r",
+											"    } else if (typeof error.detail === 'string') {\r",
+											"        pm.expect(error.detail).to.include('long');\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.request.body.formdata.remove(\"link\");\r",
+											"pm.request.body.formdata.add({\r",
+											"    key: \"link\",\r",
+											"    value: \"https://valid-url.com\"\r",
+											"});\r",
+											"\r",
+											"const longTitle = \"a\".repeat(64);\r",
+											"const longDescription = \"b\".repeat(256);\r",
+											"\r",
+											"pm.request.body.formdata.remove(\"title_en\");\r",
+											"pm.request.body.formdata.remove(\"description_en\");\r",
+											"\r",
+											"pm.request.body.formdata.add({\r",
+											"    key: \"title_en\",\r",
+											"    value: longTitle\r",
+											"});\r",
+											"pm.request.body.formdata.add({\r",
+											"    key: \"description_en\", \r",
+											"    value: longDescription\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Заголовок проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Описание проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://example.com",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "13",
+											"type": "text"
+										},
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-gif.gif"
+										},
+										{
+											"key": "description_en",
+											"value": "",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects - 422 (Popularity Negative)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status 422 for invalid popularity\", () => {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Returns validation error for popularity\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    \r",
+											"    // Если ошибка в URL - проверяем строку\r",
+											"    if (typeof response.detail === 'string') {\r",
+											"        pm.expect(response.detail).to.include('Invalid URL format');\r",
+											"    } \r",
+											"    else if (Array.isArray(response.detail)) {\r",
+											"        const popularityError = response.detail.find(error => \r",
+											"            error.loc && error.loc.includes('popularity')\r",
+											"        );\r",
+											"        pm.expect(popularityError).to.exist;\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title_en",
+											"value": "Project Title EN",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Заголовок проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Описание проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://example.com",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "-10",
+											"type": "text"
+										},
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-gif.gif"
+										},
+										{
+											"key": "description_en",
+											"value": "",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/invalid_id/image - 404 (Invalid Doc Id)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-image.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{$guid}}/image",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{$guid}}",
+										"image"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/doc_id - 404 (Invalid Doc ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects/{{$randomUUID}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{$randomUUID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		}

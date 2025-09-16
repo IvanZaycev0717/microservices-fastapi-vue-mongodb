@@ -38,11 +38,15 @@ class ProjectCreateForm(BaseModel):
     @classmethod
     def as_form(
         cls,
-        title_en: str = Form(json_schema_extra={"example": "Project Title EN"}),
+        title_en: str = Form(
+            json_schema_extra={"example": "Project Title EN"}
+        ),
         description_en: str = Form(
             json_schema_extra={"example": "Project Description EN"}
         ),
-        title_ru: str = Form(json_schema_extra={"example": "Заголовок проекта РУ"}),
+        title_ru: str = Form(
+            json_schema_extra={"example": "Заголовок проекта РУ"}
+        ),
         description_ru: str = Form(
             json_schema_extra={"example": "Описание проекта РУ"}
         ),
@@ -97,4 +101,8 @@ class ProjectUpdateRequest(BaseModel):
         None, max_length=settings.MAX_DESCRIPTION_LENGTH
     )
     link: Optional[HttpUrl] = Field(None)
-    popularity: Optional[int] = Field(0)
+    popularity: Optional[int] = Field(
+        0,
+        ge=settings.MIN_POPULARITY_BOUNDARY,
+        le=settings.MAX_POPULARITY_BOUNDARY,
+    )
