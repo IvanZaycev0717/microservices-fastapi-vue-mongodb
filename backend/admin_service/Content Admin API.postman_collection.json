@@ -1841,6 +1841,663 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "Certificates Endpoints",
+					"item": [
+						{
+							"name": "/certificates - 201 (Image added)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 201 Created\", () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Returns success message with ID\", () => {\r",
+											"    const response = pm.response.text();\r",
+											"    pm.expect(response).to.include(\"Certificate created with _id=\");\r",
+											"});\r",
+											"\r",
+											"const responseText = pm.response.text();\r",
+											"const certificateId = responseText.split(\"_id=\")[1].replace(/[\"']/g, '').trim();\r",
+											"pm.collectionVariables.set(\"certificate_id\", certificateId);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "test-image.jpg"
+										},
+										{
+											"key": "popularity",
+											"value": "10",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/certificates",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates - 201 (PDF added)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 201 Created\", () => {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Returns success message with ID\", () => {\r",
+											"    const response = pm.response.text();\r",
+											"    pm.expect(response).to.include(\"Certificate created with _id=\");\r",
+											"});\r",
+											"\r",
+											"const responseText = pm.response.text();\r",
+											"const certificateId = responseText.split(\"_id=\")[1].replace(/[\"']/g, '').trim();\r",
+											"pm.collectionVariables.set(\"certificate_id\", certificateId);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "test-pdf-vertical.pdf"
+										},
+										{
+											"key": "popularity",
+											"value": "100",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/certificates",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates - 200",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Each certificate has required fields\", () => {\r",
+											"    const certificates = pm.response.json();\r",
+											"    certificates.forEach(cert => {\r",
+											"        pm.expect(cert).to.have.all.keys('id', 'src', 'thumb', 'date', 'popularity', 'alt');\r",
+											"    });\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/certificates",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates - 200 (Sort Date Desc)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Sorted by date descending\", () => {\r",
+											"        const certificates = pm.response.json();\r",
+											"        for (let i = 1; i < certificates.length; i++) {\r",
+											"            const prevDate = new Date(certificates[i-1].date);\r",
+											"            const currDate = new Date(certificates[i].date);\r",
+											"            pm.expect(prevDate >= currDate).to.be.true;\r",
+											"        }\r",
+											"    });\r",
+											"\r",
+											"pm.test(\"Each certificate has required fields\", () => {\r",
+											"    const certificates = pm.response.json();\r",
+											"    certificates.forEach(cert => {\r",
+											"        pm.expect(cert).to.have.all.keys('id', 'src', 'thumb', 'date', 'popularity', 'alt');\r",
+											"    });\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/certificates?sort=date_desc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates"
+									],
+									"query": [
+										{
+											"key": "sort",
+											"value": "date_desc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates - 200 (Sort Date ASC) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Sorted by date ascending\", () => {\r",
+											"        const certificates = pm.response.json();\r",
+											"        for (let i = 1; i < certificates.length; i++) {\r",
+											"            const prevDate = new Date(certificates[i-1].date);\r",
+											"            const currDate = new Date(certificates[i].date);\r",
+											"            pm.expect(prevDate <= currDate).to.be.true;\r",
+											"        }\r",
+											"    });\r",
+											"\r",
+											"pm.test(\"Each certificate has required fields\", () => {\r",
+											"    const certificates = pm.response.json();\r",
+											"    certificates.forEach(cert => {\r",
+											"        pm.expect(cert).to.have.all.keys('id', 'src', 'thumb', 'date', 'popularity', 'alt');\r",
+											"    });\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/certificates?sort=date_asc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates"
+									],
+									"query": [
+										{
+											"key": "sort",
+											"value": "date_asc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates - 200 (Sort Popularity)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Sorted by popularity descending\", () => {\r",
+											"        const certificates = pm.response.json();\r",
+											"        for (let i = 1; i < certificates.length; i++) {\r",
+											"            pm.expect(certificates[i-1].popularity >= certificates[i].popularity).to.be.true;\r",
+											"        }\r",
+											"    });\r",
+											"\r",
+											"pm.test(\"Each certificate has required fields\", () => {\r",
+											"    const certificates = pm.response.json();\r",
+											"    certificates.forEach(cert => {\r",
+											"        pm.expect(cert).to.have.all.keys('id', 'src', 'thumb', 'date', 'popularity', 'alt');\r",
+											"    });\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/certificates?sort=popularity",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates"
+									],
+									"query": [
+										{
+											"key": "sort",
+											"value": "popularity"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates/doc_id - 200 (Sort Popularity)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 OK\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Returns certificate object\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.be.an('object');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Contains correct certificate ID\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.id).to.equal(pm.collectionVariables.get(\"certificate_id\"));\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Has all required fields\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.all.keys(\r",
+											"        'id', 'src', 'thumb', 'date', 'popularity', 'alt'\r",
+											"    );\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Image URLs are valid\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.src).to.include('http://');\r",
+											"    pm.expect(response.thumb).to.include('http://');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Date is valid ISO format\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    const date = new Date(response.date);\r",
+											"    pm.expect(date).to.be.a('Date');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Popularity is within range\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.popularity).to.be.at.least(0);\r",
+											"    pm.expect(response.popularity).to.be.at.most(1000);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/certificates/{{certificate_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates",
+										"{{certificate_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates/doc_id - 200 (Image Update)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 OK\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "test-image.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/certificates/{{certificate_id}}/image",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates",
+										"{{certificate_id}}",
+										"image"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates/doc_id - 200 (PDF Update)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 OK\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "test-pdf-vertical.pdf"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/certificates/{{certificate_id}}/image",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates",
+										"{{certificate_id}}",
+										"image"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates/doc_id - 200 (PDF Update) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 200 OK\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "popularity",
+											"value": "{{$randomInt}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/certificates/{{certificate_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates",
+										"{{certificate_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates/doc_id - 204 (Deleted)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 204 OK\", () => {\r",
+											"    pm.response.to.have.status(204);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-pdf-vertical.pdf"
+										},
+										{
+											"key": "popularity",
+											"value": "566",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/certificates/{{certificate_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates",
+										"{{certificate_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
@@ -2915,6 +3572,103 @@
 							"response": []
 						},
 						{
+							"name": "/projects - 422 (Popularity Too Big)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status 422 for invalid popularity\", () => {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Returns validation error for popularity\", () => {\r",
+											"    const response = pm.response.json();\r",
+											"    \r",
+											"    // Если ошибка в URL - проверяем строку\r",
+											"    if (typeof response.detail === 'string') {\r",
+											"        pm.expect(response.detail).to.include('Invalid URL format');\r",
+											"    } \r",
+											"    else if (Array.isArray(response.detail)) {\r",
+											"        const popularityError = response.detail.find(error => \r",
+											"            error.loc && error.loc.includes('popularity')\r",
+											"        );\r",
+											"        pm.expect(popularityError).to.exist;\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "title_en",
+											"value": "Project Title EN",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "Заголовок проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "Описание проекта РУ",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://example.com",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "2000",
+											"type": "text"
+										},
+										{
+											"key": "image",
+											"type": "file",
+											"src": "test-gif.gif"
+										},
+										{
+											"key": "description_en",
+											"value": "",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "/projects/invalid_id/image - 404 (Invalid Doc Id)",
 							"event": [
 								{
@@ -2927,6 +3681,13 @@
 										],
 										"type": "text/javascript",
 										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
 									}
 								}
 							],
@@ -2958,6 +3719,639 @@
 							"response": []
 						},
 						{
+							"name": "/projects/doc_id/image - 400 (Not an Image)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "wrong-format.txt"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}/image",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}",
+										"image"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/doc_id/image - 400 (Have No Image)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"value": "",
+											"type": "file"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}/image",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}",
+										"image"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/invalid_id - 404 (Invalid Doc ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "title_en",
+											"value": "{{$randomProductName}}",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "{{$randomUrl}}",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "{{$randomInt}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{$guid}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{$guid}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/doc_id - 404 (Invalid Link)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422\", function () {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "title_en",
+											"value": "{{$randomProductName}}",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "1234",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "{{$randomInt}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/doc_id - 422 (Too long strings)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422\", function () {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const longTitle = \"a\".repeat(64);\r",
+											"const longDescription = \"b\".repeat(256);\r",
+											"\r",
+											"\r",
+											"pm.request.body.urlencoded.remove(\"title_en\");\r",
+											"pm.request.body.urlencoded.remove(\"description_en\");\r",
+											"\r",
+											"pm.request.body.urlencoded.add({\r",
+											"    key: \"title_en\",\r",
+											"    value: longTitle\r",
+											"});\r",
+											"pm.request.body.urlencoded.add({\r",
+											"    key: \"description_en\", \r",
+											"    value: longDescription\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "title_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://mail.ru",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "{{$randomInt}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/doc_id - 422 (Negative Popularity)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422\", function () {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "title_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://mail.ru",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "-100",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/doc_id - 422 (Too big Popularity)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422\", function () {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "title_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://mail.ru",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "2000",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/doc_id - 422 (Empty Request)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422\", function () {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "title_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_en",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "title_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "description_ru",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "popularity",
+											"value": "",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/doc_id - 415 (JSON instead form)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 415\", function () {\r",
+											"    pm.response.to.have.status(415);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/projects/{{projects_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{projects_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "/projects/doc_id - 404 (Invalid Doc ID)",
 							"event": [
 								{
@@ -2970,6 +4364,13 @@
 										],
 										"type": "text/javascript",
 										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [],
+										"type": "text/javascript"
 									}
 								}
 							],
@@ -2984,6 +4385,84 @@
 									"path": [
 										"projects",
 										"{{$randomUUID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/projects/doc_id - 404 (Invalid Doc ID) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/projects/{{unexisted_document_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"projects",
+										"{{unexisted_document_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Certificates Endpoints",
+					"item": [
+						{
+							"name": "/certificates - 422 (Without body)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422\", function () {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/certificates",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"certificates"
 									]
 								}
 							},
@@ -3039,6 +4518,10 @@
 		},
 		{
 			"key": "projects_id",
+			"value": ""
+		},
+		{
+			"key": "certificate_id",
 			"value": ""
 		}
 	]
