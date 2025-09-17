@@ -1,7 +1,7 @@
 import io
 import logging
 from urllib.parse import urlparse
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from typing import Annotated, List, Dict, Any, Optional
 from content_admin.dependencies import (
     SortOrder,
@@ -15,7 +15,6 @@ from fastapi import status
 
 from content_admin.models.certificates import (
     CertificateCreateForm,
-    CertificateUpdateForm,
 )
 from services.minio_management import MinioCRUD
 from services.image_processor import (
@@ -181,12 +180,9 @@ async def get_certificate_by_id(
         )
 
 
-@router.patch("/{certificate_id}")
-async def update_certificate(
+@router.patch("/{certificate_id}/image")
+async def update_certificate_image(
     certificate_id: str,
-    form_data: Annotated[
-        CertificateUpdateForm, Depends(CertificateUpdateForm.as_form)
-    ],
     certificates_crud: Annotated[
         CertificatesCRUD, Depends(get_certificates_crud)
     ],
@@ -197,11 +193,9 @@ async def update_certificate(
             get_logger_factory(settings.CONTENT_SERVICE_CERTIFICATES_NAME)
         ),
     ],
-    file: Optional[UploadFile] = File(
-        None, description="Optional new certificate image"
-    ),
+    file: UploadFile = File(description="New certificate image"),
 ):
-    """Update certificate image and/or popularity."""
+    """Update only certificate image."""
     try:
         current_cert = await certificates_crud.read_one_by_id(certificate_id)
         if not current_cert:
@@ -209,87 +203,114 @@ async def update_certificate(
                 404, f"Certificate with id {certificate_id} not found"
             )
 
-        update_data = {}
+        file_bytes = await file.read()
+        is_pdf = file_bytes.startswith(b"%PDF-")
 
-        if file:
-            file_bytes = await file.read()
-            is_pdf = file_bytes.startswith(b"%PDF-")
-
-            if is_pdf:
-                image_data = await convert_pdf_to_image(
-                    file_bytes, settings.CERTIFICATE_MAX_PDF_SIZE_KB
-                )
-                processing_file = UploadFile(
-                    filename=file.filename.replace(".pdf", ".webp"),
-                    file=io.BytesIO(image_data),
-                )
-            else:
-                await file.seek(0)
-                if not await has_image_allowed_extention(file):
-                    raise HTTPException(400, "Invalid image format")
-                if not await has_image_proper_size_kb(
-                    file, settings.CERTIFICATE_MAX_IMAGE_SIZE_KB
-                ):
-                    raise HTTPException(400, "Image size exceeds limit")
-                processing_file = file
-
-            main_image_resized = await resize_image(
-                processing_file,
-                settings.CERTIFICATES_IMAGE_OUTPUT_WIDTH,
-                settings.CERTIFICATES_IMAGE_OUTPUT_HEIGHT,
+        if is_pdf:
+            image_data = await convert_pdf_to_image(
+                file_bytes, settings.CERTIFICATE_MAX_PDF_SIZE_KB
             )
-            main_image, main_image_filename = await convert_image_to_webp(
-                main_image_resized
+            processing_file = UploadFile(
+                filename=file.filename.replace(".pdf", ".webp"),
+                file=io.BytesIO(image_data),
+            )
+        else:
+            await file.seek(0)
+            if not await has_image_allowed_extention(file):
+                raise HTTPException(400, "Invalid image format")
+            if not await has_image_proper_size_kb(
+                file, settings.CERTIFICATE_MAX_IMAGE_SIZE_KB
+            ):
+                raise HTTPException(400, "Image size exceeds limit")
+            processing_file = file
+
+        main_image_resized = await resize_image(
+            processing_file,
+            settings.CERTIFICATES_IMAGE_OUTPUT_WIDTH,
+            settings.CERTIFICATES_IMAGE_OUTPUT_HEIGHT,
+        )
+        main_image, main_image_filename = await convert_image_to_webp(
+            main_image_resized
+        )
+
+        thumb_image_resized = await resize_image(
+            processing_file,
+            settings.CERTIFICATES_IMAGE_THUMB_OUTPUT_WIDTH,
+            settings.CERTIFICATES_IMAGE_THUMB_OUTPUT_HEIGHT,
+        )
+        thumb_image, _ = await convert_image_to_webp(thumb_image_resized)
+
+        main_image_url = await minio_crud.upload_file(
+            settings.CERTIFICATES_BUCKET_NAME,
+            main_image_filename,
+            main_image,
+        )
+        thumb_image_url = await minio_crud.upload_file(
+            settings.CERTIFICATES_BUCKET_NAME,
+            f"thumbnail/{main_image_filename}",
+            thumb_image,
+        )
+
+        old_src = current_cert["src"]
+        old_thumb = current_cert["thumb"]
+
+        try:
+            bucket, obj_name = extract_bucket_and_object_from_url(old_src)
+            await minio_crud.delete_file(bucket, obj_name)
+            bucket, obj_name = extract_bucket_and_object_from_url(old_thumb)
+            await minio_crud.delete_file(bucket, obj_name)
+        except Exception as e:
+            logger.warning(f"Failed to delete old images: {e}")
+
+        update_data = {
+            "src": main_image_url,
+            "thumb": thumb_image_url,
+            "alt": f"certificate_{main_image_filename.replace('.webp', '')}",
+        }
+
+        updated = await certificates_crud.update(certificate_id, update_data)
+        if not updated:
+            raise HTTPException(500, "Failed to update certificate image")
+
+        logger.info(f"Certificate image updated: {certificate_id}")
+        return "Certificate image updated successfully"
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Unexpected error: {e}")
+        raise HTTPException(500, "Internal server error")
+
+
+@router.patch("/{certificate_id}")
+async def update_certificate_popularity(
+    certificate_id: str,
+    popularity: int = Form(
+        ge=settings.MIN_POPULARITY_BOUNDARY,
+        le=settings.MAX_POPULARITY_BOUNDARY,
+        description="Popularity value (0-1000)",
+        json_schema_extra={"example": 5},
+    ),
+    certificates_crud: CertificatesCRUD = Depends(get_certificates_crud),
+    logger: logging.Logger = Depends(
+        get_logger_factory(settings.CONTENT_SERVICE_CERTIFICATES_NAME)
+    ),
+):
+    """Update only certificate popularity."""
+    try:
+        current_cert = await certificates_crud.read_one_by_id(certificate_id)
+        if not current_cert:
+            raise HTTPException(
+                404, f"Certificate with id {certificate_id} not found"
             )
 
-            thumb_image_resized = await resize_image(
-                processing_file,
-                settings.CERTIFICATES_IMAGE_THUMB_OUTPUT_WIDTH,
-                settings.CERTIFICATES_IMAGE_THUMB_OUTPUT_HEIGHT,
-            )
-            thumb_image, _ = await convert_image_to_webp(thumb_image_resized)
+        updated = await certificates_crud.update(
+            certificate_id, {"popularity": popularity}
+        )
+        if not updated:
+            raise HTTPException(500, "Failed to update certificate popularity")
 
-            main_image_url = await minio_crud.upload_file(
-                settings.CERTIFICATES_BUCKET_NAME,
-                main_image_filename,
-                main_image,
-            )
-            thumb_image_url = await minio_crud.upload_file(
-                settings.CERTIFICATES_BUCKET_NAME,
-                f"thumbnail/{main_image_filename}",
-                thumb_image,
-            )
-
-            old_src = current_cert["src"]
-            old_thumb = current_cert["thumb"]
-
-            try:
-                bucket, obj_name = extract_bucket_and_object_from_url(old_src)
-                await minio_crud.delete_file(bucket, obj_name)
-                bucket, obj_name = extract_bucket_and_object_from_url(
-                    old_thumb
-                )
-                await minio_crud.delete_file(bucket, obj_name)
-            except Exception as e:
-                logger.warning(f"Failed to delete old images: {e}")
-
-            update_data["src"] = main_image_url
-            update_data["thumb"] = thumb_image_url
-            update_data["alt"] = (
-                f"certificate_{main_image_filename.replace('.webp', '')}"
-            )
-
-        if form_data.popularity is not None:
-            update_data["popularity"] = form_data.popularity
-
-        if update_data:
-            updated = await certificates_crud.update(
-                certificate_id, update_data
-            )
-            if not updated:
-                raise HTTPException(500, "Failed to update certificate")
-
-        return "Certificate updated successfully"
+        return "Certificate popularity updated successfully"
 
     except HTTPException:
         raise

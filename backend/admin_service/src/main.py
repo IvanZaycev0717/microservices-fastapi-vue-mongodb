@@ -2,10 +2,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from content_admin.routes import about, projects, tech, certificates
 from services.data_loader import DataLoader
 from services.logger import get_logger
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from services.minio_management import MinioCRUD
 from services.mongo_db_management import (
     MongoCollectionsManager,
