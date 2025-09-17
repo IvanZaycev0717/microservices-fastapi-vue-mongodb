@@ -1,5 +1,5 @@
 from bson import ObjectId
-from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from typing import Annotated, List, Dict, Any
 from pymongo.asynchronous.database import AsyncDatabase
 from content_admin.crud.publications import PublicationsCRUD
@@ -64,6 +64,7 @@ async def get_publication_by_id(
     ],
 ):
     try:
+        
         result = await publications_crud.read_by_id(document_id)
         if not result:
             raise HTTPException(
@@ -171,26 +172,20 @@ async def delete_publication(
     ],
 ):
     try:
+        publication = await publications_crud.read_by_id(document_id)
+        if not publication:
+            raise HTTPException(404, f"Publication with id={document_id} not found")
+
         deleted = await publications_crud.delete(document_id)
         if not deleted:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Document with id={document_id} not found after image deletion",
-            )
+            raise HTTPException(500, "Failed to delete publication from database")
+        
         deleted_message = f"Publication with id={document_id} has been deleted"
         logger.info(deleted_message)
         return deleted_message
-    except ValueError as e:
-        logger.exception(f"Invalid document ID: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid document ID format",
-        )
+
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception(f"Error deleting document or image: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete document and associated image",
-        )
+        logger.exception(f"Error deleting publication: {e}")
+        raise HTTPException(500, "Failed to delete publication")

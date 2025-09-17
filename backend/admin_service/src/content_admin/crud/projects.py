@@ -24,7 +24,7 @@ class ProjectsCRUD:
             sort_direction = -1 if sort.endswith("desc") else 1
         else:
             sort_field = "popularity"
-            sort_direction = 1 if sort.endswith("desc") else -1
+            sort_direction = -1
 
         cursor = self.collection.find({}).sort(sort_field, sort_direction)
         results = await cursor.to_list(length=None)
