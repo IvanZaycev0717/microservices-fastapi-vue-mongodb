@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from content_admin.routes import about, projects, tech, certificates
+from content_admin.routes import about, projects, tech, certificates, publications
 from services.data_loader import DataLoader
 from services.logger import get_logger
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -93,6 +93,7 @@ app.include_router(about.router, tags=[settings.CONTENT_SERVICE_ABOUT_NAME])
 app.include_router(tech.router, tags=[settings.CONTENT_SERVICE_TECH_NAME])
 app.include_router(projects.router, tags=[settings.CONTENT_SERVICE_PROJECTS_NAME])
 app.include_router(certificates.router, tags=[settings.CONTENT_SERVICE_CERTIFICATES_NAME])
+app.include_router(publications.router, tags=[settings.CONTENT_SERVICE_PUBLICATIONS_NAME])
 
 app.add_middleware(
     CORSMiddleware,

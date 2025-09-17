@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     CONTENT_SERVICE_TECH_NAME: str = "Content Service - Tech"
     CONTENT_SERVICE_PROJECTS_NAME: str = "Content Service - Projects"
     CONTENT_SERVICE_CERTIFICATES_NAME: str = "Content Service - Certificates"
+    CONTENT_SERVICE_PUBLICATIONS_NAME: str = "Content Service - Publications"
 
     # Image Directories Names
     ABOUT_BUCKET_NAME: str = "about"

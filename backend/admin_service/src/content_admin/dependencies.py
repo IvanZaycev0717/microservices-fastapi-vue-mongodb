@@ -11,6 +11,7 @@ from content_admin.crud.tech import TechCRUD
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
 from content_admin.crud.certificates import CertificatesCRUD
+from content_admin.crud.publications import PublicationsCRUD
 
 
 class Language(StrEnum):
@@ -93,3 +94,7 @@ async def get_projects_crud(db: AsyncDatabase = Depends(get_db)) -> ProjectsCRUD
 
 async def get_certificates_crud(db: AsyncDatabase = Depends(get_db)) -> CertificatesCRUD:
     return CertificatesCRUD(db)
+
+
+async def get_publications_crud(db: AsyncDatabase = Depends(get_db)) -> PublicationsCRUD:
+    return PublicationsCRUD(db)

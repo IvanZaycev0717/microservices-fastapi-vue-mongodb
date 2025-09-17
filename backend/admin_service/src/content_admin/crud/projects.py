@@ -8,6 +8,7 @@ from pymongo.asynchronous.database import AsyncDatabase
 from services.logger import get_logger
 from settings import settings
 
+
 logger = get_logger(settings.CONTENT_SERVICE_PROJECTS_NAME)
 
 
