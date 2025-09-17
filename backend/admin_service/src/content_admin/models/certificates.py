@@ -1,8 +1,6 @@
 from datetime import datetime
-from typing import Optional
-from fastapi import status
 
-from fastapi import Form, HTTPException
+from fastapi import Form, HTTPException, status
 from pydantic import BaseModel, Field
 
 from settings import settings
@@ -18,6 +16,7 @@ class CertificateCreateForm(BaseModel):
         date: Certificate date in ISO format.
         popularity: Popularity score.
     """
+
     date: datetime = Field(default_factory=datetime.now)
     popularity: int = Field(
         settings.MIN_POPULARITY_BOUNDARY,

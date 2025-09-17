@@ -9,10 +9,18 @@ class Settings(BaseSettings):
     # From .env file
 
     # Content Admin
-    CONTENT_ADMIN_MONGO_ROOT_USERNAME: str = Field(description="MongoDB root username")
-    CONTENT_ADMIN_MONGO_ROOT_PASSWORD: str = Field(description="MongoDB root password")
-    CONTENT_ADMIN_MONGODB_URL: str = Field(description="MongoDB connection URL")
-    CONTENT_ADMIN_MONGO_DATABASE_NAME: str = Field(description="MongoDB database name")
+    CONTENT_ADMIN_MONGO_ROOT_USERNAME: str = Field(
+        description="MongoDB root username"
+    )
+    CONTENT_ADMIN_MONGO_ROOT_PASSWORD: str = Field(
+        description="MongoDB root password"
+    )
+    CONTENT_ADMIN_MONGODB_URL: str = Field(
+        description="MongoDB connection URL"
+    )
+    CONTENT_ADMIN_MONGO_DATABASE_NAME: str = Field(
+        description="MongoDB database name"
+    )
     CONTENT_ADMIN_MONGO_PORT: int = Field(description="MongoDB port")
     CONTENT_ADMIN_ME_CONFIG_MONGODB_URL: str = Field(
         description="Mongo Express connection URL"
@@ -66,8 +74,8 @@ class Settings(BaseSettings):
     }
     ABOUT_MAX_IMAGE_SIZE_KB: int = 500 * 1024  # 500KB
     PROJECT_MAX_IMAGE_SIZE_KB: int = 12_000 * 1024  # 12MB
-    CERTIFICATE_MAX_IMAGE_SIZE_KB: int = 1024 * 1024 # 1MB
-    CERTIFICATE_MAX_PDF_SIZE_KB: int = 5_000 * 1024 # 5MB
+    CERTIFICATE_MAX_IMAGE_SIZE_KB: int = 1024 * 1024  # 1MB
+    CERTIFICATE_MAX_PDF_SIZE_KB: int = 5_000 * 1024  # 5MB
 
     # Forms Validation Settings
     MIN_TITLE_LENGTH: int = 1

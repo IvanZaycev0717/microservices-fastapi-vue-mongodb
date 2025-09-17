@@ -21,7 +21,9 @@ class TechCRUD:
             logger.exception(f"Database error: {e}")
             raise
 
-    async def update_kingdom_items(self, kingdom_name: str, items: list[str]) -> bool:
+    async def update_kingdom_items(
+        self, kingdom_name: str, items: list[str]
+    ) -> bool:
         result = await self.collection.update_one(
             {}, {"$set": {f"{kingdom_name}.items": items}}
         )

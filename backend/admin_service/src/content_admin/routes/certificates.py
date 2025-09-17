@@ -1,30 +1,21 @@
 import io
 import logging
-from urllib.parse import urlparse
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from typing import Annotated, List, Dict, Any, Optional
-from content_admin.dependencies import (
-    SortOrder,
-    get_logger_factory,
-    get_minio_crud,
-)
-from content_admin.crud.certificates import CertificatesCRUD
-from content_admin.dependencies import get_certificates_crud
-from settings import settings
-from fastapi import status
+from typing import Annotated, Any, Dict, List
 
-from content_admin.models.certificates import (
-    CertificateCreateForm,
-)
+from fastapi import (APIRouter, Depends, File, Form, HTTPException, UploadFile,
+                     status)
+
+from content_admin.crud.certificates import CertificatesCRUD
+from content_admin.dependencies import (SortOrder, get_certificates_crud,
+                                        get_logger_factory, get_minio_crud)
+from content_admin.models.certificates import CertificateCreateForm
+from services.image_processor import (convert_image_to_webp,
+                                      has_image_allowed_extention,
+                                      has_image_proper_size_kb, resize_image)
 from services.minio_management import MinioCRUD
-from services.image_processor import (
-    convert_image_to_webp,
-    has_image_allowed_extention,
-    has_image_proper_size_kb,
-    resize_image,
-)
 from services.pdf_processor import convert_pdf_to_image
 from services.utils import extract_bucket_and_object_from_url
+from settings import settings
 
 router = APIRouter(prefix="/certificates")
 

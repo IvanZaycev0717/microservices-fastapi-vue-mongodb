@@ -1,11 +1,12 @@
 from typing import Any, Dict, List
+
 from bson import ObjectId
-from pymongo.asynchronous.database import AsyncDatabase
+from bson.errors import InvalidId
 from pymongo.asynchronous.collection import AsyncCollection
+from pymongo.asynchronous.database import AsyncDatabase
+
 from services.logger import get_logger
 from settings import settings
-from bson.errors import InvalidId
-
 
 logger = get_logger(settings.CONTENT_SERVICE_PROJECTS_NAME)
 
@@ -86,21 +87,27 @@ class PublicationsCRUD:
             }
         except InvalidId:
             return None
-    
-    async def update(self, publication_id: str, update_data: Dict[str, Any]) -> None:
+
+    async def update(
+        self, publication_id: str, update_data: Dict[str, Any]
+    ) -> None:
         await self.collection.update_one(
             {"_id": ObjectId(publication_id)}, {"$set": update_data}
         )
-    
+
     async def delete(self, document_id: str) -> bool:
         try:
             if not ObjectId.is_valid(document_id):
                 raise ValueError(f"Invalid ObjectId format: {document_id}")
 
-            result = await self.collection.delete_one({"_id": ObjectId(document_id)})
+            result = await self.collection.delete_one(
+                {"_id": ObjectId(document_id)}
+            )
 
             if result.deleted_count == 0:
-                logger.warning(f"Document with id {document_id} not found for deletion")
+                logger.warning(
+                    f"Document with id {document_id} not found for deletion"
+                )
                 return False
 
             logger.info(f"Successfully deleted document with id {document_id}")

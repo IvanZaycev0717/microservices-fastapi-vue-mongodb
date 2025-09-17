@@ -61,7 +61,9 @@ class AboutFullResponse(BaseModel):
             return str(v)
         return v
 
-    model_config = ConfigDict(populate_by_name=True, json_encoders={ObjectId: str})
+    model_config = ConfigDict(
+        populate_by_name=True, json_encoders={ObjectId: str}
+    )
 
 
 class AboutTranslatedResponse(BaseModel):
@@ -94,7 +96,9 @@ class AboutTranslatedResponse(BaseModel):
             return str(v)
         return v
 
-    model_config = ConfigDict(populate_by_name=True, json_encoders={ObjectId: str})
+    model_config = ConfigDict(
+        populate_by_name=True, json_encoders={ObjectId: str}
+    )
 
 
 class CreateAboutRequest(BaseModel):
@@ -126,7 +130,9 @@ class AboutUpdateForm(BaseModel):
         Provides structured example with both English and Russian translations.
     """
 
-    title_en: Optional[str] = Field("Title EN", max_length=settings.MAX_TITLE_LENGTH)
+    title_en: Optional[str] = Field(
+        "Title EN", max_length=settings.MAX_TITLE_LENGTH
+    )
     description_en: Optional[str] = Field(
         "Description EN", max_length=settings.MAX_DESCRIPTION_LENGTH
     )
@@ -155,11 +161,15 @@ class AboutCreateForm(BaseModel):
         as_form: Class method to transform Form parameters into model instance.
     """
 
-    title_en: str = Field("Title EN", max_length=settings.MAX_DESCRIPTION_LENGTH)
+    title_en: str = Field(
+        "Title EN", max_length=settings.MAX_DESCRIPTION_LENGTH
+    )
     description_en: str = Field(
         "Description EN", max_length=settings.MAX_DESCRIPTION_LENGTH
     )
-    title_ru: str = Field("Заголовок РУ", max_length=settings.MAX_DESCRIPTION_LENGTH)
+    title_ru: str = Field(
+        "Заголовок РУ", max_length=settings.MAX_DESCRIPTION_LENGTH
+    )
     description_ru: str = Field(
         "Описание РУ", max_length=settings.MAX_DESCRIPTION_LENGTH
     )

@@ -29,13 +29,17 @@ class DataLoader:
             raise DataLoaderError("Required files set is empty")
         try:
             if not await self._path_exists(self.content_admin_path):
-                logger.exception(f"Directory {self.content_admin_path} does not exist")
+                logger.exception(
+                    f"Directory {self.content_admin_path} does not exist"
+                )
                 raise FileNotFoundError(
                     f"Directory {self.content_admin_path} does not exist"
                 )
 
             if not await self._is_directory(self.content_admin_path):
-                logger.exception(f"{self.content_admin_path} is not a directory")
+                logger.exception(
+                    f"{self.content_admin_path} is not a directory"
+                )
                 raise NotADirectoryError(
                     f"{self.content_admin_path} is not a directory"
                 )
@@ -45,7 +49,9 @@ class DataLoader:
             missing_files = self.required_files - existing_files
 
             if missing_files:
-                logger.warning(f"Missing files: {', '.join(sorted(missing_files))}")
+                logger.warning(
+                    f"Missing files: {', '.join(sorted(missing_files))}"
+                )
                 return False
 
             logger.info("All required files are present")
@@ -62,9 +68,14 @@ class DataLoader:
             existing_files = await self._get_existing_files()
             tasks = []
             for filename in existing_files:
-                if Path(filename).suffix.lower() in settings.ALLOWED_IMAGE_EXTENSIONS:
+                if (
+                    Path(filename).suffix.lower()
+                    in settings.ALLOWED_IMAGE_EXTENSIONS
+                ):
                     tasks.append(
-                        self._upload_single_file(minio_crud, bucket_name, filename)
+                        self._upload_single_file(
+                            minio_crud, bucket_name, filename
+                        )
                     )
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -76,7 +87,9 @@ class DataLoader:
             for filename, result in zip(image_files, results):
                 if isinstance(result, Exception):
                     logger.exception(f"Failed to upload {filename}: {result}")
-                    raise DataLoaderError(f"Failed to upload {filename}: {result}")
+                    raise DataLoaderError(
+                        f"Failed to upload {filename}: {result}"
+                    )
                 else:
                     upload_results[filename] = result
                     logger.info(f"Successfully uploaded {filename} to MinIO")
@@ -103,7 +116,8 @@ class DataLoader:
             ]
 
             logger.info(
-                f"Found {len(image_files)} image files in MinIO bucket '{bucket_name}'"
+                f"Found {len(image_files)} "
+                f"image files in MinIO bucket '{bucket_name}'"
             )
             return len(image_files) > 1
 
@@ -127,13 +141,20 @@ class DataLoader:
 
                 # Replace local filename with MinIO URL if exists
                 original_filename = transformed_item.get("image_url")
-                if original_filename and original_filename in minio_urls_mapping:
+                if (
+                    original_filename
+                    and original_filename in minio_urls_mapping
+                ):
                     transformed_item["image_url"] = minio_urls_mapping[
                         original_filename
                     ]
-                    logger.debug(f"Replaced {original_filename} with MinIO URL")
+                    logger.debug(
+                        f"Replaced {original_filename} with MinIO URL"
+                    )
                 else:
-                    logger.warning(f"No MinIO URL found for {original_filename}")
+                    logger.warning(
+                        f"No MinIO URL found for {original_filename}"
+                    )
 
                 transformed_data.append(transformed_item)
 
@@ -144,13 +165,15 @@ class DataLoader:
             inserted_count = len(result.inserted_ids)
 
             logger.info(
-                f"Successfully inserted {inserted_count} documents into '{collection_name}' collection"
+                f"Successfully inserted {inserted_count} "
+                f"documents into '{collection_name}' collection"
             )
             return inserted_count
 
         except OperationFailure as e:
             logger.exception(
-                f"MongoDB operation failed for collection '{collection_name}': {e}"
+                f"MongoDB operation failed "
+                f"for collection '{collection_name}': {e}"
             )
             raise DataLoaderError(f"Database operation failed: {e}")
         except Exception as e:

@@ -1,7 +1,8 @@
 import io
-from pdf2image import convert_from_bytes
+
 from fastapi import HTTPException
-from settings import settings
+from pdf2image import convert_from_bytes
+
 from services.logger import get_logger
 
 logger = get_logger("pdf-processor")

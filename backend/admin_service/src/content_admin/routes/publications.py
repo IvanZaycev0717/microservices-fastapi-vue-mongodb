@@ -1,22 +1,16 @@
-from bson import ObjectId
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from typing import Annotated, List, Dict, Any
-from pymongo.asynchronous.database import AsyncDatabase
-from content_admin.crud.publications import PublicationsCRUD
-from content_admin.dependencies import (
-    get_publications_crud,
-    Language,
-    SortOrder,
-)
-from content_admin.dependencies import get_logger_factory
-from settings import settings
 import logging
-from fastapi import status
+from typing import Annotated, Any, Dict, List
 
-from content_admin.models.publications import (
-    PublicationCreateForm,
-    PublicationUpdateForm,
-)
+from bson import ObjectId
+from fastapi import APIRouter, Depends, Form, HTTPException, status
+
+from content_admin.crud.publications import PublicationsCRUD
+from content_admin.dependencies import (Language, SortOrder,
+                                        get_logger_factory,
+                                        get_publications_crud)
+from content_admin.models.publications import (PublicationCreateForm,
+                                               PublicationUpdateForm)
+from settings import settings
 
 router = APIRouter(prefix="/publications")
 
@@ -64,7 +58,6 @@ async def get_publication_by_id(
     ],
 ):
     try:
-        
         result = await publications_crud.read_by_id(document_id)
         if not result:
             raise HTTPException(
@@ -174,12 +167,16 @@ async def delete_publication(
     try:
         publication = await publications_crud.read_by_id(document_id)
         if not publication:
-            raise HTTPException(404, f"Publication with id={document_id} not found")
+            raise HTTPException(
+                404, f"Publication with id={document_id} not found"
+            )
 
         deleted = await publications_crud.delete(document_id)
         if not deleted:
-            raise HTTPException(500, "Failed to delete publication from database")
-        
+            raise HTTPException(
+                500, "Failed to delete publication from database"
+            )
+
         deleted_message = f"Publication with id={document_id} has been deleted"
         logger.info(deleted_message)
         return deleted_message

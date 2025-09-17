@@ -1,10 +1,11 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from bson import ObjectId
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 
-from content_admin.models.about import AboutFullResponse, AboutTranslatedResponse
+from content_admin.models.about import (AboutFullResponse,
+                                        AboutTranslatedResponse)
 from services.logger import get_logger
 from settings import settings
 
@@ -15,12 +16,14 @@ class AboutCRUD:
     def __init__(self, db: AsyncDatabase):
         self.collection: AsyncCollection = db.about
 
-    async def read_all(self, lang: Optional[str] = None) -> List[Dict[str, Any]]:
+    async def read_all(self, lang: str | None = None) -> list[dict[str, Any]]:
         try:
             if not lang or (lang not in ("en", "ru")):
                 cursor = self.collection.find()
                 results = await cursor.to_list(length=None)
-                return [AboutFullResponse(**item).model_dump() for item in results]
+                return [
+                    AboutFullResponse(**item).model_dump() for item in results
+                ]
             else:
                 pipeline = [
                     {
@@ -35,7 +38,8 @@ class AboutCRUD:
                 cursor = await self.collection.aggregate(pipeline)
                 results = await cursor.to_list(length=None)
                 return [
-                    AboutTranslatedResponse(**item).model_dump() for item in results
+                    AboutTranslatedResponse(**item).model_dump()
+                    for item in results
                 ]
 
         except Exception as e:
@@ -43,8 +47,8 @@ class AboutCRUD:
             raise
 
     async def read_one(
-        self, document_id: str, lang: Optional[str] = None
-    ) -> Optional[Dict[str, Any]]:
+        self, document_id: str, lang: str | None = None
+    ) -> dict[str, Any] | None:
         """Get a single document by ID with optional language filtering.
 
         Args:
@@ -64,8 +68,14 @@ class AboutCRUD:
                 raise ValueError(f"Invalid ObjectId format: {document_id}")
 
             if not lang:
-                result = await self.collection.find_one({"_id": ObjectId(document_id)})
-                return AboutFullResponse(**result).model_dump() if result else None
+                result = await self.collection.find_one(
+                    {"_id": ObjectId(document_id)}
+                )
+                return (
+                    AboutFullResponse(**result).model_dump()
+                    if result
+                    else None
+                )
             else:
                 pipeline = [
                     {"$match": {"_id": ObjectId(document_id)}},
@@ -82,7 +92,9 @@ class AboutCRUD:
                 results = await cursor.to_list(length=1)
                 result = results[0] if results else None
                 return (
-                    AboutTranslatedResponse(**result).model_dump() if result else None
+                    AboutTranslatedResponse(**result).model_dump()
+                    if result
+                    else None
                 )
 
         except ValueError as e:
@@ -102,7 +114,9 @@ class AboutCRUD:
             logger.exception(f"Database error in create: {e}")
             raise
 
-    async def update(self, document_id: str, update_data: Dict[str, Any]) -> bool:
+    async def update(
+        self, document_id: str, update_data: dict[str, Any]
+    ) -> bool:
         """Update a document by its ID with provided data.
 
         Args:
@@ -125,7 +139,9 @@ class AboutCRUD:
             )
 
             if result.modified_count == 0:
-                logger.warning(f"Document with id {document_id} not found for update")
+                logger.warning(
+                    f"Document with id {document_id} not found for update"
+                )
                 return False
 
             logger.info(f"Successfully updated document with id {document_id}")
@@ -155,10 +171,14 @@ class AboutCRUD:
             if not ObjectId.is_valid(document_id):
                 raise ValueError(f"Invalid ObjectId format: {document_id}")
 
-            result = await self.collection.delete_one({"_id": ObjectId(document_id)})
+            result = await self.collection.delete_one(
+                {"_id": ObjectId(document_id)}
+            )
 
             if result.deleted_count == 0:
-                logger.warning(f"Document with id {document_id} not found for deletion")
+                logger.warning(
+                    f"Document with id {document_id} not found for deletion"
+                )
                 return False
 
             logger.info(f"Successfully deleted document with id {document_id}")

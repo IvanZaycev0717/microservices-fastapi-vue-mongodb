@@ -1,17 +1,17 @@
-from enum import StrEnum
 import logging
+from enum import StrEnum
 from typing import Callable
 
 from fastapi import Depends, Request
 from pymongo.asynchronous.database import AsyncDatabase
 
 from content_admin.crud.about import AboutCRUD
+from content_admin.crud.certificates import CertificatesCRUD
 from content_admin.crud.projects import ProjectsCRUD
+from content_admin.crud.publications import PublicationsCRUD
 from content_admin.crud.tech import TechCRUD
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
-from content_admin.crud.certificates import CertificatesCRUD
-from content_admin.crud.publications import PublicationsCRUD
 
 
 class Language(StrEnum):
@@ -89,12 +89,19 @@ async def get_tech_crud(db: AsyncDatabase = Depends(get_db)) -> TechCRUD:
     return TechCRUD(db)
 
 
-async def get_projects_crud(db: AsyncDatabase = Depends(get_db)) -> ProjectsCRUD:
+async def get_projects_crud(
+    db: AsyncDatabase = Depends(get_db),
+) -> ProjectsCRUD:
     return ProjectsCRUD(db)
 
-async def get_certificates_crud(db: AsyncDatabase = Depends(get_db)) -> CertificatesCRUD:
+
+async def get_certificates_crud(
+    db: AsyncDatabase = Depends(get_db),
+) -> CertificatesCRUD:
     return CertificatesCRUD(db)
 
 
-async def get_publications_crud(db: AsyncDatabase = Depends(get_db)) -> PublicationsCRUD:
+async def get_publications_crud(
+    db: AsyncDatabase = Depends(get_db),
+) -> PublicationsCRUD:
     return PublicationsCRUD(db)

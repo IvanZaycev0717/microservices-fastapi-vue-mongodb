@@ -200,7 +200,9 @@ class MongoCollectionsManager:
                 await self.load_and_insert_data(
                     file_path, self.db[collection_name], logger
                 )
-                logger.info(f"Collection {collection_name} initialized successfully")
+                logger.info(
+                    f"Collection {collection_name} initialized successfully"
+                )
 
             logger.info("All collections initialized successfully")
 

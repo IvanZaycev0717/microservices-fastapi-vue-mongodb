@@ -2,18 +2,15 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
-from content_admin.routes import about, projects, tech, certificates, publications
+from content_admin.routes import (about, certificates, projects, publications,
+                                  tech)
 from services.data_loader import DataLoader
 from services.logger import get_logger
-from starlette.exceptions import HTTPException as StarletteHTTPException
 from services.minio_management import MinioCRUD
-from services.mongo_db_management import (
-    MongoCollectionsManager,
-    MongoConnectionManager,
-    MongoDatabaseManager,
-)
+from services.mongo_db_management import (MongoCollectionsManager,
+                                          MongoConnectionManager,
+                                          MongoDatabaseManager)
 from settings import settings
 
 logger = get_logger("main")
@@ -27,13 +24,19 @@ async def lifespan(app: FastAPI):
 
     minio_crud = MinioCRUD()
     try:
-        content_admin_client = await content_admin_mongo_connection.open_connection()
-        content_admin_database_manager = MongoDatabaseManager(content_admin_client)
+        content_admin_client = (
+            await content_admin_mongo_connection.open_connection()
+        )
+        content_admin_database_manager = MongoDatabaseManager(
+            content_admin_client
+        )
         if not await content_admin_database_manager.check_database_existence(
             settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
         ):
-            content_admin_db = await content_admin_database_manager.create_database(
-                settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
+            content_admin_db = (
+                await content_admin_database_manager.create_database(
+                    settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
+                )
             )
         else:
             content_admin_db = content_admin_client[
@@ -91,9 +94,15 @@ app = FastAPI(
 
 app.include_router(about.router, tags=[settings.CONTENT_SERVICE_ABOUT_NAME])
 app.include_router(tech.router, tags=[settings.CONTENT_SERVICE_TECH_NAME])
-app.include_router(projects.router, tags=[settings.CONTENT_SERVICE_PROJECTS_NAME])
-app.include_router(certificates.router, tags=[settings.CONTENT_SERVICE_CERTIFICATES_NAME])
-app.include_router(publications.router, tags=[settings.CONTENT_SERVICE_PUBLICATIONS_NAME])
+app.include_router(
+    projects.router, tags=[settings.CONTENT_SERVICE_PROJECTS_NAME]
+)
+app.include_router(
+    certificates.router, tags=[settings.CONTENT_SERVICE_CERTIFICATES_NAME]
+)
+app.include_router(
+    publications.router, tags=[settings.CONTENT_SERVICE_PUBLICATIONS_NAME]
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -110,7 +119,8 @@ async def log_requests(request: Request, call_next):
     try:
         response = await call_next(request)
         logger.info(
-            f"Response: {response.status_code}for {request.method} {request.url}"
+            f"Response: {response.status_code} "
+            f"for {request.method} {request.url}"
         )
         return response
     except Exception as e:

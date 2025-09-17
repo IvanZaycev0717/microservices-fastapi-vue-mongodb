@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field, HttpUrl
 from datetime import datetime
+
+from pydantic import BaseModel, Field, HttpUrl
+
 from settings import settings
 
 
@@ -18,23 +20,21 @@ class PublicationCreateForm(BaseModel):
     title_en: str = Field(
         min_length=settings.MIN_TITLE_LENGTH,
         max_length=settings.MAX_TITLE_LENGTH,
-        json_schema_extra={"example": "Publication Title EN"}
+        json_schema_extra={"example": "Publication Title EN"},
     )
     title_ru: str = Field(
         min_length=settings.MIN_TITLE_LENGTH,
         max_length=settings.MAX_TITLE_LENGTH,
-        json_schema_extra={"example": "Заголовок публикации РУ"}
+        json_schema_extra={"example": "Заголовок публикации РУ"},
     )
     page: HttpUrl = Field(
         json_schema_extra={"example": "https://example.com/page"}
     )
-    site: HttpUrl = Field(
-        json_schema_extra={"example": "https://example.com"}
-    )
+    site: HttpUrl = Field(json_schema_extra={"example": "https://example.com"})
     rating: int = Field(
         ge=settings.MIN_PUBLICATIONS_RATING_BOUNDARY,
         le=settings.MAX_PUBLICATIONS_RATING_BOUNDARY,
-        json_schema_extra={"example": 0}
+        json_schema_extra={"example": 0},
     )
     date: datetime = Field(default_factory=datetime.now)
 
@@ -55,25 +55,25 @@ class PublicationUpdateForm(BaseModel):
         "Publication Title EN",
         min_length=settings.MIN_TITLE_LENGTH,
         max_length=settings.MAX_TITLE_LENGTH,
-        json_schema_extra={"example": "Publication Title EN"}
+        json_schema_extra={"example": "Publication Title EN"},
     )
     title_ru: str = Field(
         "Заголовок публикации РУ",
         min_length=settings.MIN_TITLE_LENGTH,
         max_length=settings.MAX_TITLE_LENGTH,
-        json_schema_extra={"example": "Заголовок публикации РУ"}
+        json_schema_extra={"example": "Заголовок публикации РУ"},
     )
     page: HttpUrl = Field(
         "https://example.com/page",
-        json_schema_extra={"example": "https://example.com/page"}
+        json_schema_extra={"example": "https://example.com/page"},
     )
     site: HttpUrl = Field(
         "https://example.com",
-        json_schema_extra={"example": "https://example.com"}
+        json_schema_extra={"example": "https://example.com"},
     )
     rating: int = Field(
         0,
         ge=settings.MIN_PUBLICATIONS_RATING_BOUNDARY,
         le=settings.MAX_PUBLICATIONS_RATING_BOUNDARY,
-        json_schema_extra={"example": 0}
+        json_schema_extra={"example": 0},
     )

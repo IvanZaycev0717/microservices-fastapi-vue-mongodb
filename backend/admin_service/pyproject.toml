@@ -19,6 +19,7 @@ dependencies = [
     "minio (>=7.2.16,<8.0.0)",
     "aiofiles (>=24.1.0,<25.0.0)",
     "pdf2image (>=1.17.0,<2.0.0)",
+    "pytest (>=8.4.2,<9.0.0)",
 ]
 
 
@@ -29,4 +30,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.group.dev.dependencies]
 flake8-isort = "^6.1.2"
 ruff = "^0.12.11"
+
+[tool.ruff]
+line-length = 79
 

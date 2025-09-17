@@ -106,7 +106,9 @@ class MinioCRUD(MinioManager):
             S3Error: If MinIO operation fails (bucket creation, upload).
             Exception: For any other unexpected errors during upload.
         """
-        bucket_exists = await run_in_threadpool(self.client.bucket_exists, bucket_name)
+        bucket_exists = await run_in_threadpool(
+            self.client.bucket_exists, bucket_name
+        )
 
         if not bucket_exists:
             await run_in_threadpool(self.client.make_bucket, bucket_name)
@@ -161,4 +163,6 @@ class MinioCRUD(MinioManager):
             S3Error: If MinIO delete operation fails or object not found.
             Exception: For any other unexpected errors during deletion.
         """
-        await run_in_threadpool(self.client.remove_object, bucket_name, object_name)
+        await run_in_threadpool(
+            self.client.remove_object, bucket_name, object_name
+        )

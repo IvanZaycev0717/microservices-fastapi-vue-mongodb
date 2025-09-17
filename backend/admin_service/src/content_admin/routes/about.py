@@ -3,37 +3,19 @@ from typing import Annotated
 
 import minio
 from bson import ObjectId
-from fastapi import (
-    APIRouter,
-    Depends,
-    File,
-    Form,
-    HTTPException,
-    Query,
-    UploadFile,
-    status,
-)
+from fastapi import (APIRouter, Depends, File, Form, HTTPException, Query,
+                     UploadFile, status)
 from pydantic import ValidationError
 
 from content_admin.crud.about import AboutCRUD
-from content_admin.dependencies import (
-    get_about_crud,
-    get_logger_factory,
-    get_minio_crud,
-)
-from content_admin.models.about import (
-    AboutCreateForm,
-    AboutFullResponse,
-    AboutTranslatedResponse,
-    AboutUpdateForm,
-    CreateAboutRequest,
-)
-from services.image_processor import (
-    convert_image_to_webp,
-    has_image_allowed_extention,
-    has_image_proper_size_kb,
-    resize_image,
-)
+from content_admin.dependencies import (get_about_crud, get_logger_factory,
+                                        get_minio_crud)
+from content_admin.models.about import (AboutCreateForm, AboutFullResponse,
+                                        AboutTranslatedResponse,
+                                        AboutUpdateForm, CreateAboutRequest)
+from services.image_processor import (convert_image_to_webp,
+                                      has_image_allowed_extention,
+                                      has_image_proper_size_kb, resize_image)
 from services.minio_management import MinioCRUD
 from services.utils import extract_bucket_and_object_from_url
 from settings import settings
@@ -41,11 +23,14 @@ from settings import settings
 router = APIRouter(prefix="/about")
 
 
-@router.get("", response_model=list[AboutFullResponse] | list[AboutTranslatedResponse])
+@router.get(
+    "", response_model=list[AboutFullResponse] | list[AboutTranslatedResponse]
+)
 async def get_about_content(
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[
-        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
     ],
     lang: Annotated[str | None, Query()] = None,
 ):
@@ -70,7 +55,9 @@ async def get_about_content(
     try:
         result = await about_crud.read_all(lang)
         if not result:
-            raise HTTPException(status_code=404, detail="About content not found")
+            raise HTTPException(
+                status_code=404, detail="About content not found"
+            )
         logger.info("About collection fetched successfully")
         return result
     except Exception as e:
@@ -89,7 +76,8 @@ async def get_about_content_by_id(
     document_id: str,
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[
-        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
     ],
     lang: Annotated[str | None, Query()] = None,
 ):
@@ -129,7 +117,9 @@ async def get_about_content_by_id(
             detail="Invalid document ID format",
         )
     except Exception as e:
-        logger.exception(f"Database error fetching document {document_id}: {e}")
+        logger.exception(
+            f"Database error fetching document {document_id}: {e}"
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while fetching about content",
@@ -142,7 +132,8 @@ async def create_about_content(
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
-        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
     ],
     image: UploadFile = File(description="Изображение для загрузки"),
 ):
@@ -175,7 +166,9 @@ async def create_about_content(
             error_message = "Image invalid format"
             logger.exception(error_message)
             raise HTTPException(400, error_message)
-        if not await has_image_proper_size_kb(image, settings.ABOUT_MAX_IMAGE_SIZE_KB):
+        if not await has_image_proper_size_kb(
+            image, settings.ABOUT_MAX_IMAGE_SIZE_KB
+        ):
             error_message = "Image size exceeds 500KB"
             logger.exception(error_message)
             raise HTTPException(400, error_message)
@@ -188,7 +181,9 @@ async def create_about_content(
         webp_image, filename = await convert_image_to_webp(resized_image)
 
         bucket_name = settings.ABOUT_BUCKET_NAME
-        image_url = await minio_crud.upload_file(bucket_name, filename, webp_image)
+        image_url = await minio_crud.upload_file(
+            bucket_name, filename, webp_image
+        )
 
         logger.info(f"Image uploaded to MinIO: {image_url}")
 
@@ -229,11 +224,14 @@ async def create_about_content(
 @router.patch("/{document_id}/image", status_code=status.HTTP_200_OK)
 async def update_about_image(
     document_id: str,
-    image: Annotated[UploadFile, File(description="Новое изображение для замены")],
+    image: Annotated[
+        UploadFile, File(description="Новое изображение для замены")
+    ],
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
-        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
     ],
 ):
     """Updates the image for an existing about content document.
@@ -267,7 +265,9 @@ async def update_about_image(
 
         if not await has_image_allowed_extention(image):
             raise HTTPException(400, detail="Invalid image format")
-        if not await has_image_proper_size_kb(image, settings.ABOUT_MAX_IMAGE_SIZE_KB):
+        if not await has_image_proper_size_kb(
+            image, settings.ABOUT_MAX_IMAGE_SIZE_KB
+        ):
             raise HTTPException(400, detail="Image size exceeds limit")
 
         resized_image = await resize_image(
@@ -278,10 +278,14 @@ async def update_about_image(
         webp_image, filename = await convert_image_to_webp(resized_image)
 
         bucket_name = settings.ABOUT_BUCKET_NAME
-        new_image_url = await minio_crud.upload_file(bucket_name, filename, webp_image)
+        new_image_url = await minio_crud.upload_file(
+            bucket_name, filename, webp_image
+        )
 
         old_image_url = current_document["image_url"]
-        old_bucket, old_object = extract_bucket_and_object_from_url(old_image_url)
+        old_bucket, old_object = extract_bucket_and_object_from_url(
+            old_image_url
+        )
         await minio_crud.delete_file(old_bucket, old_object)
 
         update_data = {"image_url": new_image_url}
@@ -314,7 +318,8 @@ async def update_about_content(
     form_data: Annotated[AboutUpdateForm, Form()],
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[
-        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
     ],
 ):
     """Updates translations for an existing about content document.
@@ -354,7 +359,9 @@ async def update_about_content(
             form_data.title_en = document["translations"]["en"]["title"]
 
         if not form_data.description_en:
-            form_data.description_en = document["translations"]["en"]["description"]
+            form_data.description_en = document["translations"]["en"][
+                "description"
+            ]
 
         if not form_data.title_ru:
             form_data.title_ru = document["translations"]["ru"]["title"]
@@ -418,7 +425,8 @@ async def delete_about_content(
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
-        logging.Logger, Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME))
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
     ],
 ):
     """Delete about content document by ID and associated image from MinIO.
@@ -441,7 +449,9 @@ async def delete_about_content(
                 detail=f"Document with id {document_id} not found",
             )
         image_url = document["image_url"]
-        bucket_name, object_name = extract_bucket_and_object_from_url(image_url)
+        bucket_name, object_name = extract_bucket_and_object_from_url(
+            image_url
+        )
 
         await minio_crud.delete_file(bucket_name, object_name)
         logger.info(

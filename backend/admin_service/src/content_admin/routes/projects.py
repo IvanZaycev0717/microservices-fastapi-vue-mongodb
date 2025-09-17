@@ -3,25 +3,21 @@ from typing import Annotated
 from urllib.parse import urlparse
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from fastapi import (APIRouter, Depends, File, Form, HTTPException, Request,
+                     UploadFile, status)
 
 from content_admin.crud.projects import ProjectsCRUD
-from content_admin.dependencies import (
-    get_logger_factory,
-    get_minio_crud,
-    get_projects_crud,
-)
-from content_admin.models.projects import ProjectCreateForm, ProjectUpdateRequest
-from services.image_processor import (
-    convert_image_to_webp,
-    has_image_allowed_extention,
-    has_image_proper_size_kb,
-    resize_image,
-)
+from content_admin.dependencies import (Language, SortOrder,
+                                        get_logger_factory, get_minio_crud,
+                                        get_projects_crud)
+from content_admin.models.projects import (ProjectCreateForm,
+                                           ProjectUpdateRequest)
+from services.image_processor import (convert_image_to_webp,
+                                      has_image_allowed_extention,
+                                      has_image_proper_size_kb, resize_image)
 from services.minio_management import MinioCRUD
 from services.utils import extract_bucket_and_object_from_url
 from settings import settings
-from content_admin.dependencies import Language, SortOrder
 
 router = APIRouter(prefix="/projects")
 
@@ -74,7 +70,9 @@ async def get_project_by_id(
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_project(
-    form_data: Annotated[ProjectCreateForm, Depends(ProjectCreateForm.as_form)],
+    form_data: Annotated[
+        ProjectCreateForm, Depends(ProjectCreateForm.as_form)
+    ],
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
@@ -232,14 +230,16 @@ async def update_project(
         if "application/x-www-form-urlencoded" not in content_type:
             raise HTTPException(
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail="Only application/x-www-form-urlencoded data is supported"
+                detail="Only application/x-www-form-urlencoded data is supported",
             )
         if not ObjectId.is_valid(document_id):
             raise HTTPException(404, f"Invalid Document ID': {document_id}")
 
         document = await projects_crud.read_by_id(document_id, "all")
         if not document:
-            raise HTTPException(404, f"Document with id {document_id} not found")
+            raise HTTPException(
+                404, f"Document with id {document_id} not found"
+            )
 
         update_data = {"title": {}, "description": {}}
 
@@ -289,7 +289,7 @@ async def delete_project(
     try:
         if not ObjectId.is_valid(document_id):
             raise HTTPException(400, "Invalid document ID format")
-        
+
         document = await projects_crud.read_by_id(document_id, Language.EN)
 
         if not document:
@@ -302,10 +302,16 @@ async def delete_project(
         thumb_image_url = str(document["thumbnail"])
 
         _, image_object_name = extract_bucket_and_object_from_url(image_url)
-        _, thumb_object_name = extract_bucket_and_object_from_url(thumb_image_url)
+        _, thumb_object_name = extract_bucket_and_object_from_url(
+            thumb_image_url
+        )
 
-        await minio_crud.delete_file(settings.PROJECTS_BUCKET_NAME, image_object_name)
-        await minio_crud.delete_file(settings.PROJECTS_BUCKET_NAME, thumb_object_name)
+        await minio_crud.delete_file(
+            settings.PROJECTS_BUCKET_NAME, image_object_name
+        )
+        await minio_crud.delete_file(
+            settings.PROJECTS_BUCKET_NAME, thumb_object_name
+        )
         logger.info(
             f"Deleted image from MinIO: {image_object_name, thumb_object_name} from bucket {settings.PROJECTS_BUCKET_NAME}"
         )
