@@ -24,8 +24,10 @@ class Settings(BaseSettings):
     MINIO_HOST: str = Field(description="MinIO host")
     MINIO_PORT: str = Field(description="MinIO port")
 
-    # Service configuration
+    # Service Names Configurations
     SERVICE_NAME: str = "ADMIN_SERVICE"
+
+    # Content Service Names
     CONTENT_SERVICE_ABOUT_NAME: str = "Content Service - About"
     CONTENT_SERVICE_TECH_NAME: str = "Content Service - Tech"
     CONTENT_SERVICE_PROJECTS_NAME: str = "Content Service - Projects"
@@ -68,14 +70,17 @@ class Settings(BaseSettings):
     CERTIFICATE_MAX_PDF_SIZE_KB: int = 5_000 * 1024 # 5MB
 
     # Forms Validation Settings
+    MIN_TITLE_LENGTH: int = 1
     MAX_TITLE_LENGTH: int = 63
     MAX_DESCRIPTION_LENGTH: int = 255
     MIN_HTML_IMAGE_ALT_LENGTH: int = 1
     MAX_HTML_IMAGE_ALT_LENGTH: int = 255
     MIN_POPULARITY_BOUNDARY: int = 0
     MAX_POPULARITY_BOUNDARY: int = 1000
+    MIN_PUBLICATIONS_RATING_BOUNDARY: int = -1000
+    MAX_PUBLICATIONS_RATING_BOUNDARY: int = 1000
 
-    # About Images Sizes
+    # About Images Sizes PIXELS
     ABOUT_IMAGE_OUTPUT_WIDTH: int = 1024
     ABOUT_IMAGE_OUTPUT_HEIGHT: int = 1024
 

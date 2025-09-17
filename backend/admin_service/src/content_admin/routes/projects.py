@@ -264,9 +264,7 @@ async def update_project(
         update_data["link"] = str(form_data.link)
         update_data["popularity"] = form_data.popularity
 
-        await projects_crud.collection.update_one(
-            {"_id": ObjectId(document_id)}, {"$set": update_data}
-        )
+        await projects_crud.update(document_id, update_data)
 
         logger.info(f"Project {document_id} updated successfully")
         return {"message": "Project updated successfully"}
