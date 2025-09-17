@@ -139,7 +139,7 @@ async def update_publication(
             form_data.site = str(current_publication["site"])
         if form_data.rating is None or form_data.rating == "":
             form_data.rating = current_publication["rating"]
-        
+
         update_data = {
             "title": {"en": form_data.title_en, "ru": form_data.title_ru},
             "page": str(form_data.page),
@@ -148,10 +148,49 @@ async def update_publication(
         }
 
         await publications_crud.update(document_id, update_data)
-        return {"message": f"Publication with id={document_id} updated successfully"}
+        return {
+            "message": f"Publication with id={document_id} updated successfully"
+        }
 
     except HTTPException:
         raise
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
         raise HTTPException(500, "Internal server error")
+
+
+@router.delete("/{document_id}")
+async def delete_publication(
+    document_id: str,
+    publications_crud: Annotated[
+        PublicationsCRUD, Depends(get_publications_crud)
+    ],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+    ],
+):
+    try:
+        deleted = await publications_crud.delete(document_id)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document with id={document_id} not found after image deletion",
+            )
+        deleted_message = f"Publication with id={document_id} has been deleted"
+        logger.info(deleted_message)
+        return deleted_message
+    except ValueError as e:
+        logger.exception(f"Invalid document ID: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid document ID format",
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Error deleting document or image: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete document and associated image",
+        )

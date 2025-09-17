@@ -91,3 +91,24 @@ class PublicationsCRUD:
         await self.collection.update_one(
             {"_id": ObjectId(publication_id)}, {"$set": update_data}
         )
+    
+    async def delete(self, document_id: str) -> bool:
+        try:
+            if not ObjectId.is_valid(document_id):
+                raise ValueError(f"Invalid ObjectId format: {document_id}")
+
+            result = await self.collection.delete_one({"_id": ObjectId(document_id)})
+
+            if result.deleted_count == 0:
+                logger.warning(f"Document with id {document_id} not found for deletion")
+                return False
+
+            logger.info(f"Successfully deleted document with id {document_id}")
+            return True
+
+        except ValueError as e:
+            logger.exception(f"Validation error in delete: {e}")
+            raise
+        except Exception as e:
+            logger.exception(f"Database error in delete: {e}")
+            raise
