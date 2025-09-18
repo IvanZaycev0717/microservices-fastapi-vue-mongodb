@@ -3,19 +3,37 @@ from typing import Annotated
 
 import minio
 from bson import ObjectId
-from fastapi import (APIRouter, Depends, File, Form, HTTPException, Query,
-                     UploadFile, status)
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from pydantic import ValidationError
 
 from content_admin.crud.about import AboutCRUD
-from content_admin.dependencies import (get_about_crud, get_logger_factory,
-                                        get_minio_crud)
-from content_admin.models.about import (AboutCreateForm, AboutFullResponse,
-                                        AboutTranslatedResponse,
-                                        AboutUpdateForm, CreateAboutRequest)
-from services.image_processor import (convert_image_to_webp,
-                                      has_image_allowed_extention,
-                                      has_image_proper_size_kb, resize_image)
+from content_admin.dependencies import (
+    get_about_crud,
+    get_logger_factory,
+    get_minio_crud,
+)
+from content_admin.models.about import (
+    AboutCreateForm,
+    AboutFullResponse,
+    AboutTranslatedResponse,
+    AboutUpdateForm,
+    CreateAboutRequest,
+)
+from services.image_processor import (
+    convert_image_to_webp,
+    has_image_allowed_extention,
+    has_image_proper_size_kb,
+    resize_image,
+)
 from services.minio_management import MinioCRUD
 from services.utils import extract_bucket_and_object_from_url
 from settings import settings
@@ -30,7 +48,7 @@ async def get_about_content(
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
     lang: Annotated[str | None, Query()] = None,
 ):
@@ -77,7 +95,7 @@ async def get_about_content_by_id(
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
     lang: Annotated[str | None, Query()] = None,
 ):
@@ -133,7 +151,7 @@ async def create_about_content(
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
     image: UploadFile = File(description="Изображение для загрузки"),
 ):
@@ -231,7 +249,7 @@ async def update_about_image(
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
 ):
     """Updates the image for an existing about content document.
@@ -319,7 +337,7 @@ async def update_about_content(
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
 ):
     """Updates translations for an existing about content document.
@@ -426,7 +444,7 @@ async def delete_about_content(
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_ABOUT_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
 ):
     """Delete about content document by ID and associated image from MinIO.

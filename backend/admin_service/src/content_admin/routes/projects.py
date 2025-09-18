@@ -3,18 +3,35 @@ from typing import Annotated
 from urllib.parse import urlparse
 
 from bson import ObjectId
-from fastapi import (APIRouter, Depends, File, Form, HTTPException, Request,
-                     UploadFile, status)
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 
 from content_admin.crud.projects import ProjectsCRUD
-from content_admin.dependencies import (Language, SortOrder,
-                                        get_logger_factory, get_minio_crud,
-                                        get_projects_crud)
-from content_admin.models.projects import (ProjectCreateForm,
-                                           ProjectUpdateRequest)
-from services.image_processor import (convert_image_to_webp,
-                                      has_image_allowed_extention,
-                                      has_image_proper_size_kb, resize_image)
+from content_admin.dependencies import (
+    Language,
+    SortOrder,
+    get_logger_factory,
+    get_minio_crud,
+    get_projects_crud,
+)
+from content_admin.models.projects import (
+    ProjectCreateForm,
+    ProjectUpdateRequest,
+)
+from services.image_processor import (
+    convert_image_to_webp,
+    has_image_allowed_extention,
+    has_image_proper_size_kb,
+    resize_image,
+)
 from services.minio_management import MinioCRUD
 from services.utils import extract_bucket_and_object_from_url
 from settings import settings
@@ -27,7 +44,7 @@ async def get_projects(
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
     lang: Language = Language.EACH,
     sort: SortOrder = SortOrder.DATE_DESC,
@@ -51,7 +68,7 @@ async def get_project_by_id(
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
     lang: Language = Language.EACH,
 ):
@@ -77,7 +94,7 @@ async def create_project(
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
     image: UploadFile = File(description="Project image"),
 ):
@@ -144,7 +161,7 @@ async def update_project_image(
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
     image: UploadFile = File(description="New project image"),
 ):
@@ -222,7 +239,7 @@ async def update_project(
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
     try:
@@ -283,7 +300,7 @@ async def delete_project(
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
     try:

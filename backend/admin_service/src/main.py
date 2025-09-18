@@ -3,14 +3,22 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from content_admin.routes import (about, certificates, projects, publications,
-                                  tech)
+from auth_admin.routes import auth
+from content_admin.routes import (
+    about,
+    certificates,
+    projects,
+    publications,
+    tech,
+)
 from services.data_loader import DataLoader
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
-from services.mongo_db_management import (MongoCollectionsManager,
-                                          MongoConnectionManager,
-                                          MongoDatabaseManager)
+from services.mongo_db_management import (
+    MongoCollectionsManager,
+    MongoConnectionManager,
+    MongoDatabaseManager,
+)
 from settings import settings
 
 logger = get_logger("main")
@@ -22,14 +30,25 @@ async def lifespan(app: FastAPI):
         host=settings.CONTENT_ADMIN_MONGODB_URL
     )
 
+    auth_admin_mongo_connection = MongoConnectionManager(
+        host=settings.AUTH_ADMIN_MONGODB_URL
+    )
+
     minio_crud = MinioCRUD()
+
     try:
         content_admin_client = (
             await content_admin_mongo_connection.open_connection()
         )
+
+        auth_admin_client = await auth_admin_mongo_connection.open_connection()
+
         content_admin_database_manager = MongoDatabaseManager(
             content_admin_client
         )
+
+        auth_admin_database_manager = MongoDatabaseManager(auth_admin_client)
+
         if not await content_admin_database_manager.check_database_existence(
             settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
         ):
@@ -41,6 +60,17 @@ async def lifespan(app: FastAPI):
         else:
             content_admin_db = content_admin_client[
                 settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
+            ]
+
+        if not await auth_admin_database_manager.check_database_existence(
+            settings.AUTH_ADMIN_MONGO_DATABASE_NAME
+        ):
+            auth_admin_db = await auth_admin_database_manager.create_database(
+                settings.AUTH_ADMIN_MONGO_DATABASE_NAME
+            )
+        else:
+            auth_admin_db = auth_admin_client[
+                settings.AUTH_ADMIN_MONGO_DATABASE_NAME
             ]
 
         data_loader = DataLoader(
@@ -67,8 +97,11 @@ async def lifespan(app: FastAPI):
             logger.warning("Files not found in MinIO")
             logger.info("Starting image upload to MinIO...")
 
+        # Save Databases in App
         app.state.content_admin_mongo_client = content_admin_client
         app.state.content_admin_mongo_db = content_admin_db
+        app.state.auth_admin_mongo_client = auth_admin_client
+        app.state.auth_admin_mongo_db = auth_admin_db
 
         content_admin_mongo_collections_manager = MongoCollectionsManager(
             content_admin_client, content_admin_db
@@ -92,17 +125,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(about.router, tags=[settings.CONTENT_SERVICE_ABOUT_NAME])
-app.include_router(tech.router, tags=[settings.CONTENT_SERVICE_TECH_NAME])
+app.include_router(about.router, tags=[settings.CONTENT_ADMIN_ABOUT_NAME])
+app.include_router(tech.router, tags=[settings.CONTENT_ADMIN_TECH_NAME])
 app.include_router(
-    projects.router, tags=[settings.CONTENT_SERVICE_PROJECTS_NAME]
+    projects.router, tags=[settings.CONTENT_ADMIN_PROJECTS_NAME]
 )
 app.include_router(
-    certificates.router, tags=[settings.CONTENT_SERVICE_CERTIFICATES_NAME]
+    certificates.router, tags=[settings.CONTENT_ADMIN_CERTIFICATES_NAME]
 )
 app.include_router(
-    publications.router, tags=[settings.CONTENT_SERVICE_PUBLICATIONS_NAME]
+    publications.router, tags=[settings.CONTENT_ADMIN_PUBLICATIONS_NAME]
 )
+
+app.include_router(auth.router, tags=[settings.AUTH_ADMIN_NAME])
 
 app.add_middleware(
     CORSMiddleware,

@@ -2,16 +2,30 @@ import io
 import logging
 from typing import Annotated, Any, Dict, List
 
-from fastapi import (APIRouter, Depends, File, Form, HTTPException, UploadFile,
-                     status)
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+    status,
+)
 
 from content_admin.crud.certificates import CertificatesCRUD
-from content_admin.dependencies import (SortOrder, get_certificates_crud,
-                                        get_logger_factory, get_minio_crud)
+from content_admin.dependencies import (
+    SortOrder,
+    get_certificates_crud,
+    get_logger_factory,
+    get_minio_crud,
+)
 from content_admin.models.certificates import CertificateCreateForm
-from services.image_processor import (convert_image_to_webp,
-                                      has_image_allowed_extention,
-                                      has_image_proper_size_kb, resize_image)
+from services.image_processor import (
+    convert_image_to_webp,
+    has_image_allowed_extention,
+    has_image_proper_size_kb,
+    resize_image,
+)
 from services.minio_management import MinioCRUD
 from services.pdf_processor import convert_pdf_to_image
 from services.utils import extract_bucket_and_object_from_url
@@ -24,9 +38,7 @@ router = APIRouter(prefix="/certificates")
 async def get_certificates(
     logger: Annotated[
         logging.Logger,
-        Depends(
-            get_logger_factory(settings.CONTENT_SERVICE_CERTIFICATES_NAME)
-        ),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)),
     ],
     certificates_crud: Annotated[
         CertificatesCRUD, Depends(get_certificates_crud)
@@ -59,9 +71,7 @@ async def create_certificate(
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(
-            get_logger_factory(settings.CONTENT_SERVICE_CERTIFICATES_NAME)
-        ),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)),
     ],
     file: UploadFile = File(description="Certificate PDF or image"),
 ):
@@ -144,9 +154,7 @@ async def get_certificate_by_id(
     ],
     logger: Annotated[
         logging.Logger,
-        Depends(
-            get_logger_factory(settings.CONTENT_SERVICE_CERTIFICATES_NAME)
-        ),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)),
     ],
 ):
     """Get single certificate by ID."""
@@ -180,9 +188,7 @@ async def update_certificate_image(
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(
-            get_logger_factory(settings.CONTENT_SERVICE_CERTIFICATES_NAME)
-        ),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)),
     ],
     file: UploadFile = File(description="New certificate image"),
 ):
@@ -284,7 +290,7 @@ async def update_certificate_popularity(
     ),
     certificates_crud: CertificatesCRUD = Depends(get_certificates_crud),
     logger: logging.Logger = Depends(
-        get_logger_factory(settings.CONTENT_SERVICE_CERTIFICATES_NAME)
+        get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)
     ),
 ):
     """Update only certificate popularity."""
@@ -319,9 +325,7 @@ async def delete_certificate(
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(
-            get_logger_factory(settings.CONTENT_SERVICE_CERTIFICATES_NAME)
-        ),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)),
     ],
 ):
     """Delete certificate and associated images from storage."""

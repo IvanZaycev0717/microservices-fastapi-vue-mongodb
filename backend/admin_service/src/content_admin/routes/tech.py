@@ -50,7 +50,7 @@ async def get_all_tech(
     tech_crud: Annotated[TechCRUD, Depends(get_tech_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_TECH_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_TECH_NAME)),
     ],
 ):
     """Retrieves all technical skills from the database.
@@ -89,7 +89,7 @@ async def update_kingdom_items(
     tech_crud: Annotated[TechCRUD, Depends(get_tech_crud)],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_TECH_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_TECH_NAME)),
     ],
 ):
     """Updates technical skills for a specific kingdom.

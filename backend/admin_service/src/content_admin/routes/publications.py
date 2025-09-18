@@ -5,11 +5,16 @@ from bson import ObjectId
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 
 from content_admin.crud.publications import PublicationsCRUD
-from content_admin.dependencies import (Language, SortOrder,
-                                        get_logger_factory,
-                                        get_publications_crud)
-from content_admin.models.publications import (PublicationCreateForm,
-                                               PublicationUpdateForm)
+from content_admin.dependencies import (
+    Language,
+    SortOrder,
+    get_logger_factory,
+    get_publications_crud,
+)
+from content_admin.models.publications import (
+    PublicationCreateForm,
+    PublicationUpdateForm,
+)
 from settings import settings
 
 router = APIRouter(prefix="/publications")
@@ -21,7 +26,7 @@ async def get_publications(
         PublicationsCRUD, Depends(get_publications_crud)
     ],
     logger: logging.Logger = Depends(
-        get_logger_factory(settings.CONTENT_SERVICE_PUBLICATIONS_NAME)
+        get_logger_factory(settings.CONTENT_ADMIN_PUBLICATIONS_NAME)
     ),
     lang: Language = Language.EACH,
     sort: SortOrder = SortOrder.DATE_DESC,
@@ -54,7 +59,7 @@ async def get_publication_by_id(
     ],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
     try:
@@ -80,7 +85,7 @@ async def create_publication(
     form_data: Annotated[PublicationCreateForm, Form()],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
     try:
@@ -109,7 +114,7 @@ async def update_publication(
     form_data: Annotated[PublicationUpdateForm, Form()],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
     try:
@@ -161,7 +166,7 @@ async def delete_publication(
     ],
     logger: Annotated[
         logging.Logger,
-        Depends(get_logger_factory(settings.CONTENT_SERVICE_PROJECTS_NAME)),
+        Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
     try:

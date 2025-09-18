@@ -1,12 +1,17 @@
 import logging
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     # From .env file
+    SECRET_KEY: SecretStr
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    MIN_PASSWORD_LENGTH: int = 5
+    MAX_PASSWORD_LENGTH: int = 31
 
     # Content Admin
     CONTENT_ADMIN_MONGO_ROOT_USERNAME: str = Field(
@@ -26,6 +31,46 @@ class Settings(BaseSettings):
         description="Mongo Express connection URL"
     )
 
+    # Auth Admin
+    AUTH_ADMIN_MONGO_ROOT_USERNAME: str = Field(
+        description="MongoDB root username for auth database"
+    )
+    AUTH_ADMIN_MONGO_ROOT_PASSWORD: str = Field(
+        description="MongoDB root password for auth database"
+    )
+    AUTH_ADMIN_MONGODB_URL: str = Field(
+        description="MongoDB connection URL for auth database"
+    )
+    AUTH_ADMIN_MONGO_DATABASE_NAME: str = Field(
+        description="MongoDB database name for auth database"
+    )
+    AUTH_ADMIN_MONGO_PORT: int = Field(
+        description="MongoDB port for auth database"
+    )
+    AUTH_ADMIN_ME_CONFIG_MONGODB_URL: str = Field(
+        description="Mongo Express connection URL for auth database"
+    )
+
+    # Notification Admin
+    NOTIFICATION_ADMIN_MONGO_ROOT_USERNAME: str = Field(
+        description="MongoDB root username for notification database"
+    )
+    NOTIFICATION_ADMIN_MONGO_ROOT_PASSWORD: str = Field(
+        description="MongoDB root password for notification database"
+    )
+    NOTIFICATION_ADMIN_MONGODB_URL: str = Field(
+        description="MongoDB connection URL for notification database"
+    )
+    NOTIFICATION_ADMIN_MONGO_DATABASE_NAME: str = Field(
+        description="MongoDB database name for notification database"
+    )
+    NOTIFICATION_ADMIN_MONGO_PORT: int = Field(
+        description="MongoDB port for notification database"
+    )
+    NOTIFICATION_ADMIN_ME_CONFIG_MONGODB_URL: str = Field(
+        description="Mongo Express connection URL for notification database"
+    )
+
     # Object Storage
     MINIO_ROOT_USER: str = Field(description="MinIO user name")
     MINIO_ROOT_PASSWORD: str = Field(description="MinIO password")
@@ -36,11 +81,14 @@ class Settings(BaseSettings):
     SERVICE_NAME: str = "ADMIN_SERVICE"
 
     # Content Service Names
-    CONTENT_SERVICE_ABOUT_NAME: str = "Content Service - About"
-    CONTENT_SERVICE_TECH_NAME: str = "Content Service - Tech"
-    CONTENT_SERVICE_PROJECTS_NAME: str = "Content Service - Projects"
-    CONTENT_SERVICE_CERTIFICATES_NAME: str = "Content Service - Certificates"
-    CONTENT_SERVICE_PUBLICATIONS_NAME: str = "Content Service - Publications"
+    CONTENT_ADMIN_ABOUT_NAME: str = "Content Admin - About"
+    CONTENT_ADMIN_TECH_NAME: str = "Content Admin - Tech"
+    CONTENT_ADMIN_PROJECTS_NAME: str = "Content Admin - Projects"
+    CONTENT_ADMIN_CERTIFICATES_NAME: str = "Content Admin- Certificates"
+    CONTENT_ADMIN_PUBLICATIONS_NAME: str = "Content Admin - Publications"
+
+    # Auth Service Name
+    AUTH_ADMIN_NAME: str = "Auth Service"
 
     # Image Directories Names
     ABOUT_BUCKET_NAME: str = "about"

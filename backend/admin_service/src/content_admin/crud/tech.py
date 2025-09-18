@@ -5,7 +5,7 @@ from content_admin.models.tech import TechResponse
 from services.logger import get_logger
 from settings import settings
 
-logger = get_logger(settings.CONTENT_SERVICE_TECH_NAME)
+logger = get_logger(settings.CONTENT_ADMIN_TECH_NAME)
 
 
 class TechCRUD:

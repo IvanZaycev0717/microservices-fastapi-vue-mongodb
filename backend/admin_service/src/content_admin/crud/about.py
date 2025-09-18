@@ -4,12 +4,14 @@ from bson import ObjectId
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 
-from content_admin.models.about import (AboutFullResponse,
-                                        AboutTranslatedResponse)
+from content_admin.models.about import (
+    AboutFullResponse,
+    AboutTranslatedResponse,
+)
 from services.logger import get_logger
 from settings import settings
 
-logger = get_logger(settings.CONTENT_SERVICE_ABOUT_NAME)
+logger = get_logger(settings.CONTENT_ADMIN_ABOUT_NAME)
 
 
 class AboutCRUD:
