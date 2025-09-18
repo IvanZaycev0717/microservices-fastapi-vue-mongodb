@@ -1,4 +1,5 @@
 import pytest
+
 from src.services.utils import extract_bucket_and_object_from_url
 
 
@@ -7,7 +8,7 @@ class TestExtractBucketAndObjectFromUrl:
         """Test valid MinIO URL extraction."""
         url = "http://localhost:9000/my-bucket/path/to/file.webp"
         bucket, object_name = extract_bucket_and_object_from_url(url)
-        
+
         assert bucket == "my-bucket"
         assert object_name == "path/to/file.webp"
 
@@ -15,7 +16,7 @@ class TestExtractBucketAndObjectFromUrl:
         """Test HTTPS MinIO URL."""
         url = "https://minio.example.com:9000/bucket-name/folder/image.jpg"
         bucket, object_name = extract_bucket_and_object_from_url(url)
-        
+
         assert bucket == "bucket-name"
         assert object_name == "folder/image.jpg"
 
@@ -23,7 +24,7 @@ class TestExtractBucketAndObjectFromUrl:
         """Test object in bucket root."""
         url = "http://localhost:9000/bucket/file.txt"
         bucket, object_name = extract_bucket_and_object_from_url(url)
-        
+
         assert bucket == "bucket"
         assert object_name == "file.txt"
 
@@ -31,7 +32,7 @@ class TestExtractBucketAndObjectFromUrl:
         """Test deeply nested paths."""
         url = "http://localhost:9000/bucket/folder1/folder2/folder3/file.png"
         bucket, object_name = extract_bucket_and_object_from_url(url)
-        
+
         assert bucket == "bucket"
         assert object_name == "folder1/folder2/folder3/file.png"
 
@@ -39,7 +40,7 @@ class TestExtractBucketAndObjectFromUrl:
         """Test URL with query parameters."""
         url = "http://localhost:9000/bucket/image.jpg?version=123&token=abc"
         bucket, object_name = extract_bucket_and_object_from_url(url)
-        
+
         assert bucket == "bucket"
         assert object_name == "image.jpg"
 
@@ -77,6 +78,6 @@ class TestExtractBucketAndObjectFromUrl:
         """Test URL with authentication."""
         url = "http://user:password@localhost:9000/bucket/file.txt"
         bucket, object_name = extract_bucket_and_object_from_url(url)
-        
+
         assert bucket == "bucket"
         assert object_name == "file.txt"
