@@ -5,14 +5,13 @@ from pathlib import Path
 import aiofiles
 from bson import ObjectId
 from fastapi.concurrency import run_in_threadpool
-from pymongo.errors import OperationFailure
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import DuplicateKeyError, OperationFailure
 
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
 from services.mongo_db_management import MongoDatabaseManager
-from settings import settings
 from services.password_processor import get_password_hash
+from settings import settings
 
 logger = get_logger("data_loader")
 
@@ -205,8 +204,9 @@ class DataLoader:
         try:
             logger.info("Loading admin user")
 
-            collection = db_manager.client[settings.AUTH_ADMIN_MONGO_DATABASE_NAME]["users"]
-
+            collection = db_manager.client[
+                settings.AUTH_ADMIN_MONGO_DATABASE_NAME
+            ]["users"]
 
             # Check if admin already exists
             existing_admin = await collection.find_one({"email": admin_email})
