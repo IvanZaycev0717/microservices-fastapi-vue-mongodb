@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     AUTH_ADMIN_ME_CONFIG_MONGODB_URL: str = Field(
         description="Mongo Express connection URL for auth database"
     )
+    ADMIN_EMAIL: SecretStr
+    ADMIN_PASSWORD: SecretStr
 
     # Notification Admin
     NOTIFICATION_ADMIN_MONGO_ROOT_USERNAME: str = Field(

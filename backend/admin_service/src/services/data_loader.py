@@ -1,14 +1,18 @@
 import asyncio
+from datetime import datetime
 from pathlib import Path
 
 import aiofiles
+from bson import ObjectId
 from fastapi.concurrency import run_in_threadpool
 from pymongo.errors import OperationFailure
+from pymongo.errors import DuplicateKeyError
 
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
 from services.mongo_db_management import MongoDatabaseManager
 from settings import settings
+from services.password_processor import get_password_hash
 
 logger = get_logger("data_loader")
 
@@ -119,7 +123,8 @@ class DataLoader:
                 f"Found {len(image_files)} "
                 f"image files in MinIO bucket '{bucket_name}'"
             )
-            return len(image_files) > 1
+
+            return len(image_files) >= 1
 
         except Exception as e:
             logger.exception(f"Error checking MinIO files: {e}")
@@ -179,6 +184,70 @@ class DataLoader:
         except Exception as e:
             logger.exception(f"Unexpected error saving to MongoDB: {e}")
             raise DataLoaderError(f"Failed to save content: {e}")
+
+    async def load_admin_user_to_auth_db(
+        self,
+        db_manager: MongoDatabaseManager,
+        admin_email: str,
+        admin_password: str,
+    ) -> bool:
+        """
+        Load admin user into auth database users collection.
+
+        Args:
+            db_manager: MongoDB manager for auth database
+            admin_email: Admin email address
+            admin_password: Admin plain text password
+
+        Returns:
+            bool: True if admin was created or already exists, False on error
+        """
+        try:
+            logger.info("Loading admin user")
+
+            collection = db_manager.client[settings.AUTH_ADMIN_MONGO_DATABASE_NAME]["users"]
+
+
+            # Check if admin already exists
+            existing_admin = await collection.find_one({"email": admin_email})
+            if existing_admin:
+                logger.info(f"Admin user already exists: {admin_email}")
+                return True
+
+            # Hash password
+            hashed_password = get_password_hash(admin_password)
+
+            # Create admin user document
+            admin_user = {
+                "_id": ObjectId(),
+                "email": admin_email,
+                "password_hash": hashed_password,
+                "is_banned": False,
+                "roles": ["admin", "user"],
+                "created_at": datetime.now(),
+                "updated_at": datetime.now(),
+                "last_login_at": None,
+            }
+
+            # Insert admin user
+            result = await collection.insert_one(admin_user)
+
+            if result.inserted_id:
+                logger.info(f"Admin user created successfully: {admin_email}")
+                return True
+            else:
+                logger.error(f"Failed to create admin user: {admin_email}")
+                return False
+
+        except DuplicateKeyError:
+            logger.warning(
+                f"Admin user already exists (duplicate key): {admin_email}"
+            )
+            return True
+
+        except Exception as e:
+            logger.exception(f"Error loading admin user {admin_email}: {e}")
+            return False
 
     async def _upload_single_file(
         self, minio_crud: MinioCRUD, bucket_name: str, filename: str

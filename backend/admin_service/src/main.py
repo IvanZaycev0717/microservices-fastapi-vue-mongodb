@@ -37,85 +37,109 @@ async def lifespan(app: FastAPI):
     minio_crud = MinioCRUD()
 
     try:
-        content_admin_client = (
-            await content_admin_mongo_connection.open_connection()
-        )
-
+        # Establish MongoDB connections
+        content_admin_client = await content_admin_mongo_connection.open_connection()
         auth_admin_client = await auth_admin_mongo_connection.open_connection()
 
-        content_admin_database_manager = MongoDatabaseManager(
-            content_admin_client
-        )
-
+        # Initialize database managers
+        content_admin_database_manager = MongoDatabaseManager(content_admin_client)
         auth_admin_database_manager = MongoDatabaseManager(auth_admin_client)
 
+        # Ensure content admin database exists
         if not await content_admin_database_manager.check_database_existence(
             settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
         ):
-            content_admin_db = (
-                await content_admin_database_manager.create_database(
-                    settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
-                )
-            )
-        else:
-            content_admin_db = content_admin_client[
+            content_admin_db = await content_admin_database_manager.create_database(
                 settings.CONTENT_ADMIN_MONGO_DATABASE_NAME
-            ]
+            )
+            logger.info(f"Created content database: {settings.CONTENT_ADMIN_MONGO_DATABASE_NAME}")
+        else:
+            content_admin_db = content_admin_client[settings.CONTENT_ADMIN_MONGO_DATABASE_NAME]
+            logger.info(f"Using existing content database: {settings.CONTENT_ADMIN_MONGO_DATABASE_NAME}")
 
+        # Ensure auth admin database exists
         if not await auth_admin_database_manager.check_database_existence(
             settings.AUTH_ADMIN_MONGO_DATABASE_NAME
         ):
             auth_admin_db = await auth_admin_database_manager.create_database(
                 settings.AUTH_ADMIN_MONGO_DATABASE_NAME
             )
+            logger.info(f"Created auth database: {settings.AUTH_ADMIN_MONGO_DATABASE_NAME}")
         else:
-            auth_admin_db = auth_admin_client[
-                settings.AUTH_ADMIN_MONGO_DATABASE_NAME
-            ]
+            auth_admin_db = auth_admin_client[settings.AUTH_ADMIN_MONGO_DATABASE_NAME]
+            logger.info(f"Using existing auth database: {settings.AUTH_ADMIN_MONGO_DATABASE_NAME}")
 
+        # Initialize data loader
         data_loader = DataLoader(
             settings.CONTENT_ADMIN_PATH, settings.INITIAL_DATA_LOADING_FILES
         )
+
+        # Check local files
         if not await data_loader.check_loading_files():
-            logger.warning("Missing local files")
-            raise FileNotFoundError("Files not found in local machine")
-        if not await data_loader.check_minio_files_existence(
-            minio_crud, settings.ABOUT_BUCKET_NAME
-        ):
-            logger.warning("Files not found in MinIO")
-            logger.info("Starting image upload to MinIO...")
+            logger.error("Missing local files for initialization")
+            raise FileNotFoundError("Required files not found in local machine")
+
+        # Process ABOUT bucket
+        if not await data_loader.check_minio_files_existence(minio_crud, settings.ABOUT_BUCKET_NAME):
+            logger.warning("Files not found in MinIO ABOUT bucket")
+            logger.info("Starting image upload to MinIO ABOUT bucket...")
             uploaded_files = await data_loader.upload_images_to_minio(
                 minio_crud, settings.ABOUT_BUCKET_NAME
             )
-            logger.info(f"{uploaded_files} was upload to MinIO")
+            logger.info(f"Uploaded {len(uploaded_files)} files to MinIO ABOUT bucket")
         else:
-            logger.info("MinIO already has required files")
+            logger.info("MinIO ABOUT bucket already has required files")
 
-        if not await data_loader.check_minio_files_existence(
-            minio_crud, settings.PROJECTS_BUCKET_NAME
-        ):
-            logger.warning("Files not found in MinIO")
-            logger.info("Starting image upload to MinIO...")
+        # Process PROJECTS bucket
+        if not await data_loader.check_minio_files_existence(minio_crud, settings.PROJECTS_BUCKET_NAME):
+            logger.warning("Files not found in MinIO PROJECTS bucket")
+            logger.info("Starting image upload to MinIO PROJECTS bucket...")
+            uploaded_files = await data_loader.upload_images_to_minio(
+                minio_crud, settings.PROJECTS_BUCKET_NAME
+            )
+            logger.info(f"Uploaded {len(uploaded_files)} files to MinIO PROJECTS bucket")
+        else:
+            logger.info("MinIO PROJECTS bucket already has required files")
 
-        # Save Databases in App
+        # Load admin user into auth database
+        admin_loaded = await data_loader.load_admin_user_to_auth_db(
+            auth_admin_database_manager,
+            settings.ADMIN_EMAIL.get_secret_value(),
+            settings.ADMIN_PASSWORD.get_secret_value()
+        )
+
+        if not admin_loaded:
+            logger.error("Failed to load admin user into auth database - check logs for details")
+
+        # Initialize collections
+        content_admin_mongo_collections_manager = MongoCollectionsManager(
+            content_admin_client, content_admin_db
+        )
+        await content_admin_mongo_collections_manager.initialize_collections()
+        logger.info("Database collections initialized successfully")
+
+        # Save connections to app state
         app.state.content_admin_mongo_client = content_admin_client
         app.state.content_admin_mongo_db = content_admin_db
         app.state.auth_admin_mongo_client = auth_admin_client
         app.state.auth_admin_mongo_db = auth_admin_db
+        app.state.minio_crud = minio_crud
 
-        content_admin_mongo_collections_manager = MongoCollectionsManager(
-            content_admin_client, content_admin_db
-        )
-
-        await content_admin_mongo_collections_manager.initialize_collections()
+        logger.info("Application startup complete - all services initialized")
 
     except FileNotFoundError as e:
-        logger.exception(e)
-    except Exception:
-        logger.exception("Failed to connect to MongoDB")
-    yield
+        logger.exception(f"Initialization failed due to missing files: {e}")
+        raise
+    except Exception as e:
+        logger.exception(f"Application startup failed: {e}")
+        raise
+    finally:
+        yield
+
+    # Cleanup on shutdown
     await content_admin_mongo_connection.close_connection()
-    logger.info("Application shutdown complete")
+    await auth_admin_mongo_connection.close_connection()
+    logger.info("Application shutdown complete - connections closed")
 
 
 app = FastAPI(

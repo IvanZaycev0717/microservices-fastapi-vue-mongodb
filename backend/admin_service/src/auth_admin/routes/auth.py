@@ -26,82 +26,201 @@ router = APIRouter(prefix="/auth")
 
 
 @router.get("", response_model=list[UserResponse])
-async def get_all_users(db=Depends(get_db)):
+async def get_all_users(
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.AUTH_ADMIN_NAME)),
+    ],
+    db: Annotated[AsyncDatabase, Depends(get_db)],
+):
     """Get all users (admin only)."""
-    auth_crud = AuthCRUD(db)
-    users = await auth_crud.get_all_users()
+    try:
+        logger.info("Fetching all users")
+        auth_crud = AuthCRUD(db)
+        users = await auth_crud.get_all_users()
 
-    for user in users:
-        user["id"] = str(user["_id"])
-        del user["_id"]
-    return users
+        if not users:
+            logger.info("No users found in database")
+            return []
+
+        for user in users:
+            user["id"] = str(user["_id"])
+            del user["_id"]
+            user.pop("password_hash", None)
+            user.pop("_id", None)
+
+        logger.info(f"Successfully retrieved {len(users)} users")
+        return users
+
+    except Exception as e:
+        logger.exception(f"Failed to fetch users: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while fetching users",
+        )
 
 
 @router.post("/register", response_model=dict)
 async def register_user(
-    user_data: Annotated[CreateUserForm, Form()], db=Depends(get_db)
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.AUTH_ADMIN_NAME)),
+    ],
+    user_data: Annotated[CreateUserForm, Form()],
+    db: Annotated[AsyncDatabase, Depends(get_db)],
 ):
     """Register new user and return access token."""
-    auth_crud = AuthCRUD(db)
+    try:
+        logger.info(f"Registration attempt for email: {user_data.email}")
+        auth_crud = AuthCRUD(db)
 
-    existing_user = await auth_crud.get_user_by_email(user_data.email)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exists",
+        # Check if user already exists
+        existing_user = await auth_crud.get_user_by_email(user_data.email)
+        if existing_user:
+            logger.warning(
+                f"Registration failed - email already exists: {user_data.email}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with this email already exists",
+            )
+
+        # Hash password
+        hashed_password = get_password_hash(user_data.password)
+        if not hashed_password:
+            logger.error("Password hashing failed during registration")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal server error",
+            )
+
+        # Create user
+        user = await auth_crud.create_user(
+            email=user_data.email,
+            password_hash=hashed_password,
+            roles=user_data.roles,
         )
 
-    hashed_password = get_password_hash(user_data.password)
+        # Create access token
+        access_token = create_access_token(
+            data={
+                "sub": user["email"],
+                "email": user["email"],
+                "roles": user["roles"],
+            }
+        )
 
-    user = await auth_crud.create_user(
-        email=user_data.email,
-        password_hash=hashed_password,
-        roles=user_data.roles,
-    )
+        logger.info(f"User registered successfully: {user_data.email}")
 
-    access_token = create_access_token(
-        data={
-            "sub": user["email"],
-            "email": user["email"],
-            "roles": user["roles"],
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user_id": str(user["_id"]),
         }
-    )
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user_id": str(user["_id"]),
-    }
+    except HTTPException:
+        # Re-raise already handled HTTP exceptions
+        raise
+
+    except Exception as e:
+        logger.exception(f"Registration failed for {user_data.email}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during registration",
+        )
 
 
 @router.post("/login", response_model=Token)
 async def login_for_access_token(
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.AUTH_ADMIN_NAME)),
+    ],
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[AsyncDatabase, Depends(get_db)],
 ):
     """Login user and return access token."""
-    user = await authenticate_user(form_data.username, form_data.password, db)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
+    try:
+        logger.info(f"Login attempt for username: {form_data.username}")
+
+        user = await authenticate_user(
+            form_data.username, form_data.password, db
+        )
+        if not user:
+            logger.warning(f"Failed login attempt for: {form_data.username}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Update last login time
+        auth_crud = AuthCRUD(db)
+        await auth_crud.update_user_last_login(form_data.username)
+
+        access_token = create_access_token(
+            data={
+                "sub": user["email"],
+                "email": user["email"],
+                "roles": user.get("roles", []),
+            }
         )
 
-    access_token = create_access_token(
-        data={
-            "sub": user["email"],
-            "email": user["email"],
-            "roles": user.get("roles", []),
-        }
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+        logger.info(f"User logged in successfully: {form_data.username}")
+
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    except HTTPException:
+        # Re-raise already handled HTTP exceptions
+        raise
+
+    except Exception as e:
+        logger.exception(f"Login failed for {form_data.username}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during login",
+        )
 
 
 @router.get("/users/me", response_model=UserResponse)
-async def read_users_me(current_user: dict = Depends(get_current_active_user)):
+async def read_users_me(
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.AUTH_ADMIN_NAME)),
+    ],
+    current_user: Annotated[dict, Depends(get_current_active_user)],
+):
     """Get current user information."""
-    return current_user
+    try:
+        logger.info(f"Fetching user profile for: {current_user.get('email')}")
+
+        # Remove sensitive data from response
+        user_response = current_user.copy()
+        user_response.pop("password_hash", None)
+        user_response.pop("_id", None)
+
+        # Ensure id field is present
+        if "_id" in current_user:
+            user_response["id"] = str(current_user["_id"])
+
+        logger.info(
+            f"User profile retrieved successfully for: {current_user.get('email')}"
+        )
+
+        return user_response
+
+    except HTTPException:
+        # Re-raise already handled HTTP exceptions from dependencies
+        raise
+
+    except Exception as e:
+        logger.exception(
+            f"Failed to fetch user profile for {current_user.get('email')}: {e}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while fetching user profile",
+        )
 
 
 @router.patch("/update/{email}", response_model=dict)

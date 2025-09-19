@@ -7,36 +7,23 @@ logger = get_logger("password-processor")
 
 
 def get_password_hash(password: str) -> str | None:
-    """Safely hash a password using bcrypt.
-
-    Args:
-        password: Plain text password to hash
-
-    Returns:
-        str: Hashed password as string, or None if hashing failed
-
-    Raises:
-        ValueError: If password is empty or too long
-    """
     if not password:
         error_message = "Password cannot be empty"
         logger.exception(error_message)
         raise ValueError(error_message)
 
-    if (
-        len(password) < settings.MIN_PASSWORD_LENGTH
-        or len(password) > settings.MAX_PASSWORD_LENGTH
+    if not (
+        settings.MIN_PASSWORD_LENGTH
+        <= len(password)
+        <= settings.MAX_PASSWORD_LENGTH
     ):
         logger.error(f"Wrong password length - {len(password)}")
         return None
 
     try:
         password_bytes = password.encode("utf-8")
-
         salt = bcrypt.gensalt(rounds=12)
-
         hashed_bytes = bcrypt.hashpw(password_bytes, salt)
-
         hashed_str = hashed_bytes.decode("utf-8")
 
         if not hashed_str.startswith("$2b$12$"):
@@ -46,11 +33,8 @@ def get_password_hash(password: str) -> str | None:
         logger.info("Password hashed successfully")
         return hashed_str
 
-    except (ValueError, TypeError, UnicodeEncodeError) as e:
-        logger.exception(f"Password hashing failed: {e}")
-        return None
     except Exception as e:
-        logger.exception(f"Unexpected error during password hashing: {e}")
+        logger.exception(f"Password hashing failed: {e}")
         return None
 
 
