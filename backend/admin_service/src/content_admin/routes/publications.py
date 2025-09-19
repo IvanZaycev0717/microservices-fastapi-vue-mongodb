@@ -64,7 +64,7 @@ async def get_publication_by_id(
 ):
     try:
         result = await publications_crud.read_by_id(document_id)
-        if not result:
+        if result is None:
             raise HTTPException(
                 status_code=404, detail="Publication not found"
             )

@@ -3220,14 +3220,15 @@
 									"response": []
 								},
 								{
-									"name": "/about/wrong_id - 400 (Not MongoDB ID)",
+									"name": "/about/wrong_id - 404 (Not MongoDB ID)",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status 400 for invalid ObjectId\", () => pm.response.to.have.status(400));\r",
-													""
+													"pm.test(\"Status code is 404\", function () {\r",
+													"    pm.response.to.have.status(404);\r",
+													"});"
 												],
 												"type": "text/javascript",
 												"packages": {}
@@ -3236,8 +3237,11 @@
 										{
 											"listen": "prerequest",
 											"script": {
-												"exec": [],
-												"type": "text/javascript"
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -4194,8 +4198,11 @@
 										{
 											"listen": "prerequest",
 											"script": {
-												"exec": [],
-												"type": "text/javascript"
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -5319,6 +5326,13 @@
 												"type": "text/javascript",
 												"packages": {}
 											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [],
+												"type": "text/javascript"
+											}
 										}
 									],
 									"request": {
@@ -5361,6 +5375,755 @@
 											],
 											"path": [
 												"publications"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications - 422 (Invalid Site URL)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "title_en",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "title_ru",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "page",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "site",
+													"value": "{{$randomColor}}",
+													"type": "text"
+												},
+												{
+													"key": "rating",
+													"value": "{{$randomInt}}",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{base_url}}/publications",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications - 422 (Too Short Title)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "title_en",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "title_ru",
+													"value": "",
+													"type": "text"
+												},
+												{
+													"key": "page",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "site",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "rating",
+													"value": "{{$randomInt}}",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{base_url}}/publications",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications - 422 (Too Long Title)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "title_en",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "title_ru",
+													"value": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
+													"type": "text"
+												},
+												{
+													"key": "page",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "site",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "rating",
+													"value": "{{$randomInt}}",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{base_url}}/publications",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications - 422 (Too Low Rating)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "title_en",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "title_ru",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "page",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "site",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "rating",
+													"value": "-5000",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{base_url}}/publications",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications - 422 (Too Big Rating)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "title_en",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "title_ru",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "page",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "site",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "rating",
+													"value": "5000",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{base_url}}/publications",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications - 422 (Missing Fields)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "title_en",
+													"value": "",
+													"type": "text"
+												},
+												{
+													"key": "title_ru",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "page",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "site",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "rating",
+													"value": "12",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{base_url}}/publications",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications - 422 (Wrong Rating Format)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "title_en",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "title_ru",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "page",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "site",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "rating",
+													"value": "very good rating",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{base_url}}/publications",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications - 422 (Missing Fields)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "title_ru",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "page",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "site",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "rating",
+													"value": "123",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{base_url}}/publications",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications/pub_id - 404 (Unexisted Document ID)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 404\", function () {\r",
+													"    pm.response.to.have.status(404);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url}}/publications/unxisted_doc_id",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications",
+												"unxisted_doc_id"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications/pub_id - 404 (Unexisted Document ID)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 404\", function () {\r",
+													"    pm.response.to.have.status(404);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "title_en",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "title_ru",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "page",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "site",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "rating",
+													"value": "{{$randomInt}}",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{base_url}}/publications/unxisted_doc_id",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications",
+												"unxisted_doc_id"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "/publications/pub_id - 404 (Unexisted Document ID)",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 404\", function () {\r",
+													"    pm.response.to.have.status(404);\r",
+													"});"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										},
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "title_en",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "title_ru",
+													"value": "{{$randomFirstName}}",
+													"type": "text"
+												},
+												{
+													"key": "page",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "site",
+													"value": "{{$randomUrl}}",
+													"type": "text"
+												},
+												{
+													"key": "rating",
+													"value": "{{$randomInt}}",
+													"type": "text"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{base_url}}/publications/unxisted_doc_id",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"publications",
+												"unxisted_doc_id"
 											]
 										}
 									},

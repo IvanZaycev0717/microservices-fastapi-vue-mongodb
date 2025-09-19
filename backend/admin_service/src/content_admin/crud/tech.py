@@ -12,15 +12,13 @@ class TechCRUD:
     def __init__(self, db: AsyncDatabase):
         self.collection: AsyncCollection = db.tech
 
+    # READ
     async def read_all(self) -> list[TechResponse]:
-        try:
-            cursor = self.collection.find()
-            results = await cursor.to_list(length=None)
-            return [TechResponse(**doc) for doc in results]
-        except Exception as e:
-            logger.exception(f"Database error: {e}")
-            raise
+        cursor = self.collection.find()
+        results = await cursor.to_list(length=None)
+        return [TechResponse(**doc) for doc in results]
 
+    # UPDATE
     async def update_kingdom_items(
         self, kingdom_name: str, items: list[str]
     ) -> bool:

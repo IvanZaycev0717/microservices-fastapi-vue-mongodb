@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 from bson import ObjectId
 from bson.errors import InvalidId
+from pymongo import ASCENDING, DESCENDING
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 
@@ -15,15 +16,32 @@ class ProjectsCRUD:
     def __init__(self, db: AsyncDatabase):
         self.collection: AsyncCollection = db.projects
 
+    # CREATE
+    async def create(self, project_data: dict[str, Any]) -> str:
+        """Create new project document in MongoDB collection.
+
+        Args:
+            project_data: Dictionary with project data including multilingual fields.
+
+        Returns:
+            str: String representation of inserted document's ObjectId.
+
+        Raises:
+            Exception: If database operation fails.
+        """
+        result = await self.collection.insert_one(project_data)
+        return str(result.inserted_id)
+
+    # READ
     async def read_all(
         self, lang: str, sort: str = "date_desc"
     ) -> List[Dict[str, Any]]:
         if sort.startswith("date"):
             sort_field = "date"
-            sort_direction = -1 if sort.endswith("desc") else 1
+            sort_direction = DESCENDING if sort.endswith("desc") else ASCENDING
         else:
             sort_field = "popularity"
-            sort_direction = -1
+            sort_direction = DESCENDING
 
         cursor = self.collection.find({}).sort(sort_field, sort_direction)
         results = await cursor.to_list(length=None)
@@ -96,29 +114,11 @@ class ProjectsCRUD:
                     else item["date"],
                     "popularity": item["popularity"],
                 }
-
         except InvalidId:
+            logger.exception("Invalid document Id")
             return None
 
-    async def create(self, project_data: dict[str, Any]) -> str:
-        """Create new project document in MongoDB collection.
-
-        Args:
-            project_data: Dictionary with project data including multilingual fields.
-
-        Returns:
-            str: String representation of inserted document's ObjectId.
-
-        Raises:
-            Exception: If database operation fails.
-        """
-        try:
-            result = await self.collection.insert_one(project_data)
-            return str(result.inserted_id)
-        except Exception as e:
-            logger.exception(f"Database error in create: {e}")
-            raise
-
+    # UPDATE
     async def update(
         self, project_id: str, update_data: Dict[str, Any]
     ) -> None:
@@ -127,6 +127,7 @@ class ProjectsCRUD:
             {"_id": ObjectId(project_id)}, {"$set": update_data}
         )
 
+    # DELETE
     async def delete(self, document_id: str) -> bool:
         """Delete project document by ID.
 
@@ -139,26 +140,15 @@ class ProjectsCRUD:
         Raises:
             InvalidId: If document_id is not a valid ObjectId.
         """
-        try:
-            if not ObjectId.is_valid(document_id):
-                raise ValueError(f"Invalid ObjectId format: {document_id}")
+        result = await self.collection.delete_one(
+            {"_id": ObjectId(document_id)}
+        )
 
-            result = await self.collection.delete_one(
-                {"_id": ObjectId(document_id)}
+        if result.deleted_count == 0:
+            logger.warning(
+                f"Document with id {document_id} not found for deletion"
             )
+            return False
 
-            if result.deleted_count == 0:
-                logger.warning(
-                    f"Document with id {document_id} not found for deletion"
-                )
-                return False
-
-            logger.info(f"Successfully deleted document with id {document_id}")
-            return True
-
-        except ValueError as e:
-            logger.exception(f"Validation error in delete: {e}")
-            raise
-        except Exception as e:
-            logger.exception(f"Database error in delete: {e}")
-            raise
+        logger.info(f"Successfully deleted document with id {document_id}")
+        return True

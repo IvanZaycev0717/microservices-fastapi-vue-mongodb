@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 from bson import ObjectId
 from bson.errors import InvalidId
+from pymongo import ASCENDING, DESCENDING
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 
@@ -15,66 +16,61 @@ class PublicationsCRUD:
     def __init__(self, db: AsyncDatabase):
         self.collection: AsyncCollection = db.publications
 
+    # CREATE
+    async def create(self, publication_data: dict[str, Any]):
+        result = await self.collection.insert_one(publication_data)
+        return str(result.inserted_id)
+
+    # READ
     async def read_all(
         self, lang: str, sort: str = "date_desc"
     ) -> List[Dict[str, Any]]:
-        try:
-            if sort.startswith("date"):
-                sort_field = "date"
-                sort_direction = -1 if sort.endswith("desc") else 1
+        if sort.startswith("date"):
+            sort_field = "date"
+            sort_direction = DESCENDING if sort.endswith("desc") else ASCENDING
+        else:
+            sort_field = "rating"
+            sort_direction = DESCENDING
+
+        cursor = self.collection.find({}).sort(sort_field, sort_direction)
+        results = await cursor.to_list(length=None)
+
+        transformed_results = []
+        for item in results:
+            if lang not in ("en", "ru"):
+                transformed_results.append(
+                    {
+                        "id": str(item["_id"]),
+                        "title": item["title"],
+                        "page": item["page"],
+                        "site": item["site"],
+                        "rating": item["rating"],
+                        "date": item["date"].isoformat()
+                        if hasattr(item["date"], "isoformat")
+                        else item["date"],
+                    }
+                )
             else:
-                sort_field = "rating"
-                sort_direction = -1
-
-            cursor = self.collection.find({}).sort(sort_field, sort_direction)
-            results = await cursor.to_list(length=None)
-
-            transformed_results = []
-            for item in results:
-                if lang not in ("en", "ru"):
-                    transformed_results.append(
-                        {
-                            "id": str(item["_id"]),
-                            "title": item["title"],
-                            "page": item["page"],
-                            "site": item["site"],
-                            "rating": item["rating"],
-                            "date": item["date"].isoformat()
-                            if hasattr(item["date"], "isoformat")
-                            else item["date"],
-                        }
-                    )
-                else:
-                    transformed_results.append(
-                        {
-                            "id": str(item["_id"]),
-                            "title": item["title"].get(lang, ""),
-                            "page": item["page"],
-                            "site": item["site"],
-                            "rating": item["rating"],
-                            "date": item["date"].isoformat()
-                            if hasattr(item["date"], "isoformat")
-                            else item["date"],
-                        }
-                    )
-            return transformed_results
-
-        except Exception as e:
-            logger.exception(f"Database error in read_all: {e}")
-            raise
-
-    async def create(self, publication_data: dict[str, Any]):
-        try:
-            result = await self.collection.insert_one(publication_data)
-            return str(result.inserted_id)
-        except Exception as e:
-            logger.exception(f"Database error in create: {e}")
-            raise
+                transformed_results.append(
+                    {
+                        "id": str(item["_id"]),
+                        "title": item["title"].get(lang, ""),
+                        "page": item["page"],
+                        "site": item["site"],
+                        "rating": item["rating"],
+                        "date": item["date"].isoformat()
+                        if hasattr(item["date"], "isoformat")
+                        else item["date"],
+                    }
+                )
+        return transformed_results
 
     async def read_by_id(self, publication_id: str):
         try:
             object_id = ObjectId(publication_id)
             item = await self.collection.find_one({"_id": object_id})
+            if not item:
+                return None
             return {
                 "id": str(item["_id"]),
                 "title": item["title"],
@@ -86,8 +82,10 @@ class PublicationsCRUD:
                 else item["date"],
             }
         except InvalidId:
+            logger.exception("Invalid document Id")
             return None
 
+    # UPDATE
     async def update(
         self, publication_id: str, update_data: Dict[str, Any]
     ) -> None:
@@ -95,27 +93,17 @@ class PublicationsCRUD:
             {"_id": ObjectId(publication_id)}, {"$set": update_data}
         )
 
+    # DELETE
     async def delete(self, document_id: str) -> bool:
-        try:
-            if not ObjectId.is_valid(document_id):
-                raise ValueError(f"Invalid ObjectId format: {document_id}")
+        result = await self.collection.delete_one(
+            {"_id": ObjectId(document_id)}
+        )
 
-            result = await self.collection.delete_one(
-                {"_id": ObjectId(document_id)}
+        if result.deleted_count == 0:
+            logger.warning(
+                f"Document with id {document_id} not found for deletion"
             )
+            return False
 
-            if result.deleted_count == 0:
-                logger.warning(
-                    f"Document with id {document_id} not found for deletion"
-                )
-                return False
-
-            logger.info(f"Successfully deleted document with id {document_id}")
-            return True
-
-        except ValueError as e:
-            logger.exception(f"Validation error in delete: {e}")
-            raise
-        except Exception as e:
-            logger.exception(f"Database error in delete: {e}")
-            raise
+        logger.info(f"Successfully deleted document with id {document_id}")
+        return True
