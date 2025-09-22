@@ -1,5 +1,3 @@
-# models/token.py
-from bson import ObjectId
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from datetime import datetime
 from typing import Optional

@@ -2,7 +2,14 @@ from datetime import datetime
 from typing import Any, Optional
 
 from bson import ObjectId
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    SecretStr,
+    model_validator,
+)
 
 from auth_admin.models.user_role import UserRole
 from settings import settings
@@ -42,7 +49,7 @@ class UserResponse(BaseModel):
                 "is_banned": False,
                 "roles": ["USER"],
                 "created_at": "2023-10-01T12:00:00Z",
-                "last_login_at": "2023-10-05T14:30:00Z"
+                "last_login_at": "2023-10-05T14:30:00Z",
             }
         }
     )
@@ -81,3 +88,8 @@ class UserUpdateForm(BaseModel):
             "example": {"is_banned": False, "roles": ["USER", "ADMIN"]}
         }
     )
+
+
+class LoginForm(BaseModel):
+    email: str
+    password: SecretStr

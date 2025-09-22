@@ -7,16 +7,6 @@ from auth_admin.models.auth import UserDB
 from auth_admin.models.user_role import UserRole
 
 
-# auth_admin/crud/auth.py
-from datetime import datetime, timezone
-from pymongo.asynchronous.database import AsyncDatabase
-from bson import ObjectId
-from typing import Optional
-
-from auth_admin.models.user_role import UserRole
-from auth_admin.models.auth import UserDB
-
-
 class AuthCRUD:
     def __init__(self, db: AsyncDatabase):
         self.collection = db.users
@@ -31,7 +21,9 @@ class AuthCRUD:
     async def get_user_by_id(self, user_id: str) -> Optional[UserDB]:
         """Get user by ID and return as UserDB model."""
         try:
-            user_dict = await self.collection.find_one({"_id": ObjectId(user_id)})
+            user_dict = await self.collection.find_one(
+                {"_id": ObjectId(user_id)}
+            )
             if user_dict:
                 return UserDB(**user_dict)
             return None
@@ -41,33 +33,37 @@ class AuthCRUD:
     async def get_all_users(self) -> list[UserDB]:
         cursor = self.collection.find()
         users_dict = await cursor.to_list(length=None)
-        
+
         users = []
         for user_dict in users_dict:
-            # Переименовываем _id в id
             user_dict["id"] = str(user_dict["_id"])
             del user_dict["_id"]
             users.append(UserDB(**user_dict))
-        
+
         return users
 
-    async def create_user(self, email: str, password_hash: str, roles: list[UserRole]) -> UserDB:
+    async def create_user(
+        self, email: str, password_hash: str, roles: list[UserRole]
+    ) -> UserDB:
         """Create user and return as UserDB model."""
         user_data = {
             "email": email,
             "password_hash": password_hash,
-            "roles": [role.value for role in roles] if roles else [UserRole.USER.value],
+            "roles": [role.value for role in roles]
+            if roles
+            else [UserRole.USER.value],
             "is_banned": False,
             "created_at": datetime.now(timezone.utc),
-            "last_login_at": None
+            "last_login_at": None,
         }
-        
+
         result = await self.collection.insert_one(user_data)
-        created_user = await self.collection.find_one({"_id": result.inserted_id})
+        created_user = await self.collection.find_one(
+            {"_id": result.inserted_id}
+        )
         return UserDB(**created_user)
 
     async def update_user(self, email: str, update_data: dict) -> Optional[UserDB]:
-        """Update user and return updated UserDB model."""
         result = await self.collection.update_one(
             {"email": email}, 
             {"$set": update_data}
@@ -75,12 +71,18 @@ class AuthCRUD:
         
         if result.modified_count > 0:
             updated_user = await self.collection.find_one({"email": email})
-            return UserDB(**updated_user)
+            if updated_user:
+                # Убедись, что эта конвертация есть
+                updated_user["id"] = str(updated_user["_id"])
+                del updated_user["_id"]
+                return UserDB(**updated_user)
         return None
 
     async def update_user_last_login(self, email: str) -> Optional[UserDB]:
         """Update user's last login time and return UserDB model."""
-        return await self.update_user(email, {"last_login_at": datetime.now(timezone.utc)})
+        return await self.update_user(
+            email, {"last_login_at": datetime.now(timezone.utc)}
+        )
 
     async def delete_user_by_email(self, email: str) -> bool:
         """Delete user by email."""

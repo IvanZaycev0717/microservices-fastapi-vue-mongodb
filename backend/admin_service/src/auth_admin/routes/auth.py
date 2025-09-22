@@ -16,6 +16,7 @@ from auth_admin.dependencies import (
 )
 from auth_admin.models.auth import (
     CreateUserForm,
+    LoginForm,
     UserDB,
     UserResponse,
     UserUpdateForm,
@@ -123,7 +124,7 @@ async def register_user(
             datetime.now() + settings.REFRESH_TOKEN_EXPIRES_AT
         )
         await token_crud.create_refresh_token(
-            user_id=str(user["_id"]),
+            user_id=user.id,
             token=refresh_token,
             expired_at=refresh_token_expires,
         )
@@ -134,7 +135,7 @@ async def register_user(
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
-            "user_id": str(user["_id"]),
+            "user_id": user.id,
             "expires_in": settings.ACCESS_TOKEN_EXPIRE_AT.total_seconds(),
         }
 
@@ -152,36 +153,40 @@ async def register_user(
 @router.post("/login", response_model=dict)
 async def login_for_access_token(
     logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))],
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    form_data: Annotated[LoginForm, Depends()],
     db: Annotated[AsyncDatabase, Depends(get_db)],
 ):
     """Login user and return access token with refresh token."""
     try:
-        logger.info(f"Login attempt for username: {form_data.username}")
-        user = await authenticate_user(form_data.username, form_data.password, db)
-        if not user:
-            logger.warning(f"Failed login attempt for: {form_data.username}")
+        logger.info(f"Login attempt for username: {form_data.email}")
+        user_dict = await authenticate_user(form_data.email, form_data.password.get_secret_value(), db)
+        if not user_dict:
+            logger.warning(f"Failed login attempt for: {form_data.email}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect email or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+        else:
+            user_dict["id"] = str(user_dict["_id"])
+            del user_dict["_id"]
+            user = UserDB(**user_dict)
 
         if user.is_banned:
-            logger.warning(f"Login attempt for banned user: {form_data.username}")
+            logger.warning(f"Login attempt for banned user: {form_data.email}")
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User account is banned",
             )
 
         auth_crud = AuthCRUD(db)
-        await auth_crud.update_user_last_login(form_data.username)
+        await auth_crud.update_user_last_login(form_data.email)
 
         token_data = {
             "sub": user.email,
             "email": user.email,
             "roles": user.roles,
-            "user_id": user._id,
+            "user_id": user.id,
         }
 
         access_token = create_jwt_token(
@@ -202,18 +207,18 @@ async def login_for_access_token(
         )
 
         await token_crud.create_refresh_token(
-            user_id=str(user["_id"]),
+            user_id=user.id,
             token=refresh_token,
             expired_at=refresh_token_expires,
         )
 
-        logger.info(f"User logged in successfully: {form_data.username}")
+        logger.info(f"User logged in successfully: {form_data.email}")
 
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
-            "user_id": str(user["_id"]),
+            "user_id": user.id,
             "expires_in": settings.ACCESS_TOKEN_EXPIRE_AT.total_seconds(),
         }
 
@@ -221,7 +226,7 @@ async def login_for_access_token(
         raise
 
     except Exception as e:
-        logger.exception(f"Login failed for {form_data.username}: {e}")
+        logger.exception(f"Login failed for {form_data.email}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error during login",
