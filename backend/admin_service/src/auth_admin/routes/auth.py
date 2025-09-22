@@ -1,38 +1,31 @@
-from datetime import datetime, timezone
 import logging
+from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Form, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-import jwt
+from fastapi import (APIRouter, Body, Cookie, Depends, Form, HTTPException,
+                     Response, status)
 from jwt.exceptions import JWTException
 from pymongo.asynchronous.database import AsyncDatabase
 
 from auth_admin.crud.auth import AuthCRUD
-from auth_admin.dependencies import (
-    authenticate_user,
-    get_current_active_user,
-    get_db,
-)
-from auth_admin.models.auth import (
-    CreateUserForm,
-    LoginForm,
-    UserDB,
-    UserResponse,
-    UserUpdateForm,
-)
+from auth_admin.crud.token import TokenCRUD
+from auth_admin.dependencies import (authenticate_user,
+                                     get_current_active_user, get_db)
+from auth_admin.models.auth import (CreateUserForm, LoginForm, UserDB,
+                                    UserResponse, UserUpdateForm)
 from content_admin.dependencies import get_logger_factory
 from services.password_processor import get_password_hash
 from services.token_processor import create_jwt_token, verify_jwt_token
 from settings import settings
-from auth_admin.crud.token import TokenCRUD
 
 router = APIRouter(prefix="/auth")
 
 
 @router.get("", response_model=list[UserResponse])
 async def get_all_users(
-    logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))],
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))
+    ],
     db: Annotated[AsyncDatabase, Depends(get_db)],
 ):
     """Get all users (admin only)."""
@@ -53,7 +46,7 @@ async def get_all_users(
                 is_banned=user.is_banned,
                 roles=user.roles,
                 created_at=user.created_at,
-                last_login_at=user.last_login_at
+                last_login_at=user.last_login_at,
             )
             user_responses.append(user_response)
 
@@ -67,9 +60,13 @@ async def get_all_users(
             detail="Internal server error while fetching users",
         )
 
+
 @router.post("/register", response_model=dict)
 async def register_user(
-    logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))],
+    response: Response,
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))
+    ],
     user_data: Annotated[CreateUserForm, Form()],
     db: Annotated[AsyncDatabase, Depends(get_db)],
 ):
@@ -81,7 +78,9 @@ async def register_user(
 
         existing_user = await auth_crud.get_user_by_email(user_data.email)
         if existing_user:
-            logger.warning(f"Registration failed - email already exists: {user_data.email}")
+            logger.warning(
+                f"Registration failed - email already exists: {user_data.email}"
+            )
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User with this email already exists",
@@ -131,9 +130,18 @@ async def register_user(
 
         logger.info(f"User registered successfully: {user_data.email}")
 
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+            max_age=int(settings.REFRESH_TOKEN_EXPIRES_AT.total_seconds()),
+            path="/auth/refresh",
+        )
+
         return {
             "access_token": access_token,
-            "refresh_token": refresh_token,
             "token_type": "bearer",
             "user_id": user.id,
             "expires_in": settings.ACCESS_TOKEN_EXPIRE_AT.total_seconds(),
@@ -152,14 +160,19 @@ async def register_user(
 
 @router.post("/login", response_model=dict)
 async def login_for_access_token(
-    logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))],
+    response: Response,
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))
+    ],
     form_data: Annotated[LoginForm, Depends()],
     db: Annotated[AsyncDatabase, Depends(get_db)],
 ):
     """Login user and return access token with refresh token."""
     try:
         logger.info(f"Login attempt for username: {form_data.email}")
-        user_dict = await authenticate_user(form_data.email, form_data.password.get_secret_value(), db)
+        user_dict = await authenticate_user(
+            form_data.email, form_data.password.get_secret_value(), db
+        )
         if not user_dict:
             logger.warning(f"Failed login attempt for: {form_data.email}")
             raise HTTPException(
@@ -211,12 +224,19 @@ async def login_for_access_token(
             token=refresh_token,
             expired_at=refresh_token_expires,
         )
-
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+            max_age=int(settings.REFRESH_TOKEN_EXPIRES_AT.total_seconds()),
+            path="/auth/refresh",
+        )
         logger.info(f"User logged in successfully: {form_data.email}")
 
         return {
             "access_token": access_token,
-            "refresh_token": refresh_token,
             "token_type": "bearer",
             "user_id": user.id,
             "expires_in": settings.ACCESS_TOKEN_EXPIRE_AT.total_seconds(),
@@ -326,7 +346,9 @@ async def update_user(
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user_by_email(
-    logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))],
+    logger: Annotated[
+        logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))
+    ],
     email: Annotated[str, Form(description="Email пользователя для удаления")],
     db=Depends(get_db),
 ):
@@ -344,7 +366,9 @@ async def delete_user_by_email(
         deleted = await auth_crud.delete_user_by_email(email)
         if not deleted:
             logger.error(f"Failed to delete user: {email}")
-            raise HTTPException(status_code=500, detail="Failed to delete user")
+            raise HTTPException(
+                status_code=500, detail="Failed to delete user"
+            )
 
         logger.info(f"User and tokens deleted successfully: {email}")
 
@@ -357,22 +381,26 @@ async def delete_user_by_email(
 
 @router.post("/refresh", response_model=dict)
 async def refresh_tokens(
+    response: Response,
     db: Annotated[AsyncDatabase, Depends(get_db)],
     logger: Annotated[
         logging.Logger,
         Depends(get_logger_factory(settings.AUTH_ADMIN_NAME)),
     ],
-    refresh_token: str = Body(embed=True),
+    refresh_token: str = Cookie(alias="refresh_token"),
 ):
     """Refresh access token using refresh token."""
     try:
         auth_crud = AuthCRUD(db)
         token_crud = TokenCRUD(db)
 
+        if not refresh_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                "Refresh token missing")
+
         try:
-            payload = verify_jwt_token(
-                refresh_token
-            )
+            payload = verify_jwt_token(refresh_token)
         except JWTException:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -424,6 +452,7 @@ async def refresh_tokens(
         )
 
         await token_crud.mark_token_as_used(refresh_token)
+        response.delete_cookie(key="refresh_token", path="/auth/refresh")
 
         logger.info(f"Tokens refreshed successfully for user: {user.email}")
 
@@ -433,10 +462,12 @@ async def refresh_tokens(
             "expires_in": settings.ACCESS_TOKEN_EXPIRE_AT.total_seconds(),
         }
 
-    except HTTPException:
-        raise
+    except HTTPException as e:
+        response.delete_cookie(key="refresh_token", path="/auth/refresh")
+        raise e
 
     except Exception as e:
+        response.delete_cookie(key="refresh_token", path="/auth/refresh")
         logger.exception(f"Token refresh failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -446,18 +477,25 @@ async def refresh_tokens(
 
 @router.post("/logout", response_model=dict)
 async def logout(
+    response: Response,
     db: Annotated[AsyncDatabase, Depends(get_db)],
     logger: Annotated[
         logging.Logger,
         Depends(get_logger_factory(settings.AUTH_ADMIN_NAME)),
     ],
-    refresh_token: str = Body(embed=True),
+    refresh_token: str = Cookie(alias="refresh_token"),
 ):
     """Invalidate refresh token on logout."""
     try:
         token_crud = TokenCRUD(db)
 
+        if not refresh_token:
+            response.delete_cookie(key="refresh_token", path="/auth/refresh")
+
+
         success = await token_crud.mark_token_as_used(refresh_token)
+        
+        response.delete_cookie(key="refresh_token", path="/auth/refresh")
 
         if not success:
             raise HTTPException(
@@ -469,9 +507,11 @@ async def logout(
         return {"message": "Logged out successfully"}
 
     except HTTPException:
+        response.delete_cookie(key="refresh_token", path="/auth/refresh")
         raise
 
     except Exception as e:
+        response.delete_cookie(key="refresh_token", path="/auth/refresh")
         logger.exception(f"Logout failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

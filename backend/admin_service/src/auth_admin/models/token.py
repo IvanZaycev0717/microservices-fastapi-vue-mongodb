@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from datetime import datetime
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from auth_admin.models.user_role import UserRole
 
@@ -19,7 +20,7 @@ class Token(BaseModel):
                 "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                 "token_type": "bearer",
                 "user_id": "507f1f77bcf86cd799439011",
-                "expires_in": 3600
+                "expires_in": 3600,
             }
         }
     )
@@ -50,7 +51,7 @@ class TokenPayload(BaseModel):
                 "user_id": "507f1f77bcf86cd799439011",
                 "type": "access",
                 "exp": 1696500000,
-                "iat": 1696413600
+                "iat": 1696413600,
             }
         }
     )

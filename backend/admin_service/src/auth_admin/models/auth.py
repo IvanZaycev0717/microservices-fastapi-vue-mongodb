@@ -1,15 +1,7 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Optional
 
-from bson import ObjectId
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    EmailStr,
-    Field,
-    SecretStr,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, SecretStr
 
 from auth_admin.models.user_role import UserRole
 from settings import settings

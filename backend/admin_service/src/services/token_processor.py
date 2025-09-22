@@ -23,7 +23,6 @@ def create_jwt_token(
     secret_key: SecretStr | None = SECRET_KEY,
     algorithm: str = ALGORITHM,
 ) -> str:
-
     signing_key = jwk_from_dict(
         {"kty": "oct", "k": secret_key.get_secret_value()}
     )
@@ -50,7 +49,6 @@ def verify_jwt_token(
     secret_key: SecretStr | None = SECRET_KEY,
     algorithm: str = ALGORITHM,
 ) -> dict:
-
     verifying_key = jwk_from_dict(
         {"kty": "oct", "k": secret_key.get_secret_value()}
     )
@@ -70,7 +68,7 @@ def create_token_for_user(
     user_id: str,
     email: str,
     expires_delta: timedelta,
-    roles: list | None = None
+    roles: list | None = None,
 ) -> str:
     if roles is None:
         roles = ["user"]

@@ -1,8 +1,7 @@
 # crud/token.py
-from pymongo.asynchronous.database import AsyncDatabase
 from datetime import datetime
-from bson import ObjectId
-from typing import Optional
+
+from pymongo.asynchronous.database import AsyncDatabase
 
 
 class TokenCRUD:
