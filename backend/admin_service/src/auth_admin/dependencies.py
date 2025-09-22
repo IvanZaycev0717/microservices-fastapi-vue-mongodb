@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pymongo.asynchronous.database import AsyncDatabase
 
 from services.password_processor import verify_password
-from services.token_processor import verify_access_token
+from services.token_processor import verify_jwt_token
 
 
 async def get_db(request: Request) -> AsyncDatabase:
@@ -39,7 +39,7 @@ async def get_current_user(
     )
 
     try:
-        payload = verify_access_token(token)
+        payload = verify_jwt_token(token)
         email = payload.get("email")
         if email is None:
             raise credentials_exception

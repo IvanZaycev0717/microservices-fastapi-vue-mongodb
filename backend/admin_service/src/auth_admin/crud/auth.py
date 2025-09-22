@@ -1,86 +1,88 @@
-from datetime import datetime
-from enum import Enum
-
-from bson import ObjectId
-from pymongo import ReturnDocument
+from datetime import datetime, timezone
 from pymongo.asynchronous.database import AsyncDatabase
+from bson import ObjectId
+from typing import Optional
+
+from auth_admin.models.auth import UserDB
+from auth_admin.models.user_role import UserRole
 
 
-class UserRole(str, Enum):
-    USER = "user"
-    ADMIN = "admin"
+# auth_admin/crud/auth.py
+from datetime import datetime, timezone
+from pymongo.asynchronous.database import AsyncDatabase
+from bson import ObjectId
+from typing import Optional
+
+from auth_admin.models.user_role import UserRole
+from auth_admin.models.auth import UserDB
 
 
 class AuthCRUD:
     def __init__(self, db: AsyncDatabase):
         self.collection = db.users
 
-    # CREATE
-    async def create_user(
-        self,
-        email: str,
-        password_hash: str,
-        roles: list[UserRole] | None = None,
-    ) -> dict:
-        """Create new user in database."""
+    async def get_user_by_email(self, email: str) -> Optional[UserDB]:
+        """Get user by email and return as UserDB model."""
+        user_dict = await self.collection.find_one({"email": email})
+        if user_dict:
+            return UserDB(**user_dict)
+        return None
+
+    async def get_user_by_id(self, user_id: str) -> Optional[UserDB]:
+        """Get user by ID and return as UserDB model."""
+        try:
+            user_dict = await self.collection.find_one({"_id": ObjectId(user_id)})
+            if user_dict:
+                return UserDB(**user_dict)
+            return None
+        except Exception:
+            return None
+
+    async def get_all_users(self) -> list[UserDB]:
+        cursor = self.collection.find()
+        users_dict = await cursor.to_list(length=None)
+        
+        users = []
+        for user_dict in users_dict:
+            # Переименовываем _id в id
+            user_dict["id"] = str(user_dict["_id"])
+            del user_dict["_id"]
+            users.append(UserDB(**user_dict))
+        
+        return users
+
+    async def create_user(self, email: str, password_hash: str, roles: list[UserRole]) -> UserDB:
+        """Create user and return as UserDB model."""
         user_data = {
             "email": email,
             "password_hash": password_hash,
+            "roles": [role.value for role in roles] if roles else [UserRole.USER.value],
             "is_banned": False,
-            "roles": [role.value for role in (roles or [UserRole.USER])],
-            "created_at": datetime.now(),
-            "updated_at": datetime.now(),
-            "last_login_at": None,
+            "created_at": datetime.now(timezone.utc),
+            "last_login_at": None
         }
-
+        
         result = await self.collection.insert_one(user_data)
-        return await self.get_user_by_id(result.inserted_id)
+        created_user = await self.collection.find_one({"_id": result.inserted_id})
+        return UserDB(**created_user)
 
-    # READ
-    async def get_all_users(self) -> list[dict]:
-        """Get all users from database."""
-        cursor = self.collection.find()
-        return await cursor.to_list()
-
-    async def get_user_by_id(self, user_id: str) -> dict | None:
-        """Get user by MongoDB ObjectId."""
-        return await self.collection.find_one({"_id": ObjectId(user_id)})
-
-    async def get_user_by_email(self, email: str) -> dict | None:
-        """Get user by email address."""
-        return await self.collection.find_one({"email": email})
-
-    # UPDATE
-    async def update_user_last_login(self, email: str) -> dict | None:
-        """Update user's last login timestamp."""
-        return await self.collection.find_one_and_update(
-            {"email": email},
-            {"$set": {"last_login_at": datetime.now()}},
-            return_document=ReturnDocument.AFTER,
+    async def update_user(self, email: str, update_data: dict) -> Optional[UserDB]:
+        """Update user and return updated UserDB model."""
+        result = await self.collection.update_one(
+            {"email": email}, 
+            {"$set": update_data}
         )
+        
+        if result.modified_count > 0:
+            updated_user = await self.collection.find_one({"email": email})
+            return UserDB(**updated_user)
+        return None
 
-    async def update_user(self, email: str, update_data: dict) -> dict | None:
-        """Update user fields (is_banned, roles)."""
-        allowed_fields = {"is_banned", "roles"}
-        filtered_update = {
-            key: value
-            for key, value in update_data.items()
-            if key in allowed_fields and value is not None
-        }
+    async def update_user_last_login(self, email: str) -> Optional[UserDB]:
+        """Update user's last login time and return UserDB model."""
+        return await self.update_user(email, {"last_login_at": datetime.now(timezone.utc)})
 
-        if not filtered_update:
-            return None
-
-        filtered_update["updated_at"] = datetime.now()
-
-        return await self.collection.find_one_and_update(
-            {"email": email},
-            {"$set": filtered_update},
-            return_document=ReturnDocument.AFTER,
-        )
-
-    # DELETE
     async def delete_user_by_email(self, email: str) -> bool:
-        """Delete user by email address."""
+        """Delete user by email."""
         result = await self.collection.delete_one({"email": email})
         return result.deleted_count > 0

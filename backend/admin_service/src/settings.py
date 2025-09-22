@@ -4,12 +4,12 @@ from pathlib import Path
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from datetime import timedelta
 
 class Settings(BaseSettings):
     # From .env file
     SECRET_KEY: SecretStr
     ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
     MIN_PASSWORD_LENGTH: int = 5
     MAX_PASSWORD_LENGTH: int = 31
 
@@ -50,8 +50,14 @@ class Settings(BaseSettings):
     AUTH_ADMIN_ME_CONFIG_MONGODB_URL: str = Field(
         description="Mongo Express connection URL for auth database"
     )
+
+    # Admin credentials
     ADMIN_EMAIL: SecretStr
     ADMIN_PASSWORD: SecretStr
+
+    # Tokens Settings
+    ACCESS_TOKEN_EXPIRE_AT: timedelta = timedelta(minutes=30)
+    REFRESH_TOKEN_EXPIRES_AT: timedelta = timedelta(days=7)
 
     # Notification Admin
     NOTIFICATION_ADMIN_MONGO_ROOT_USERNAME: str = Field(
