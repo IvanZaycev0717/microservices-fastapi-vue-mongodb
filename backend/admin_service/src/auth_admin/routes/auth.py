@@ -23,7 +23,7 @@ from auth_admin.models.auth import (
 )
 from content_admin.dependencies import get_logger_factory
 from services.password_processor import get_password_hash
-from services.token_processor import create_jwt_token
+from services.token_processor import create_jwt_token, verify_jwt_token
 from settings import settings
 from auth_admin.crud.token import TokenCRUD
 
@@ -370,10 +370,8 @@ async def refresh_tokens(
         token_crud = TokenCRUD(db)
 
         try:
-            payload = jwt.decode(
-                refresh_token,
-                settings.SECRET_KEY,
-                algorithms=[settings.ALGORITHM],
+            payload = verify_jwt_token(
+                refresh_token
             )
         except JWTException:
             raise HTTPException(
@@ -408,17 +406,17 @@ async def refresh_tokens(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
-        if user.get("is_banned"):
+        if user.is_banned:
             await token_crud.mark_token_as_used(refresh_token)
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN, detail="User is banned"
             )
 
         token_data = {
-            "sub": user["email"],
-            "email": user["email"],
-            "roles": user["roles"],
-            "user_id": str(user["_id"]),
+            "sub": user.email,
+            "email": user.email,
+            "roles": user.roles,
+            "user_id": user.id,
         }
 
         access_token = create_jwt_token(
@@ -427,7 +425,7 @@ async def refresh_tokens(
 
         await token_crud.mark_token_as_used(refresh_token)
 
-        logger.info(f"Tokens refreshed successfully for user: {user['email']}")
+        logger.info(f"Tokens refreshed successfully for user: {user.email}")
 
         return {
             "access_token": access_token,
