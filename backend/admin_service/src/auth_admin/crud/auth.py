@@ -15,6 +15,8 @@ class AuthCRUD:
         """Get user by email and return as UserDB model."""
         user_dict = await self.collection.find_one({"email": email})
         if user_dict:
+            user_dict["id"] = str(user_dict["_id"])
+            del user_dict["_id"]
             return UserDB(**user_dict)
         return None
 
@@ -61,6 +63,8 @@ class AuthCRUD:
         created_user = await self.collection.find_one(
             {"_id": result.inserted_id}
         )
+        created_user["id"] = str(created_user["_id"])
+        del created_user["_id"]
         return UserDB(**created_user)
 
     async def update_user(self, email: str, update_data: dict) -> Optional[UserDB]:

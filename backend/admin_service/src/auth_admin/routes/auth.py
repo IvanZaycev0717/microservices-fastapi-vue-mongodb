@@ -105,7 +105,7 @@ async def register_user(
             "sub": user.email,
             "email": user.email,
             "roles": user.roles,
-            "user_id": user._id,
+            "user_id": user.id,
         }
 
         access_token = create_jwt_token(
