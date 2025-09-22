@@ -326,43 +326,33 @@ async def update_user(
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user_by_email(
-    logger: Annotated[
-        logging.Logger,
-        Depends(get_logger_factory(settings.AUTH_ADMIN_NAME)),
-    ],
+    logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))],
     email: Annotated[str, Form(description="Email пользователя для удаления")],
     db=Depends(get_db),
 ):
-    """Delete user by email address."""
     try:
         auth_crud = AuthCRUD(db)
+        token_crud = TokenCRUD(db)
 
         user = await auth_crud.get_user_by_email(email)
         if not user:
             logger.warning(f"Attempt to delete non-existent user: {email}")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-            )
+            raise HTTPException(status_code=404, detail="User not found")
+
+        await token_crud.collection.delete_many({"user_id": user.id})
 
         deleted = await auth_crud.delete_user_by_email(email)
         if not deleted:
             logger.error(f"Failed to delete user: {email}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to delete user",
-            )
+            raise HTTPException(status_code=500, detail="Failed to delete user")
 
-        logger.info(f"User deleted successfully: {email}")
+        logger.info(f"User and tokens deleted successfully: {email}")
 
     except HTTPException:
         raise
-
     except Exception as e:
-        logger.exception(f"Unexpected error during user deletion: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error",
-        )
+        logger.exception(f"Error during user deletion: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/refresh", response_model=dict)
