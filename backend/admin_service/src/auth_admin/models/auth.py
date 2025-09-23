@@ -48,8 +48,11 @@ class UserResponse(BaseModel):
 
 
 class CreateUserForm(BaseModel):
-    email: EmailStr
-    password: str = Field(
+    email: EmailStr = Field(
+        min_length=settings.MIN_EMAIL_LENGTH,
+        max_length=settings.MAX_EMAIL_LENGHT,
+    )
+    password: SecretStr = Field(
         min_length=settings.MIN_PASSWORD_LENGTH,
         max_length=settings.MAX_PASSWORD_LENGTH,
         description=f"Password must be between {settings.MIN_PASSWORD_LENGTH} and {settings.MAX_PASSWORD_LENGTH} characters",
@@ -83,5 +86,12 @@ class UserUpdateForm(BaseModel):
 
 
 class LoginForm(BaseModel):
-    email: str
-    password: SecretStr
+    email: EmailStr = Field(
+        min_length=settings.MIN_EMAIL_LENGTH,
+        max_length=settings.MAX_EMAIL_LENGHT,
+    )
+    password: SecretStr = Field(
+        min_length=settings.MIN_PASSWORD_LENGTH,
+        max_length=settings.MAX_PASSWORD_LENGTH,
+        description=f"Password must be between {settings.MIN_PASSWORD_LENGTH} and {settings.MAX_PASSWORD_LENGTH} characters",
+    )
