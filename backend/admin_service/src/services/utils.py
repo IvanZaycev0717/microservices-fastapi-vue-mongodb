@@ -1,5 +1,5 @@
+from typing import Any
 from urllib.parse import urlparse
-
 
 def extract_bucket_and_object_from_url(file_url: str) -> tuple[str, str]:
     """Extract bucket name and object name from MinIO file URL.

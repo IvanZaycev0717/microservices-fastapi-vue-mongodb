@@ -8,6 +8,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Path,
     UploadFile,
     status,
 )
@@ -73,7 +74,7 @@ async def create_certificate(
         logging.Logger,
         Depends(get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)),
     ],
-    file: UploadFile = File(description="Certificate PDF or image"),
+    file: Annotated[UploadFile, File(description="Certificate PDF or image")],
 ):
     try:
         file_bytes = await file.read()
@@ -148,7 +149,9 @@ async def create_certificate(
 
 @router.get("/{certificate_id}")
 async def get_certificate_by_id(
-    certificate_id: str,
+    certificate_id: Annotated[
+        str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)
+    ],
     certificates_crud: Annotated[
         CertificatesCRUD, Depends(get_certificates_crud)
     ],
@@ -181,7 +184,9 @@ async def get_certificate_by_id(
 
 @router.patch("/{certificate_id}/image")
 async def update_certificate_image(
-    certificate_id: str,
+    certificate_id: Annotated[
+        str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)
+    ],
     certificates_crud: Annotated[
         CertificatesCRUD, Depends(get_certificates_crud)
     ],
@@ -190,7 +195,7 @@ async def update_certificate_image(
         logging.Logger,
         Depends(get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)),
     ],
-    file: UploadFile = File(description="New certificate image"),
+    file: Annotated[UploadFile, File(description="New certificate image")],
 ):
     """Update only certificate image."""
     try:
@@ -281,14 +286,16 @@ async def update_certificate_image(
 
 @router.patch("/{certificate_id}")
 async def update_certificate_popularity(
-    certificate_id: str,
+    certificates_crud: Annotated[CertificatesCRUD, Depends(get_certificates_crud)],
+    certificate_id: Annotated[
+        str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)
+    ],
     popularity: int = Form(
         ge=settings.MIN_POPULARITY_BOUNDARY,
         le=settings.MAX_POPULARITY_BOUNDARY,
         description="Popularity value (0-1000)",
         json_schema_extra={"example": 5},
     ),
-    certificates_crud: CertificatesCRUD = Depends(get_certificates_crud),
     logger: logging.Logger = Depends(
         get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)
     ),
@@ -318,7 +325,9 @@ async def update_certificate_popularity(
 
 @router.delete("/{certificate_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_certificate(
-    certificate_id: str,
+    certificate_id: Annotated[
+        str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)
+    ],
     certificates_crud: Annotated[
         CertificatesCRUD, Depends(get_certificates_crud)
     ],

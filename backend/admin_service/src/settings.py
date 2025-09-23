@@ -168,6 +168,9 @@ class Settings(BaseSettings):
         3000, description="MongoDB server selection timeout in milliseconds"
     )
 
+    # MongoDB Objects Validation
+    MONGO_ID_VALID_ID_REGEXP: str = r"^[0-9a-fA-F]{24}$"
+
     # Logging configuration
     LOGGING_LEVEL: int = Field(logging.INFO, description="Logging level")
 

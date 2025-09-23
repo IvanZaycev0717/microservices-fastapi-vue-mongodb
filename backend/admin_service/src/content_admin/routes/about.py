@@ -9,6 +9,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Path,
     Query,
     UploadFile,
     status,
@@ -91,13 +92,13 @@ async def get_about_content(
     response_model=AboutFullResponse | AboutTranslatedResponse,
 )
 async def get_about_content_by_id(
-    document_id: str,
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[
         logging.Logger,
         Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
-    lang: Annotated[str | None, Query()] = None,
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
+    lang: Annotated[str | None, Query()] = None
 ):
     """Get specific about
     content document by ID with optional language filtering.
@@ -153,7 +154,7 @@ async def create_about_content(
         logging.Logger,
         Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
-    image: UploadFile = File(description="Изображение для загрузки"),
+    image: Annotated[UploadFile, File(description="Изображение для загрузки")],
 ):
     """Creates new about content entry with image upload and translations.
 
@@ -241,7 +242,6 @@ async def create_about_content(
 
 @router.patch("/{document_id}/image", status_code=status.HTTP_200_OK)
 async def update_about_image(
-    document_id: str,
     image: Annotated[
         UploadFile, File(description="Новое изображение для замены")
     ],
@@ -251,6 +251,7 @@ async def update_about_image(
         logging.Logger,
         Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
 ):
     """Updates the image for an existing about content document.
 
@@ -332,13 +333,13 @@ async def update_about_image(
 
 @router.patch("/{document_id}", status_code=status.HTTP_200_OK)
 async def update_about_content(
-    document_id: str,
     form_data: Annotated[AboutUpdateForm, Form()],
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     logger: Annotated[
         logging.Logger,
         Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
 ):
     """Updates translations for an existing about content document.
 
@@ -439,13 +440,13 @@ async def update_about_content(
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_about_content(
-    document_id: str,
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
         logging.Logger,
         Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
 ):
     """Delete about content document by ID and associated image from MinIO.
 

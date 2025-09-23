@@ -9,6 +9,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Path,
     Request,
     UploadFile,
     status,
@@ -64,7 +65,7 @@ async def get_projects(
 
 @router.get("/{document_id}")
 async def get_project_by_id(
-    document_id: str,
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     logger: Annotated[
         logging.Logger,
@@ -156,7 +157,7 @@ async def create_project(
 
 @router.patch("/{document_id}/image")
 async def update_project_image(
-    document_id: str,
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[
@@ -233,7 +234,7 @@ async def update_project_image(
 
 @router.patch("/{document_id}")
 async def update_project(
-    document_id: str,
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
     request: Request,
     form_data: Annotated[ProjectUpdateRequest, Form()],
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
@@ -295,7 +296,7 @@ async def update_project(
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(
-    document_id: str,
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
     projects_crud: Annotated[ProjectsCRUD, Depends(get_projects_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
     logger: Annotated[

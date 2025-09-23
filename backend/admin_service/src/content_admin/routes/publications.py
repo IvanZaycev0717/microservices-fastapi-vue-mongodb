@@ -2,7 +2,7 @@ import logging
 from typing import Annotated, Any, Dict, List
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, Form, HTTPException, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Path, status
 
 from content_admin.crud.publications import PublicationsCRUD
 from content_admin.dependencies import (
@@ -53,7 +53,7 @@ async def get_publications(
 
 @router.get("/{document_id}")
 async def get_publication_by_id(
-    document_id: str,
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
     publications_crud: Annotated[
         PublicationsCRUD, Depends(get_publications_crud)
     ],
@@ -107,7 +107,7 @@ async def create_publication(
 
 @router.patch("/{document_id}")
 async def update_publication(
-    document_id: str,
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
     publications_crud: Annotated[
         PublicationsCRUD, Depends(get_publications_crud)
     ],
@@ -160,7 +160,7 @@ async def update_publication(
 
 @router.delete("/{document_id}")
 async def delete_publication(
-    document_id: str,
+    document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
     publications_crud: Annotated[
         PublicationsCRUD, Depends(get_publications_crud)
     ],
