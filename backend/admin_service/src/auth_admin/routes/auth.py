@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime, timezone
 from typing import Annotated
-from pydantic import EmailStr
 
 from fastapi import (
     APIRouter,
@@ -14,6 +13,7 @@ from fastapi import (
     status,
 )
 from jwt.exceptions import JWTException
+from pydantic import EmailStr
 from pymongo.asynchronous.database import AsyncDatabase
 
 from auth_admin.crud.auth import AuthCRUD
