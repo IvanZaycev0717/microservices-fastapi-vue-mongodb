@@ -98,7 +98,7 @@ async def get_about_content_by_id(
         Depends(get_logger_factory(settings.CONTENT_ADMIN_ABOUT_NAME)),
     ],
     document_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
-    lang: Annotated[str | None, Query()] = None
+    lang: Annotated[str | None, Query()] = None,
 ):
     """Get specific about
     content document by ID with optional language filtering.

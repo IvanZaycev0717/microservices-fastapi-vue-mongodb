@@ -26,9 +26,6 @@ class SortOrder(StrEnum):
     POPULARITY = "popularity"
 
 
-
-
-
 def get_logger_dependency() -> logging.Logger:
     """Get configured logger instance for dependency injection.
 

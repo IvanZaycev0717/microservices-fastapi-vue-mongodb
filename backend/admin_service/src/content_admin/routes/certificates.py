@@ -286,7 +286,9 @@ async def update_certificate_image(
 
 @router.patch("/{certificate_id}")
 async def update_certificate_popularity(
-    certificates_crud: Annotated[CertificatesCRUD, Depends(get_certificates_crud)],
+    certificates_crud: Annotated[
+        CertificatesCRUD, Depends(get_certificates_crud)
+    ],
     certificate_id: Annotated[
         str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)
     ],
