@@ -4,6 +4,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from auth_admin.routes import auth
+from comments_admin.db_connection import get_engine
+from comments_admin.models import Base
 from content_admin.routes import (
     about,
     certificates,
@@ -18,6 +20,10 @@ from services.mongo_db_management import (
     MongoCollectionsManager,
     MongoConnectionManager,
     MongoDatabaseManager,
+)
+from services.postgres_db_management import (
+    PostgresConnectionManager,
+    PostgresDatabaseManager,
 )
 from settings import settings
 
@@ -34,20 +40,36 @@ async def lifespan(app: FastAPI):
         host=settings.AUTH_ADMIN_MONGODB_URL
     )
 
+    comments_admin_postgres_connection = PostgresConnectionManager(
+        host=settings.COMMENTS_ADMIN_POSTGRES_ROOT_NAME,
+        port=settings.COMMENTS_ADMIN_POSTGRES_PORT,
+        user=settings.POSTGRES_USER,
+        password=settings.POSTGRES_PASSWORD,
+        database=settings.COMMENTS_ADMIN_POSTGRES_DB_NAME,
+    )
+
     minio_crud = MinioCRUD()
 
     try:
-        # Establish MongoDB connections
+        # Establish connections
         content_admin_client = (
             await content_admin_mongo_connection.open_connection()
         )
         auth_admin_client = await auth_admin_mongo_connection.open_connection()
+
+        comments_admin_client = (
+            await comments_admin_postgres_connection.open_connection()
+        )
 
         # Initialize database managers
         content_admin_database_manager = MongoDatabaseManager(
             content_admin_client
         )
         auth_admin_database_manager = MongoDatabaseManager(auth_admin_client)
+
+        comments_admin_database_manager = PostgresDatabaseManager(
+            comments_admin_client
+        )
 
         # Ensure content admin database exists
         if not await content_admin_database_manager.check_database_existence(
@@ -86,6 +108,33 @@ async def lifespan(app: FastAPI):
             logger.info(
                 f"Using existing auth database: {settings.AUTH_ADMIN_MONGO_DATABASE_NAME}"
             )
+
+        # Ensure comments database exists
+        if not await comments_admin_database_manager.check_database_existence(
+            settings.COMMENTS_ADMIN_POSTGRES_DB_NAME
+        ):
+            success = await comments_admin_database_manager.create_database(
+                settings.AUTH_ADMIN_MONGO_DATABASE_NAME
+            )
+            if success:
+                logger.info(
+                    f"Created comments database: {settings.COMMENTS_ADMIN_POSTGRES_DB_NAME}"
+                )
+            else:
+                logger.exception(
+                    f"Failed to create comments database: {settings.COMMENTS_ADMIN_POSTGRES_DB_NAME}"
+                )
+                raise Exception("PostgreSQL database creation failed")
+        else:
+            logger.info(
+                f"Using existing comments database: {settings.COMMENTS_ADMIN_POSTGRES_DB_NAME}"
+            )
+        await comments_admin_postgres_connection.close_connection()
+
+        # Comments tables creation
+        engine = get_engine()
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
         # Initialize data loader
         data_loader = DataLoader(
@@ -165,10 +214,10 @@ async def lifespan(app: FastAPI):
         raise
     finally:
         yield
-
-    # Cleanup on shutdown
     await content_admin_mongo_connection.close_connection()
     await auth_admin_mongo_connection.close_connection()
+    await comments_admin_postgres_connection.close_connection()
+    await engine.dispose()
     logger.info("Application shutdown complete - connections closed")
 
 

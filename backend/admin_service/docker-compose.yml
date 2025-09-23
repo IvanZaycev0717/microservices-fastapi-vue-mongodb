@@ -23,6 +23,19 @@ services:
     volumes:
       - auth_db_data:/data/db
 
+  comments_db:
+    image: postgres:17.6
+    container_name: comments_db
+    restart: unless-stopped
+    environment:
+      COMMENTS_ADMIN_POSTGRES_DB_NAME: ${COMMENTS_ADMIN_POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${COMMENTS_ADMIN_POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   notification_db:
     image: mongo:8.0
     container_name: notification_db
@@ -89,3 +102,4 @@ volumes:
   auth_db_data:
   notification_db_data:
   minio_data:
+  postgres_data:

@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     MIN_EMAIL_LENGTH: int = 3
     MAX_EMAIL_LENGHT: int = 255
 
-    # Content Admin
+    # MondoDB Settings
     CONTENT_ADMIN_MONGO_ROOT_USERNAME: str = Field(
         description="MongoDB root username"
     )
@@ -32,6 +32,19 @@ class Settings(BaseSettings):
     CONTENT_ADMIN_ME_CONFIG_MONGODB_URL: str = Field(
         description="Mongo Express connection URL"
     )
+
+    # PostgreSQL Settings
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+
+    COMMENTS_ADMIN_POSTGRES_ROOT_NAME: str
+    COMMENTS_ADMIN_POSTGRES_PORT: int
+    COMMENTS_ADMIN_POSTGRES_DB_NAME: str
+    COMMENTS_ADMIN_POSTGRES_DB_URL: str
+    POSTGRES_CONNECTION_TIMEOUT: int = 30
+    POSTGRES_COMMAND_TIMEOUT: int = 60
+    POSTGRES_POOL_MIN_SIZE: int = 1
+    POSTGRES_POOL_MAX_SIZE: int = 10
 
     # Auth Admin
     AUTH_ADMIN_MONGO_ROOT_USERNAME: str = Field(

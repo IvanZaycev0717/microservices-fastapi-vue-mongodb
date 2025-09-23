@@ -10,7 +10,7 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 from services.logger import get_logger
 from settings import settings
 
-logger = get_logger("db_connection")
+logger = get_logger("mongo_db_connection")
 
 
 class MongoConnectionManager:
