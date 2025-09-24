@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field, EmailStr, field_validator
 
 from settings import settings
@@ -35,3 +36,14 @@ class CreateCommentForm(BaseModel):
     @classmethod
     def empty_str_to_none(cls, v):
         return None if v == "" else v
+
+class CommentResponse(BaseModel):
+    id: int
+    project_id: str
+    author_id: str
+    author_email: str
+    comment_text: str
+    created_at: datetime
+    parent_comment_id: int | None
+    likes: int
+    dislikes: int
