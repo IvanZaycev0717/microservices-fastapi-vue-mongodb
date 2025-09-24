@@ -113,6 +113,15 @@ class Settings(BaseSettings):
     # Auth Service Name
     AUTH_ADMIN_NAME: str = "Auth Service"
 
+    # Comments Service Name
+    COMMENTS_ADMIN_NAME: str = 'Comments Service'
+
+    # Comments Service Settings
+    COMMENTS_PROJECT_ID_LENGTH: int = 24
+    COMMENTS_AUTHOR_ID_LENGTH: int = 24
+    MIN_COMMENT_LENGTH: int = 1
+    MAX_COMMENT_LENGTH: int = 1000
+
     # Image Directories Names
     ABOUT_BUCKET_NAME: str = "about"
     PROJECTS_BUCKET_NAME: str = "projects"

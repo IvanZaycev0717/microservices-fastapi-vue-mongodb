@@ -25,6 +25,7 @@ dependencies = [
     "pydantic[email] (>=2.11.9,<3.0.0)",
     "asyncpg (>=0.30.0,<0.31.0)",
     "sqlalchemy (>=2.0.43,<3.0.0)",
+    "alembic (>=1.16.5,<2.0.0)",
 ]
 
 

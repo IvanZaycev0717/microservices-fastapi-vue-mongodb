@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from auth_admin.routes import auth
 from comments_admin.db_connection import get_engine
+from comments_admin.routes import comments
 from comments_admin.models import Base
 from content_admin.routes import (
     about,
@@ -241,6 +242,8 @@ app.include_router(
 )
 
 app.include_router(auth.router, tags=[settings.AUTH_ADMIN_NAME])
+
+app.include_router(comments.router, tags=[settings.COMMENTS_ADMIN_NAME])
 
 app.add_middleware(
     CORSMiddleware,
