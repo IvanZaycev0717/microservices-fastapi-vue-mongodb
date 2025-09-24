@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated
 from datetime import datetime
@@ -80,4 +80,26 @@ async def get_all_comments(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
+        )
+
+
+@router.get("/{comment_id}", response_model=CommentResponse)
+async def get_comment(
+    comment_id: Annotated[int, Path(ge=1)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME))],
+):
+    try:
+        crud = CommentsCRUD(db_session)
+        comment = await crud.read_one_comment(comment_id)
+        logger.info(f"Retrieved comment with id={comment_id}")
+        return comment
+    except ValueError as e:
+        logger.error(f"Error retrieving comment {comment_id}: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        logger.error(f"Unexpected error retrieving comment {comment_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error"
         )
