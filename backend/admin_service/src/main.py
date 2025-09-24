@@ -2,11 +2,15 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from auth_admin.routes import auth
-from comments_admin.db_connection import get_engine
-from comments_admin.routes import comments
 from comments_admin.models import Base
+from comments_admin.routes import comments
 from content_admin.routes import (
     about,
     certificates,
@@ -29,6 +33,11 @@ from services.postgres_db_management import (
 from settings import settings
 
 logger = get_logger("main")
+
+engine = create_async_engine(settings.COMMENTS_ADMIN_POSTGRES_DB_URL)
+AsyncSessionLocal = async_sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
 
 
 @asynccontextmanager
@@ -115,7 +124,7 @@ async def lifespan(app: FastAPI):
             settings.COMMENTS_ADMIN_POSTGRES_DB_NAME
         ):
             success = await comments_admin_database_manager.create_database(
-                settings.AUTH_ADMIN_MONGO_DATABASE_NAME
+                settings.COMMENTS_ADMIN_POSTGRES_DB_NAME
             )
             if success:
                 logger.info(
@@ -133,7 +142,6 @@ async def lifespan(app: FastAPI):
         await comments_admin_postgres_connection.close_connection()
 
         # Comments tables creation
-        engine = get_engine()
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
@@ -203,6 +211,7 @@ async def lifespan(app: FastAPI):
         app.state.content_admin_mongo_db = content_admin_db
         app.state.auth_admin_mongo_client = auth_admin_client
         app.state.auth_admin_mongo_db = auth_admin_db
+        app.state.postgres_engine = engine
         app.state.minio_crud = minio_crud
 
         logger.info("Application startup complete - all services initialized")

@@ -1,4 +1,5 @@
 from logging.config import fileConfig
+
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
@@ -70,12 +71,13 @@ def run_migrations_online() -> None:
 
     """
     connectable = create_async_engine(settings.COMMENTS_ADMIN_POSTGRES_DB_URL)
-    
+
     async def run_async_migrations():
         async with connectable.connect() as connection:
             await connection.run_sync(do_run_migrations)
-    
+
     import asyncio
+
     asyncio.run(run_async_migrations())
 
 

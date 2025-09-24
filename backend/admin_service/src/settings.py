@@ -114,7 +114,7 @@ class Settings(BaseSettings):
     AUTH_ADMIN_NAME: str = "Auth Service"
 
     # Comments Service Name
-    COMMENTS_ADMIN_NAME: str = 'Comments Service'
+    COMMENTS_ADMIN_NAME: str = "Comments Service"
 
     # Comments Service Settings
     COMMENTS_PROJECT_ID_LENGTH: int = 24

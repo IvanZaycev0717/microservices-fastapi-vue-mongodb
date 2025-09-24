@@ -1,16 +1,15 @@
 import logging
+from datetime import datetime
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Form, HTTPException, Path
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Annotated
-from datetime import datetime
 
-from comments_admin.db_connection import get_db_session
+from comments_admin.crud import CommentsCRUD
+from comments_admin.dependencies import get_db_session
 from comments_admin.schemas import CommentResponse, CreateCommentForm
 from content_admin.dependencies import get_logger_factory
-
 from settings import settings
-from comments_admin.crud import CommentsCRUD
-
 
 router = APIRouter(prefix="/comments")
 
@@ -152,7 +151,10 @@ async def update_comment(
 async def delete_comment(
     comment_id: Annotated[int, Path(ge=1)],
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
-    logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME))],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
+    ],
 ):
     try:
         crud = CommentsCRUD(db_session)
@@ -161,10 +163,14 @@ async def delete_comment(
         return {"message": f"Comment with id={deleted_id} was deleted"}
     except ValueError as e:
         logger.error(f"Error deleting comment {comment_id}: {str(e)}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+        )
     except Exception as e:
-        logger.error(f"Unexpected error deleting comment {comment_id}: {str(e)}")
+        logger.error(
+            f"Unexpected error deleting comment {comment_id}: {str(e)}"
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         )
