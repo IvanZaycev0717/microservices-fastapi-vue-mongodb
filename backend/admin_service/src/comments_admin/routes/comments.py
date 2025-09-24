@@ -87,7 +87,10 @@ async def get_all_comments(
 async def get_comment(
     comment_id: Annotated[int, Path(ge=1)],
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
-    logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME))],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
+    ],
 ):
     try:
         crud = CommentsCRUD(db_session)
@@ -96,9 +99,71 @@ async def get_comment(
         return comment
     except ValueError as e:
         logger.error(f"Error retrieving comment {comment_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+        )
+    except Exception as e:
+        logger.error(
+            f"Unexpected error retrieving comment {comment_id}: {str(e)}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
+
+
+@router.patch("/{comment_id}", response_model=dict)
+async def update_comment(
+    comment_id: Annotated[int, Path(ge=1)],
+    new_text: Annotated[
+        str,
+        Form(
+            min_length=settings.MIN_COMMENT_LENGTH,
+            description="New comment text",
+        ),
+    ],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
+    ],
+):
+    try:
+        crud = CommentsCRUD(db_session)
+        updated_id = await crud.update_comment(comment_id, new_text)
+        logger.info(f"Comment with id={updated_id} updated successfully")
+        return {"message": f"Comment with id={updated_id} was updated"}
+    except ValueError as e:
+        logger.error(f"Error updating comment {comment_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+        )
+    except Exception as e:
+        logger.error(
+            f"Unexpected error updating comment {comment_id}: {str(e)}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
+
+
+@router.delete("/{comment_id}")
+async def delete_comment(
+    comment_id: Annotated[int, Path(ge=1)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    logger: Annotated[logging.Logger, Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME))],
+):
+    try:
+        crud = CommentsCRUD(db_session)
+        deleted_id = await crud.delete_comment(comment_id)
+        logger.info(f"Comment with id={deleted_id} deleted successfully")
+        return {"message": f"Comment with id={deleted_id} was deleted"}
+    except ValueError as e:
+        logger.error(f"Error deleting comment {comment_id}: {str(e)}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except Exception as e:
-        logger.error(f"Unexpected error retrieving comment {comment_id}: {str(e)}")
+        logger.error(f"Unexpected error deleting comment {comment_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
