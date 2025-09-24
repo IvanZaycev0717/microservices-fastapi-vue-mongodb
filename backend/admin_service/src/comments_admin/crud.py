@@ -71,3 +71,24 @@ class CommentsCRUD:
         except SQLAlchemyError as e:
             await self.db_session.rollback()
             raise ValueError(f"Database error deleting comment: {str(e)}")
+
+    # SET DEFAULT COMMENTS OF BANNED USER
+    async def set_default_comments_of_banned_user(self, author_id: str) -> int:
+        """
+        Обновляет текст всех комментариев автора на 'Пользователь был забанен'
+        Дочерние комментарии остаются нетронутыми
+        """
+        try:
+            stmt = (
+                update(Comment)
+                .where(Comment.author_id == author_id)
+                .values(comment_text="Пользователь был забанен")
+            )
+            result = await self.db_session.execute(stmt)
+            await self.db_session.commit()
+
+            updated_count = result.rowcount
+            return updated_count
+        except SQLAlchemyError as e:
+            await self.db_session.rollback()
+            raise ValueError(f"Database error banning user comments: {str(e)}")

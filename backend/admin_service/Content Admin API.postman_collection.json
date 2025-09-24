@@ -779,7 +779,8 @@
 													"});"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
@@ -789,7 +790,8 @@
 													""
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -797,13 +799,19 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{base_url}}/about/{{document_id}}",
+											"raw": "{{base_url}}/about/:document_id",
 											"host": [
 												"{{base_url}}"
 											],
 											"path": [
 												"about",
-												"{{document_id}}"
+												":document_id"
+											],
+											"variable": [
+												{
+													"key": "document_id",
+													"value": "{{document_id}}"
+												}
 											]
 										}
 									},
@@ -3504,6 +3512,754 @@
 							]
 						}
 					]
+				},
+				{
+					"name": "Comments Admin",
+					"item": [
+						{
+							"name": "/comments - 201 (Parent Comment)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function() {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has success message\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"message\");\r",
+											"    pm.expect(response.message).to.include(\"was created\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is acceptable\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});\r",
+											"\r",
+											"if (pm.response.code === 201) {\r",
+											"    const response = pm.response.json();\r",
+											"    const message = response.message;\r",
+											"    const commentId = message.match(/id=(\\d+)/)[1];\r",
+											"    \r",
+											"    pm.collectionVariables.set(\"last_created_comment_id_1\", commentId);\r",
+											"    console.log(\"Saved comment ID: \" + commentId);\r",
+											"}\r",
+											"\r",
+											"pm.test(\"Response has correct structure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.be.an('object');\r",
+											"    pm.expect(response).to.have.keys(['message']);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"test1@example.com\",\r\n    \"comment_text\": \"Это тестовый комментарий для проверки создания\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 201 (Child Comment)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function() {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has success message\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"message\");\r",
+											"    pm.expect(response.message).to.include(\"was created\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is acceptable\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});\r",
+											"\r",
+											"if (pm.response.code === 201) {\r",
+											"    const response = pm.response.json();\r",
+											"    const message = response.message;\r",
+											"    const commentId = message.match(/id=(\\d+)/)[1];\r",
+											"    \r",
+											"    pm.collectionVariables.set(\"last_created_comment_id_2\", commentId);\r",
+											"    console.log(\"Saved comment ID: \" + commentId);\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_2}}\",\r\n    \"author_email\": \"test2@example.com\",\r\n    \"comment_text\": \"Это ответ на предыдущий комментарий\",\r\n    \"parent_comment_id\": {{last_created_comment_id_1}}\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 201 (Long Comment Boundary)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function() {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has success message\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"message\");\r",
+											"    pm.expect(response.message).to.include(\"was created\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is acceptable\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});\r",
+											"\r",
+											"if (pm.response.code === 201) {\r",
+											"    const response = pm.response.json();\r",
+											"    const message = response.message;\r",
+											"    const commentId = message.match(/id=(\\d+)/)[1];\r",
+											"    \r",
+											"    pm.collectionVariables.set(\"last_created_comment_id_3\", commentId);\r",
+											"    console.log(\"Saved comment ID: \" + commentId);\r",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_2}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"test3@example.com\",\r\n    \"comment_text\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 200 (Fetch All comments)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function() {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response is JSON array\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.be.an('array');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is acceptable\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Each comment has correct structure\", function() {\r",
+											"    const comments = pm.response.json();\r",
+											"    \r",
+											"    comments.forEach(function(comment, index) {\r",
+											"        pm.expect(comment).to.have.property('id');\r",
+											"        pm.expect(comment).to.have.property('project_id');\r",
+											"        pm.expect(comment).to.have.property('author_id');\r",
+											"        pm.expect(comment).to.have.property('author_email');\r",
+											"        pm.expect(comment).to.have.property('comment_text');\r",
+											"        pm.expect(comment).to.have.property('created_at');\r",
+											"        pm.expect(comment).to.have.property('likes');\r",
+											"        pm.expect(comment).to.have.property('dislikes');\r",
+											"        pm.expect(comment).to.have.property('parent_comment_id');\r",
+											"\r",
+											"        pm.expect(comment.id).to.be.a('number');\r",
+											"        pm.expect(comment.project_id).to.be.a('string');\r",
+											"        pm.expect(comment.author_id).to.be.a('string');\r",
+											"        pm.expect(comment.author_email).to.be.a('string');\r",
+											"        pm.expect(comment.comment_text).to.be.a('string');\r",
+											"        pm.expect(comment.likes).to.be.a('number');\r",
+											"        pm.expect(comment.dislikes).to.be.a('number');\r",
+											"        \r",
+											"        if (comment.parent_comment_id !== null) {\r",
+											"            pm.expect(comment.parent_comment_id).to.be.a('number');\r",
+											"        }\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Comments are sorted by created_at descending\", function() {\r",
+											"    const comments = pm.response.json();\r",
+											"    \r",
+											"    if (comments.length > 1) {\r",
+											"        for (let i = 0; i < comments.length - 1; i++) {\r",
+											"            const currentDate = new Date(comments[i].created_at);\r",
+											"            const nextDate = new Date(comments[i + 1].created_at);\r",
+											"            pm.expect(currentDate).to.be.greaterThan(nextDate);\r",
+											"        }\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 200 (Fetch Parent Comment)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function() {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Comment ID is correct\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    pm.expect(comment.id).to.above(0);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Project ID matches expected format\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    pm.expect(comment.project_id).to.match(/^[a-f0-9]{24}$/);\r",
+											"    pm.expect(comment.author_id).to.match(/^[a-f0-9]{24}$/);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Parent comment ID is null (root comment)\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    pm.expect(comment.parent_comment_id).to.be.null;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Likes and dislikes are zero\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    pm.expect(comment.likes).to.equal(0);\r",
+											"    pm.expect(comment.dislikes).to.equal(0);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Comment is a root comment (no parent)\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    pm.expect(comment.parent_comment_id).to.be.null;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Comment text length is reasonable\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    const textLength = comment.comment_text.length;\r",
+											"    pm.expect(textLength).to.be.above(0);\r",
+											"    pm.expect(textLength).to.be.below(1000);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is fast\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comments/:comment_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments",
+										":comment_id"
+									],
+									"variable": [
+										{
+											"key": "comment_id",
+											"value": "{{last_created_comment_id_1}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments/com_id - 200 (Fetch Child Comment) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function() {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has valid comment structure\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    \r",
+											"    const requiredFields = [\r",
+											"        'id', 'project_id', 'author_id', 'author_email', \r",
+											"        'comment_text', 'created_at', 'parent_comment_id', 'likes', 'dislikes'\r",
+											"    ];\r",
+											"    \r",
+											"    requiredFields.forEach(field => {\r",
+											"        pm.expect(comment).to.have.property(field);\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Parent comment ID is a number\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    pm.expect(comment.parent_comment_id).to.be.a('number');\r",
+											"    pm.expect(comment.parent_comment_id).to.not.be.null;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Parent comment ID is positive integer\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    pm.expect(comment.parent_comment_id).to.be.at.least(1);\r",
+											"    pm.expect(comment.parent_comment_id).to.be.finite;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Comment is a child comment (has parent)\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    pm.expect(comment.parent_comment_id).to.exist;\r",
+											"    pm.expect(comment.parent_comment_id).to.not.be.null;\r",
+											"    pm.expect(comment.id).to.not.equal(comment.parent_comment_id);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Parent comment ID matches saved parent ID\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    const savedParentId = pm.collectionVariables.get(\"parent_comment_id\");\r",
+											"    \r",
+											"    if (savedParentId) {\r",
+											"        pm.expect(comment.parent_comment_id).to.equal(parseInt(savedParentId));\r",
+											"    }\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Project ID matches parent's project ID\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    const savedProjectId = pm.collectionVariables.get(\"parent_project_id\");\r",
+											"    \r",
+											"    if (savedProjectId) {\r",
+											"        pm.expect(comment.project_id).to.equal(savedProjectId);\r",
+											"    }\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Basic field validation\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(comment.id).to.be.a('number');\r",
+											"    pm.expect(comment.project_id).to.match(/^[a-f0-9]{24}$/);\r",
+											"    pm.expect(comment.author_id).to.match(/^[a-f0-9]{24}$/);\r",
+											"    pm.expect(comment.author_email).to.include('@');\r",
+											"    pm.expect(comment.comment_text.length).to.be.within(1, 1000);\r",
+											"    pm.expect(comment.likes).to.equal(0);\r",
+											"    pm.expect(comment.dislikes).to.equal(0);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Created_at is valid and recent\", function() {\r",
+											"    const comment = pm.response.json();\r",
+											"    const commentDate = new Date(comment.created_at);\r",
+											"    const now = new Date();\r",
+											"    \r",
+											"    pm.expect(commentDate).to.be.a('Date');\r",
+											"    pm.expect(commentDate.toString()).to.not.equal('Invalid Date');\r",
+											"    pm.expect(commentDate).to.be.below(now);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comments/:comment_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments",
+										":comment_id"
+									],
+									"variable": [
+										{
+											"key": "comment_id",
+											"value": "{{last_created_comment_id_2}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments/com_id - 200 (Update Text Comment)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"const jsonData = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Message key exists\", function () {\r",
+											"    pm.expect(jsonData.message).to.exist;\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Correct update message received\", function () {\r",
+											"    pm.expect(jsonData.message).to.contain(\"was updated\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"new_text\": \"string\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments/:comment_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments",
+										":comment_id"
+									],
+									"variable": [
+										{
+											"key": "comment_id",
+											"value": "{{last_created_comment_id_1}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments/ban_user/ - 200 (Ban User)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comments/ban_user/:author_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments",
+										"ban_user",
+										":author_id"
+									],
+									"variable": [
+										{
+											"key": "author_id",
+											"value": "{{author_id_1}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments/com_id - 200 (Delete Parent Comment)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comments/:comment_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments",
+										":comment_id"
+									],
+									"variable": [
+										{
+											"key": "comment_id",
+											"value": "{{last_created_comment_id_1}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments/com_id - 200 (Delete Another Parent Comment)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comments/:comment_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments",
+										":comment_id"
+									],
+									"variable": [
+										{
+											"key": "comment_id",
+											"value": "{{last_created_comment_id_3}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
@@ -4535,6 +5291,183 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "/auth/delete - 422 (No Body)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 No Content\", function () {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/delete",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"delete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/auth/delete - 404 (Unexisted Email)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404 No Content\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "email",
+											"value": "unxisted_email@admin.com",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/delete",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"delete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/auth/delete - 422 (Invalid Email)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 No Content\", function () {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "email",
+											"value": "{{$randomInt}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/delete",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"delete"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -4755,12 +5688,13 @@
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status code is 404\", function () {\r",
-													"    pm.response.to.have.status(404);\r",
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
 													"});"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
@@ -4770,7 +5704,8 @@
 													""
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -4839,10 +5774,11 @@
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status 400 for invalid ObjectId\", () => pm.response.to.have.status(400));"
+													"pm.test(\"Status 422 for invalid ObjectId\", () => pm.response.to.have.status(422));"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
@@ -4852,7 +5788,8 @@
 													""
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -4933,10 +5870,11 @@
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status 400 for invalid ObjectId\", () => pm.response.to.have.status(400));"
+													"pm.test(\"Status 422 for invalid ObjectId\", () => pm.response.to.have.status(422));"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
@@ -4946,7 +5884,8 @@
 													""
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -5035,10 +5974,11 @@
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status 400 for invalid ObjectId\", () => pm.response.to.have.status(400));"
+													"pm.test(\"Status 422 for invalid ObjectId\", () => pm.response.to.have.status(422));"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
@@ -5048,7 +5988,8 @@
 													""
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -5710,18 +6651,19 @@
 									"response": []
 								},
 								{
-									"name": "/projects/invalid_id/image - 404 (Invalid Doc Id)",
+									"name": "/projects/invalid_id/image - 422 (Invalid Doc Id)",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status code is 404\", function () {\r",
-													"    pm.response.to.have.status(404);\r",
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
 													"});"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
@@ -5731,7 +6673,8 @@
 													""
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -5869,18 +6812,19 @@
 									"response": []
 								},
 								{
-									"name": "/projects/invalid_id - 404 (Invalid Doc ID)",
+									"name": "/projects/invalid_id - 422 (Invalid Doc ID)",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status code is 404\", function () {\r",
-													"    pm.response.to.have.status(404);\r",
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
 													"});"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
@@ -5890,7 +6834,8 @@
 													""
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -6402,19 +7347,24 @@
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status code is 400\", function () {\r",
-													"    pm.response.to.have.status(400);\r",
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
 													"});"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
 											"listen": "prerequest",
 											"script": {
-												"exec": [],
-												"type": "text/javascript"
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -7473,18 +8423,19 @@
 									"response": []
 								},
 								{
-									"name": "/publications/pub_id - 404 (Unexisted Document ID)",
+									"name": "/publications/pub_id - 422 (Unexisted Document ID)",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status code is 404\", function () {\r",
-													"    pm.response.to.have.status(404);\r",
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
 													"});"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
@@ -7494,7 +8445,8 @@
 													""
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -7515,18 +8467,19 @@
 									"response": []
 								},
 								{
-									"name": "/publications/pub_id - 404 (Unexisted Document ID)",
+									"name": "/publications/pub_id - 422 (Unexisted Document ID)",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status code is 404\", function () {\r",
-													"    pm.response.to.have.status(404);\r",
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
 													"});"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
@@ -7536,7 +8489,8 @@
 													""
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -7587,18 +8541,19 @@
 									"response": []
 								},
 								{
-									"name": "/publications/pub_id - 404 (Unexisted Document ID)",
+									"name": "/publications/pub_id - 422 (Unexisted Document ID)",
 									"event": [
 										{
 											"listen": "test",
 											"script": {
 												"exec": [
-													"pm.test(\"Status code is 404\", function () {\r",
-													"    pm.response.to.have.status(404);\r",
+													"pm.test(\"Status code is 422\", function () {\r",
+													"    pm.response.to.have.status(422);\r",
 													"});"
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										},
 										{
@@ -7608,7 +8563,8 @@
 													""
 												],
 												"type": "text/javascript",
-												"packages": {}
+												"packages": {},
+												"requests": {}
 											}
 										}
 									],
@@ -7692,7 +8648,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:8000"
+			"value": ""
 		},
 		{
 			"key": "document_id",
@@ -7704,7 +8660,7 @@
 		},
 		{
 			"key": "unexisted_document_id",
-			"value": "507f1f77bcf86cd799439011"
+			"value": ""
 		},
 		{
 			"key": "skills_data",
@@ -7743,11 +8699,43 @@
 			"value": ""
 		},
 		{
-			"key": "has_refresh_cookie",
+			"key": "author_id_1",
 			"value": ""
 		},
 		{
-			"key": "user_banned",
+			"key": "author_id_2",
+			"value": ""
+		},
+		{
+			"key": "author_id_3",
+			"value": ""
+		},
+		{
+			"key": "author_id_4",
+			"value": ""
+		},
+		{
+			"key": "author_id_5",
+			"value": ""
+		},
+		{
+			"key": "project_id_1",
+			"value": ""
+		},
+		{
+			"key": "project_id_2",
+			"value": ""
+		},
+		{
+			"key": "last_created_comment_id_1",
+			"value": ""
+		},
+		{
+			"key": "last_created_comment_id_2",
+			"value": ""
+		},
+		{
+			"key": "last_created_comment_id_3",
 			"value": ""
 		}
 	]

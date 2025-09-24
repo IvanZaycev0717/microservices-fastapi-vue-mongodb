@@ -30,9 +30,9 @@ class Comment(Base):
         DateTime, nullable=False, index=True
     )
     parent_comment_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("comments.id"), nullable=True
+        Integer, ForeignKey("comments.id", ondelete="CASCADE"), nullable=True
     )
     likes: Mapped[int]
     dislikes: Mapped[int]
 
-    children = relationship("Comment")
+    children = relationship("Comment", cascade="all, delete-orphan")

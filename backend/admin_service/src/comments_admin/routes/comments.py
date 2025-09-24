@@ -7,7 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from comments_admin.crud import CommentsCRUD
 from comments_admin.dependencies import get_db_session
-from comments_admin.schemas import CommentResponse, CreateCommentForm
+from comments_admin.schemas import (
+    CommentResponse,
+    CreateCommentForm,
+    UpdateCommentRequest,
+)
 from content_admin.dependencies import get_logger_factory
 from settings import settings
 
@@ -17,10 +21,10 @@ router = APIRouter(prefix="/comments")
 from fastapi import HTTPException, status
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_comment(
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
-    comment: Annotated[CreateCommentForm, Form()],
+    comment: CreateCommentForm,
     logger: Annotated[
         logging.Logger,
         Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
@@ -56,7 +60,7 @@ async def create_comment(
         )
 
 
-@router.get("/", response_model=list[CommentResponse])
+@router.get("", response_model=list[CommentResponse])
 async def get_all_comments(
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
     logger: Annotated[
@@ -114,13 +118,7 @@ async def get_comment(
 @router.patch("/{comment_id}", response_model=dict)
 async def update_comment(
     comment_id: Annotated[int, Path(ge=1)],
-    new_text: Annotated[
-        str,
-        Form(
-            min_length=settings.MIN_COMMENT_LENGTH,
-            description="New comment text",
-        ),
-    ],
+    update_data: UpdateCommentRequest,
     db_session: Annotated[AsyncSession, Depends(get_db_session)],
     logger: Annotated[
         logging.Logger,
@@ -129,7 +127,9 @@ async def update_comment(
 ):
     try:
         crud = CommentsCRUD(db_session)
-        updated_id = await crud.update_comment(comment_id, new_text)
+        updated_id = await crud.update_comment(
+            comment_id, update_data.new_text
+        )
         logger.info(f"Comment with id={updated_id} updated successfully")
         return {"message": f"Comment with id={updated_id} was updated"}
     except ValueError as e:
@@ -170,6 +170,42 @@ async def delete_comment(
         logger.error(
             f"Unexpected error deleting comment {comment_id}: {str(e)}"
         )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
+
+
+@router.patch("/ban_user/{author_id}", status_code=status.HTTP_200_OK)
+async def ban_user_comments(
+    author_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
+    ],
+):
+    try:
+        crud = CommentsCRUD(db_session)
+        updated_count = await crud.set_default_comments_of_banned_user(
+            author_id
+        )
+
+        logger.info(
+            f"Banned user {author_id}: updated {updated_count} comments"
+        )
+        return {
+            "message": f"User {author_id} banned successfully",
+            "updated_comments": updated_count,
+        }
+
+    except ValueError as e:
+        logger.error(f"Error banning user {author_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error banning user {author_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",

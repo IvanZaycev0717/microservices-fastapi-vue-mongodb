@@ -49,3 +49,10 @@ class CommentResponse(BaseModel):
     parent_comment_id: int | None
     likes: int
     dislikes: int
+
+
+class UpdateCommentRequest(BaseModel):
+    new_text: str = Field(
+        min_length=settings.MIN_COMMENT_LENGTH,
+        max_length=settings.MAX_COMMENT_LENGTH,
+    )
