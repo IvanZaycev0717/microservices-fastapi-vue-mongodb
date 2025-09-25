@@ -214,6 +214,11 @@ class Settings(BaseSettings):
     SMTP_SERVER: str = "smtp.yandex.ru"
     SMTP_PORT: int = 465
 
+    MIN_EMAIL_SUBJECT_LENGHT: int = 1
+    MAX_EMAIL_SUBJECT_LENGHT: int = 63
+    MIN_EMAIL_MESSAGE_LENGTH: int = 1
+    MAX_EMAIL_MESSAGE_LENGHT: int = 255
+
     def create_directories(self):
         """Create necessary directories on startup"""
         self.ABOUT_IMAGES_PATH.mkdir(parents=True, exist_ok=True)

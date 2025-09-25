@@ -2,7 +2,14 @@ import logging
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Path,
+    status,
+)
 from pydantic import EmailStr
 from pymongo.asynchronous.database import AsyncDatabase
 
@@ -20,7 +27,7 @@ from settings import settings
 router = APIRouter(prefix="/notifications")
 
 
-@router.get("/", response_model=list[NotificationResponse])
+@router.get("", response_model=list[NotificationResponse])
 async def get_all_notifications(
     db: Annotated[AsyncDatabase, Depends(get_notification_db)],
     logger: Annotated[
@@ -82,10 +89,13 @@ async def get_notifications_by_email(
         )
 
 
-@router.post("", response_model=NotificationResponse)
+@router.post(
+    "",
+    response_model=NotificationResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_notification(
     notification: NotificationCreate,
-    background_tasks: BackgroundTasks,
     logger: Annotated[
         logging.Logger,
         Depends(get_logger_factory(settings.NOTIFICATION_ADMIN_NAME)),
@@ -97,16 +107,6 @@ async def create_notification(
     try:
         notification_id = await crud.create(notification)
         logger.info(f"Notification created successfully: {notification_id}")
-
-        if settings.IS_SEND_EMAIL_ENABLED:
-            background_tasks.add_task(
-                send_email_task,
-                notification_id,
-                notification.to_email,
-                notification.subject,
-                notification.message,
-                db,
-            )
 
         return NotificationResponse(
             id=notification_id,
@@ -132,7 +132,9 @@ async def create_notification(
 
 @router.delete("/{notification_id}")
 async def delete_notification(
-    notification_id: str,
+    notification_id: Annotated[
+        str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)
+    ],
     db: Annotated[AsyncDatabase, Depends(get_notification_db)],
     logger: Annotated[
         logging.Logger,
@@ -161,6 +163,7 @@ async def delete_notification(
         )
 
 
+# WEBHOOKS USING ONLY
 @router.post("/ban")
 async def ban_notification(
     ban_data: BanNotification,

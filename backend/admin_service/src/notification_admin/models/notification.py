@@ -1,13 +1,27 @@
+import html
 from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
+from settings import settings
+
 
 class NotificationCreate(BaseModel):
     to_email: EmailStr  # получатель письма
-    subject: str = Field(min_length=1, max_length=200)  # тема письма
-    message: str = Field(min_length=1)  # сообщение письма
+    subject: str = Field(
+        min_length=settings.MIN_EMAIL_SUBJECT_LENGHT,
+        max_length=settings.MAX_EMAIL_SUBJECT_LENGHT,
+    )  # тема письма
+    message: str = Field(
+        min_length=settings.MIN_EMAIL_MESSAGE_LENGTH,
+        max_length=settings.MAX_EMAIL_MESSAGE_LENGHT,
+    )  # сообщение письма
+
+    @field_validator("subject", "message")
+    @classmethod
+    def escape_html(cls, v: str) -> str:
+        return html.escape(v)
 
 
 class NotificationResponse(BaseModel):

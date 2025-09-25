@@ -2,6 +2,7 @@ from datetime import datetime
 
 from bson import ObjectId
 from bson.errors import BSONError
+from pymongo import DESCENDING
 from pymongo.asynchronous.database import AsyncDatabase
 from pymongo.errors import DuplicateKeyError
 
@@ -35,7 +36,7 @@ class NotificationCRUD:
     # READ
     async def get_all(self) -> list[dict]:
         try:
-            cursor = self.collection.find()
+            cursor = self.collection.find().sort("created_at", DESCENDING)
             notifications = await cursor.to_list(length=100)
             return notifications
         except Exception as e:

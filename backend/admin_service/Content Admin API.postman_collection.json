@@ -4260,6 +4260,312 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "Notifications Admin",
+					"item": [
+						{
+							"name": "/notifications - 201",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Тесты для создания уведомления (без сохранения в переменные)\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.expect(pm.response.code).to.be.eq(201);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct structure\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property('_id');\r",
+											"    pm.expect(jsonData).to.have.property('to_email');\r",
+											"    pm.expect(jsonData).to.have.property('subject');\r",
+											"    pm.expect(jsonData).to.have.property('message');\r",
+											"    pm.expect(jsonData).to.have.property('status');\r",
+											"    pm.expect(jsonData).to.have.property('created_at');\r",
+											"    pm.expect(jsonData).to.have.property('sent_at');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Email is valid format\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.to_email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Returned data matches sent data\", function () {\r",
+											"    const requestData = JSON.parse(pm.request.body.raw);\r",
+											"    const responseData = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(responseData.to_email).to.equal(requestData.to_email);\r",
+											"    pm.expect(responseData.subject).to.equal(requestData.subject);\r",
+											"    pm.expect(responseData.message).to.equal(requestData.message);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Status is pending after creation\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.status).to.equal('pending');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Created_at is present\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.created_at).to.be.a('string');\r",
+											"    pm.expect(new Date(jsonData.created_at).toString()).to.not.equal('Invalid Date');\r",
+											"});\r",
+											"\r",
+											"const responseData = pm.response.json();\r",
+											"pm.collectionVariables.set(\"notification_id\", responseData._id);"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to_email\": \"{{email}}\",\r\n  \"subject\": \"{{$randomJobTitle}}\",\r\n  \"message\": \"{{$randomLoremSentence}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 200",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Тесты для успешного получения списка уведомлений (200)\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response is an array\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.be.an('array');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Each notification has required fields\", function () {\r",
+											"    const notifications = pm.response.json();\r",
+											"    \r",
+											"    notifications.forEach((notification, index) => {\r",
+											"        pm.expect(notification).to.have.property('_id');\r",
+											"        pm.expect(notification._id).to.be.a('string');\r",
+											"        pm.expect(notification).to.have.property('to_email');\r",
+											"        pm.expect(notification.to_email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);\r",
+											"        pm.expect(notification).to.have.property('subject');\r",
+											"        pm.expect(notification).to.have.property('message');\r",
+											"        pm.expect(notification).to.have.property('status');\r",
+											"        pm.expect(notification.status).to.be.oneOf(['pending', 'sent', 'failed']);\r",
+											"        pm.expect(notification).to.have.property('created_at');\r",
+											"        pm.expect(notification).to.have.property('sent_at');\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Dates are in ISO format\", function () {\r",
+											"    const notifications = pm.response.json();\r",
+											"    \r",
+											"    notifications.forEach((notification) => {\r",
+											"        pm.expect(notification.created_at).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}/);\r",
+											"        if (notification.sent_at) {\r",
+											"            pm.expect(notification.sent_at).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}/);\r",
+											"        }\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Notifications are sorted by created_at DESC\", function () {\r",
+											"    const notifications = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(notifications.length).to.be.greaterThan(0);\r",
+											"    \r",
+											"    for (let i = 0; i < notifications.length - 1; i++) {\r",
+											"        const currentDate = new Date(notifications[i].created_at);\r",
+											"        const nextDate = new Date(notifications[i + 1].created_at);\r",
+											"        \r",
+											"        pm.expect(currentDate.getTime()).to.be.greaterThanOrEqual(nextDate.getTime(),\r",
+											"            `Notification ${i} should be newer than ${i + 1}`\r",
+											"        );\r",
+											"    }\r",
+											"});\r",
+											"\r",
+											"pm.test(\"All created_at dates are valid\", function () {\r",
+											"    const notifications = pm.response.json();\r",
+											"    \r",
+											"    notifications.forEach((notification, index) => {\r",
+											"        const date = new Date(notification.created_at);\r",
+											"        pm.expect(date.toString()).to.not.equal('Invalid Date', \r",
+											"            `Invalid date at index ${index}: ${notification.created_at}`\r",
+											"        );\r",
+											"    });\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications/by-email/email - 200",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response is an array\", function () {\r",
+											"    pm.expect(pm.response.json()).to.be.an('array');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/notifications/by-email/:email",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications",
+										"by-email",
+										":email"
+									],
+									"variable": [
+										{
+											"key": "email",
+											"value": "{{email}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications/delete - 200",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/notifications/:notification_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications",
+										":notification_id"
+									],
+									"variable": [
+										{
+											"key": "notification_id",
+											"value": "{{notification_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
@@ -9787,6 +10093,1905 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "/comments - 422 (Invalid Type Comment ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{$randomEmail}}\",\r\n    \"comment_text\": \"{{$randomLoremText}} \",\r\n    \"parent_comment_id\": 12.456\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Invalid Type Comment ID) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{$randomEmail}}\",\r\n    \"comment_text\": \"{{$randomLoremText}} \",\r\n    \"parent_comment_id\": 12.456\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (No Comment Text)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{$randomEmail}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (No Email)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"comment_text\": \"{{$randomLoremText}} \"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (No Project Id)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{$randomEmail}}\",\r\n    \"comment_text\": \"{{$randomLoremText}} \"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (No Project Id) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{$randomEmail}}\",\r\n    \"comment_text\": \"{{$randomLoremText}} \"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/commentsUnxisted - 404 (Unexisted Endpoint)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/commentsall",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"commentsall"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments/comm_id - 404 (Invalid Comment ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comment/:comment_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comment",
+										":comment_id"
+									],
+									"variable": [
+										{
+											"key": "comment_id",
+											"value": "{{$randomLoremLines}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments/comm_id - 404 (Invalid Comment ID) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comment/:comment_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comment",
+										":comment_id"
+									],
+									"variable": [
+										{
+											"key": "comment_id",
+											"value": "1.23"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments/comm_id - 404 (Invalid Comment ID) Copy 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comment/:comment_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comment",
+										":comment_id"
+									],
+									"variable": [
+										{
+											"key": "comment_id",
+											"value": "1.23"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments/comm_id - 404 (Invalid Comment ID) Copy 3",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comment/:comment_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comment",
+										":comment_id"
+									],
+									"variable": [
+										{
+											"key": "comment_id",
+											"value": "0"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments/comm_id - 404 (Invalid Comment ID) Copy 4",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comment/ban_user/:author_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comment",
+										"ban_user",
+										":author_id"
+									],
+									"variable": [
+										{
+											"key": "author_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Notifications Admin",
+					"item": [
+						{
+							"name": "/notifications - 422 (Empty email)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Empty email returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error has correct validation structure\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData).to.have.property('detail');\r",
+											"    pm.expect(responseData.detail).to.be.an('array');\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'value_error');\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('loc').that.includes('body', 'to_email');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates missing @-sign\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    const errorDetail = responseData.detail[0];\r",
+											"    pm.expect(errorDetail.msg).to.include('@-sign');\r",
+											"    pm.expect(errorDetail.input).to.equal('');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context contains reason\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].ctx).to.have.property('reason');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to_email\": \"\",\r\n  \"subject\": \"{{$randomJobTitle}}\",\r\n  \"message\": \"{{$randomLoremSentence}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 422 (Invalid Email)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Empty email returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error has correct validation structure\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData).to.have.property('detail');\r",
+											"    pm.expect(responseData.detail).to.be.an('array');\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'value_error');\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('loc').that.includes('body', 'to_email');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates missing @-sign\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    const errorDetail = responseData.detail[0];\r",
+											"    pm.expect(errorDetail.msg).to.include('@-sign');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context contains reason\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].ctx).to.have.property('reason');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to_email\": \"test@ex ample.com\",\r\n  \"subject\": \"{{$randomJobTitle}}\",\r\n  \"message\": \"{{$randomLoremSentence}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 422 (Empty Subject)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Empty subject returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is string_too_short\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'string_too_short');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to subject field\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['body', 'subject']);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates minimum length requirement\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].msg).to.include('at least 1 character');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context shows min_length constraint\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].ctx).to.have.property('min_length', 1);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Input shows empty string that failed validation\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input).to.equal('');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to_email\": \"{{email}}\",\r\n  \"subject\": \"\",\r\n  \"message\": \"{{$randomLoremSentence}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 422 (Too Long Subject)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Тест для слишком длинной темы письма\r",
+											"pm.test(\"Long subject returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is string_too_long\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'string_too_long');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to subject field\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['body', 'subject']);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates maximum length exceeded\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].msg).to.include('at most 63 characters');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context shows max_length constraint\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].ctx).to.have.property('max_length', 63);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Input shows the long string that failed validation\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input).to.have.lengthOf(64); // 64 символа\r",
+											"    pm.expect(responseData.detail[0].input).to.match(/^A+$/); // Проверяем что это AAAAA...\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to_email\": \"{{email}}\",\r\n  \"subject\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\",\r\n  \"message\": \"{{$randomLoremSentence}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 422 (Empty Message)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Empty message returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is string_too_short\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'string_too_short');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to message field\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['body', 'message']);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates minimum length requirement\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].msg).to.include('at least 1 character');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context shows min_length constraint\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].ctx).to.have.property('min_length', 1);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Input shows empty string that failed validation\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input).to.equal('');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to_email\": \"{{email}}\",\r\n  \"subject\": \"AAAAAAAAAAAAAA\",\r\n  \"message\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 422 (Too Large Message)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Long message returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is string_too_long\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'string_too_long');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to message field\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['body', 'message']);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates maximum length exceeded\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].msg).to.include('at most 255 characters');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context shows max_length constraint\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].ctx).to.have.property('max_length', 255);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Input shows the long string that failed validation\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input).to.have.lengthOf(256); // 256 символов\r",
+											"    pm.expect(responseData.detail[0].input).to.match(/^A+$/); // Проверяем что это AAAAA...\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Input length exceeds maximum limit\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input.length).to.be.greaterThan(255);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to_email\": \"{{email}}\",\r\n  \"subject\": \"AAAAAAAAAAAAAA\",\r\n  \"message\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 422 (No Email)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Missing to_email returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is missing\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'missing');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to to_email field\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['body', 'to_email']);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates field is required\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].msg).to.equal('Field required');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Input shows received data without to_email\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input).to.have.property('subject');\r",
+											"    pm.expect(responseData.detail[0].input).to.have.property('message');\r",
+											"    pm.expect(responseData.detail[0].input).to.not.have.property('to_email');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Received subject and message are present in input\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input.subject).to.equal('AAAAAAAAAAAAAA');\r",
+											"    pm.expect(responseData.detail[0].input.message).to.equal('AAAAAAAAAAAAAAAAAAAAAAAAAA');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"subject\": \"AAAAAAAAAAAAAA\",\r\n  \"message\": \"AAAAAAAAAAAAAAAAAAAAAAAAAA\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 422 (No Subject)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Missing subject returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is missing\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'missing');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to subject field\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['body', 'subject']);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates field is required\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].msg).to.equal('Field required');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Input shows received data without subject\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input).to.have.property('to_email');\r",
+											"    pm.expect(responseData.detail[0].input).to.have.property('message');\r",
+											"    pm.expect(responseData.detail[0].input).to.not.have.property('subject');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Received to_email and message are present in input\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input.to_email).to.equal('test@example.com');\r",
+											"    pm.expect(responseData.detail[0].input.message).to.equal('AAAAAAAAAAAAAAAAAAAAAAAAAA');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Email in input is valid format\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input.to_email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to_email\": \"{{email}}\",\r\n  \"message\": \"AAAAAAAAAAAAAAAAAAAAAAAAAA\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 422 (No Message)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Missing message returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is missing\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'missing');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to message field\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['body', 'message']);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates field is required\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].msg).to.equal('Field required');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Input shows received data without message\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input).to.have.property('to_email');\r",
+											"    pm.expect(responseData.detail[0].input).to.have.property('subject');\r",
+											"    pm.expect(responseData.detail[0].input).to.not.have.property('message');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Received to_email and subject are present in input\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input.to_email).to.equal('test@example.com');\r",
+											"    pm.expect(responseData.detail[0].input.subject).to.equal('AAAAAAAAAAAAAA');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Email in input is valid format\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input.to_email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Subject length is within limits\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    const subjectLength = responseData.detail[0].input.subject.length;\r",
+											"    pm.expect(subjectLength).to.be.greaterThan(0);\r",
+											"    pm.expect(subjectLength).to.be.lessThanOrEqual(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"to_email\": \"{{email}}\",\r\n  \"subject\": \"AAAAAAAAAAAAAA\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 422 (IS NOT JSON)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Тест для form-data вместо JSON\r",
+											"pm.test(\"Form-data instead of JSON returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is model_attributes_type\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'model_attributes_type');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to body level\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['body']);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates dictionary/object expected\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].msg).to.include('dictionary or object');\r",
+											"});\r",
+											"\r",
+											"\r",
+											"pm.test(\"Form-data boundary is present in input\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input).to.match(/^-+[0-9]+/); // Проверяем boundary\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "email",
+											"value": "{{email}}",
+											"type": "text"
+										},
+										{
+											"key": "subject",
+											"value": "{{$randomAbbreviation}}",
+											"type": "text"
+										},
+										{
+											"key": "message",
+											"value": "{{$randomAbbreviation}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 422 (EMPTY JSON)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Тест для пустого JSON объекта\r",
+											"pm.test(\"Empty JSON object returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error response contains multiple validation errors\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail).to.be.an('array');\r",
+											"    pm.expect(responseData.detail).to.have.lengthOf(3);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"First error is for missing to_email field\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'missing');\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['body', 'to_email']);\r",
+											"    pm.expect(responseData.detail[0].msg).to.equal('Field required');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Second error is for missing subject field\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[1]).to.have.property('type', 'missing');\r",
+											"    pm.expect(responseData.detail[1].loc).to.eql(['body', 'subject']);\r",
+											"    pm.expect(responseData.detail[1].msg).to.equal('Field required');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Third error is for missing message field\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[2]).to.have.property('type', 'missing');\r",
+											"    pm.expect(responseData.detail[2].loc).to.eql(['body', 'message']);\r",
+											"    pm.expect(responseData.detail[2].msg).to.equal('Field required');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"All errors point to empty input object\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    responseData.detail.forEach((error, index) => {\r",
+											"        pm.expect(error.input).to.eql({});\r",
+											"    });\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error locations cover all required fields\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    const locations = responseData.detail.map(error => error.loc[1]);\r",
+											"    pm.expect(locations).to.include('to_email');\r",
+											"    pm.expect(locations).to.include('subject');\r",
+											"    pm.expect(locations).to.include('message');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/notifications",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications - 404 (Unexisted Url)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Тест для 404 Not Found\r",
+											"pm.test(\"Not Found returns 404 status code\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(404);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message is 'Not Found'\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData).to.have.property('detail', 'Not Found');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has simple error structure\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData).to.have.property('detail');\r",
+											"    pm.expect(Object.keys(responseData)).to.have.lengthOf(1); // Только detail\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Content-Type is application/json\", function () {\r",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is acceptable\", function () {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/notificationssdsd",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notificationssdsd"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications/by-email/invalid_email- 422",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Invalid email in path returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is value_error\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'value_error');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to path email parameter\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['path', 'email']);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates missing @-sign\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].msg).to.include('@-sign');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Input shows invalid email that failed validation\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input).to.equal('invalid_email');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context contains reason\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].ctx).to.have.property('reason');\r",
+											"    pm.expect(responseData.detail[0].ctx.reason).to.include('@-sign');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"URL contains the invalid email parameter\", function () {\r",
+											"    const url = pm.request.url.toString();\r",
+											"    pm.expect(url).to.include('invalid_email');\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/notifications/by-email/:email",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications",
+										"by-email",
+										":email"
+									],
+									"variable": [
+										{
+											"key": "email",
+											"value": "invalid_email"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications/by-email/uneisted_email- 404",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Тест для 404 - уведомления не найдены\r",
+											"pm.test(\"No notifications found returns 404 status code\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(404);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message is 'No notifications found'\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData).to.have.property('detail', 'No notifications found');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has simple error structure\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData).to.have.property('detail');\r",
+											"    pm.expect(Object.keys(responseData)).to.have.lengthOf(1);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Content-Type is application/json\", function () {\r",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message is user-friendly\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail).to.be.a('string');\r",
+											"    pm.expect(responseData.detail).to.not.be.empty;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is reasonable\", function () {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(500); // Быстрый ответ\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/notifications/by-email/:email",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications",
+										"by-email",
+										":email"
+									],
+									"variable": [
+										{
+											"key": "email",
+											"value": "{{$randomEmail}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications/delete - 422 (Invalid Mongo ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Invalid notification_id returns 422 error\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is string_pattern_mismatch\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0]).to.have.property('type', 'string_pattern_mismatch');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to path notification_id\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].loc).to.eql(['path', 'notification_id']);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates pattern mismatch\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].msg).to.include('match pattern');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Input shows invalid ID that failed validation\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].input).to.equal('invalid_id');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context shows expected pattern\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail[0].ctx).to.have.property('pattern', '^[0-9a-fA-F]{24}$');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"URL contains the invalid notification_id\", function () {\r",
+											"    const url = pm.request.url.toString();\r",
+											"    pm.expect(url).to.include('invalid_id');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Invalid ID does not match ObjectId pattern\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    const invalidId = responseData.detail[0].input;\r",
+											"    pm.expect(invalidId).to.not.match(/^[0-9a-fA-F]{24}$/);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/notifications/:notification_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications",
+										":notification_id"
+									],
+									"variable": [
+										{
+											"key": "notification_id",
+											"value": "invalid_id"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications/delete - 404 (IUnexisted Mongo ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Notification not found returns 404 status code\", function () {\r",
+											"    pm.expect(pm.response.code).to.equal(404);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message is 'Notification not found'\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData).to.have.property('detail', 'Notification not found');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has simple error structure\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData).to.have.property('detail');\r",
+											"    pm.expect(Object.keys(responseData)).to.have.lengthOf(1);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Content-Type is application/json\", function () {\r",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message is clear and actionable\", function () {\r",
+											"    const responseData = pm.response.json();\r",
+											"    pm.expect(responseData.detail).to.be.a('string');\r",
+											"    pm.expect(responseData.detail).to.include('Notification');\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is fast\", function () {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(300); // Очень быстрый ответ\r",
+											"});\r",
+											"\r",
+											"pm.test(\"URL contains the non-existent notification ID\", function () {\r",
+											"    const url = pm.request.url.toString();\r",
+											"    pm.expect(url).to.include('/notifications/');\r",
+											"    // Проверяем что в URL есть какой-то ID (даже если невалидный)\r",
+											"    const pathParts = url.split('/');\r",
+											"    const notificationId = pathParts[pathParts.length - 1];\r",
+											"    pm.expect(notificationId).to.not.be.empty;\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/notifications/:notification_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"notifications",
+										":notification_id"
+									],
+									"variable": [
+										{
+											"key": "notification_id",
+											"value": "{{unexisted_document_id}}"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
@@ -9921,6 +12126,10 @@
 		},
 		{
 			"key": "xss_comment_id",
+			"value": ""
+		},
+		{
+			"key": "notification_id",
 			"value": ""
 		}
 	]
