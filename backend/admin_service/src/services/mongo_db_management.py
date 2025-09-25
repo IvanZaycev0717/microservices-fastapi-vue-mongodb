@@ -145,6 +145,14 @@ class MongoDatabaseManager:
             logger.exception(f"Unexpected error creating database: {e}")
             return False
 
+    async def get_database_list(self) -> list:
+        """Возвращает список всех баз данных"""
+        try:
+            return await self.client.list_database_names()
+        except Exception as e:
+            logger.error(f"Error getting database list: {e}")
+            return []
+
 
 class MongoCollectionsManager:
     """

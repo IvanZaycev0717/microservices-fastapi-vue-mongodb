@@ -41,7 +41,7 @@ class CreateCommentForm(BaseModel):
     def empty_str_to_none(cls, v):
         return None if v == "" else v
 
-    @field_validator('comment_text')
+    @field_validator("comment_text")
     @classmethod
     def escape_html(cls, v: str) -> str:
         return escape(v)
