@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import (
     APIRouter,
+    BackgroundTasks,
     Cookie,
     Depends,
     Form,
@@ -33,6 +34,11 @@ from auth_admin.models.auth import (
 from content_admin.dependencies import get_logger_factory
 from services.password_processor import get_password_hash
 from services.token_processor import create_jwt_token, verify_jwt_token
+from services.webhooks import (
+    send_ban_comments_webhook,
+    send_ban_notification_webhook,
+    send_delete_notification_webhook,
+)
 from settings import settings
 
 router = APIRouter(prefix="/auth")
@@ -313,6 +319,7 @@ async def read_users_me(
 
 @router.patch("/update/{email}", response_model=dict)
 async def update_user(
+    background_tasks: BackgroundTasks,
     logger: Annotated[
         logging.Logger,
         Depends(get_logger_factory(settings.AUTH_ADMIN_NAME)),
@@ -342,6 +349,12 @@ async def update_user(
         update_dict = {}
         if update_data.is_banned is not None:
             update_dict["is_banned"] = update_data.is_banned
+
+            if update_data.is_banned is True:
+                background_tasks.add_task(send_ban_notification_webhook, email)
+
+                background_tasks.add_task(send_ban_comments_webhook, user.id)
+
         if update_data.roles is not None:
             update_dict["roles"] = [role.value for role in update_data.roles]
 
@@ -373,6 +386,7 @@ async def update_user(
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user_by_email(
+    background_tasks: BackgroundTasks,
     logger: Annotated[
         logging.Logger, Depends(get_logger_factory(settings.AUTH_ADMIN_NAME))
     ],
@@ -403,6 +417,8 @@ async def delete_user_by_email(
             raise HTTPException(
                 status_code=500, detail="Failed to delete user"
             )
+
+        background_tasks.add_task(send_delete_notification_webhook, email)
 
         logger.info(f"User and tokens deleted successfully: {email}")
 

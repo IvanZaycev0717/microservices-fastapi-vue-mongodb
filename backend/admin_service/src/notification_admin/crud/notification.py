@@ -33,6 +33,17 @@ class NotificationCRUD:
             raise ValueError(f"Invalid data format: {e}")
 
     # READ
+    async def get_all(self) -> list[dict]:
+        try:
+            cursor = self.collection.find()
+            notifications = await cursor.to_list(length=100)
+            return notifications
+        except Exception as e:
+            raise
+
+    async def get_by_email(self, email: str) -> list[dict]:
+        cursor = self.collection.find({"to_email": email})
+        return await cursor.to_list(length=100)
 
     # UPDATE
     async def update_status(self, notification_id: str, status: str) -> bool:
@@ -47,3 +58,9 @@ class NotificationCRUD:
             return False
 
     # DELETE
+    async def delete(self, notification_id: str) -> bool:
+        """Удаляет уведомление по ID"""
+        result = await self.collection.delete_one(
+            {"_id": ObjectId(notification_id)}
+        )
+        return result.deleted_count > 0

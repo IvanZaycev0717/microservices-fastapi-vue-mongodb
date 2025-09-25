@@ -1,6 +1,5 @@
 from typing import Literal, Optional
 
-from bson import ObjectId
 from fastapi import Form
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -57,13 +56,9 @@ class AboutFullResponse(BaseModel):
     @field_validator("id", mode="before")
     @classmethod
     def convert_objectid_to_str(cls, v):
-        if isinstance(v, ObjectId):
-            return str(v)
-        return v
+        return str(v)
 
-    model_config = ConfigDict(
-        populate_by_name=True, json_encoders={ObjectId: str}
-    )
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class AboutTranslatedResponse(BaseModel):
@@ -92,13 +87,9 @@ class AboutTranslatedResponse(BaseModel):
     @field_validator("id", mode="before")
     @classmethod
     def convert_objectid_to_str(cls, v):
-        if isinstance(v, ObjectId):
-            return str(v)
-        return v
+        return str(v)
 
-    model_config = ConfigDict(
-        populate_by_name=True, json_encoders={ObjectId: str}
-    )
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class CreateAboutRequest(BaseModel):

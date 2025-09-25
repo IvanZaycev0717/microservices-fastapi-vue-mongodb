@@ -1,6 +1,5 @@
 from typing import List
 
-from bson import ObjectId
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
@@ -72,10 +71,6 @@ class TechResponse(BaseModel):
     @field_validator("id", mode="before")
     @classmethod
     def convert_objectid_to_str(cls, v):
-        if isinstance(v, ObjectId):
-            return str(v)
-        return v
+        return str(v)
 
-    model_config = ConfigDict(
-        populate_by_name=True, json_encoders={ObjectId: str}
-    )
+    model_config = ConfigDict(populate_by_name=True)

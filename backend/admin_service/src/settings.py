@@ -8,6 +8,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # From .env file
+    BASE_HOST: str
+    BASE_PORT: int
+
     SECRET_KEY: SecretStr
     ALGORITHM: str
     MIN_PASSWORD_LENGTH: int = 5
@@ -204,6 +207,7 @@ class Settings(BaseSettings):
     )
 
     # Email Settings
+    IS_SEND_EMAIL_ENABLED: bool = True
     SMTP_USERNAME: SecretStr
     SMTP_PASSWORD: SecretStr
     SMTP_FROM: SecretStr

@@ -342,4 +342,4 @@ if __name__ == "__main__":
     import uvicorn
 
     logger.info("Starting Uvicorn server...")
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host=settings.BASE_HOST, port=settings.BASE_PORT)
