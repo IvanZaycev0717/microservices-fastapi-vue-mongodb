@@ -116,6 +116,9 @@ class Settings(BaseSettings):
     # Comments Service Name
     COMMENTS_ADMIN_NAME: str = "Comments Service"
 
+    # Notifications Service Name
+    NOTIFICATION_ADMIN_NAME: str = "Notifications Service"
+
     # Comments Service Settings
     COMMENTS_PROJECT_ID_LENGTH: int = 24
     COMMENTS_AUTHOR_ID_LENGTH: int = 24
@@ -199,6 +202,13 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file="../.env", env_file_encoding="utf-8", extra="ignore"
     )
+
+    # Email Settings
+    SMTP_USERNAME: SecretStr
+    SMTP_PASSWORD: SecretStr
+    SMTP_FROM: SecretStr
+    SMTP_SERVER: str = "smtp.yandex.ru"
+    SMTP_PORT: int = 465
 
     def create_directories(self):
         """Create necessary directories on startup"""

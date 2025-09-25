@@ -19,6 +19,7 @@ from content_admin.routes import (
     publications,
     tech,
 )
+from notification_admin.routes import notification
 from services.data_loader import DataLoader
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
@@ -258,6 +259,10 @@ app.include_router(
 app.include_router(auth.router, tags=[settings.AUTH_ADMIN_NAME])
 
 app.include_router(comments.router, tags=[settings.COMMENTS_ADMIN_NAME])
+
+app.include_router(
+    notification.router, tags=[settings.NOTIFICATION_ADMIN_NAME]
+)
 
 app.add_middleware(
     CORSMiddleware,
