@@ -4586,7 +4586,7 @@
 										},
 										{
 											"key": "email",
-											"value": "verylongemailaddressdesignedtoexceedmaximumlengthlimitsfortestingvalidationanderrorhandlingmechanismsinuserregistrationendpointsthisemailisintentionallymuchlongerthanwhatstandardemailclientswouldaccepttoprovidesystemresiliencetesting@testingdomainforboundaryconditionsandinputvalidation.com",
+											"value": "{{longEmail}}",
 											"type": "text"
 										}
 									]
@@ -8617,6 +8617,1178 @@
 							]
 						}
 					]
+				},
+				{
+					"name": "Comments Admin",
+					"item": [
+						{
+							"name": "/comments - 422 (Invalid Project Id)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error structure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"detail\");\r",
+											"    pm.expect(response.detail).to.be.an(\"array\");\r",
+											"    pm.expect(response.detail.length).to.be.greaterThan(0);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is string_pattern_mismatch\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"type\", \"string_pattern_mismatch\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to project_id field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"loc\");\r",
+											"    pm.expect(firstError.loc).to.be.an(\"array\");\r",
+											"    pm.expect(firstError.loc).to.include(\"body\", \"project_id\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates pattern mismatch\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"msg\");\r",
+											"    pm.expect(firstError.msg).to.include(\"String should match pattern\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context contains the expected pattern\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"ctx\");\r",
+											"    pm.expect(firstError.ctx).to.have.property(\"pattern\", \"^[0-9a-fA-F]{24}$\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is acceptable for validation error\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+											"});\r",
+											"\r",
+											"// Проверка что ответ не содержит ID созданного комментария\r",
+											"pm.test(\"Response does not contain success message\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.not.have.property(\"message\");\r",
+											"    pm.expect(response).to.not.have.property(\"id\");\r",
+											"});\r",
+											"\r",
+											"// Логирование ошибки для отладки\r",
+											"console.log(\"Validation error details:\", JSON.stringify(pm.response.json(), null, 2));"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{$randomAbbreviation}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"test1@example.com\",\r\n    \"comment_text\": \"Это тестовый комментарий для проверки создания\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Empty Project Id)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error structure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"detail\");\r",
+											"    pm.expect(response.detail).to.be.an(\"array\");\r",
+											"    pm.expect(response.detail.length).to.be.greaterThan(0);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is string_pattern_mismatch\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"type\", \"string_pattern_mismatch\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to project_id field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"loc\");\r",
+											"    pm.expect(firstError.loc).to.be.an(\"array\");\r",
+											"    pm.expect(firstError.loc).to.include(\"body\", \"project_id\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates pattern mismatch\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"msg\");\r",
+											"    pm.expect(firstError.msg).to.include(\"String should match pattern\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context contains the expected pattern\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"ctx\");\r",
+											"    pm.expect(firstError.ctx).to.have.property(\"pattern\", \"^[0-9a-fA-F]{24}$\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is acceptable for validation error\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+											"});\r",
+											"\r",
+											"// Проверка что ответ не содержит ID созданного комментария\r",
+											"pm.test(\"Response does not contain success message\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.not.have.property(\"message\");\r",
+											"    pm.expect(response).to.not.have.property(\"id\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"test1@example.com\",\r\n    \"comment_text\": \"Это тестовый комментарий для проверки создания\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Invalid Author Id) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error structure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"detail\");\r",
+											"    pm.expect(response.detail).to.be.an(\"array\");\r",
+											"    pm.expect(response.detail.length).to.be.greaterThan(0);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is string_pattern_mismatch\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"type\", \"string_pattern_mismatch\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to author_id field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"loc\");\r",
+											"    pm.expect(firstError.loc).to.be.an(\"array\");\r",
+											"    pm.expect(firstError.loc).to.include(\"body\", \"author_id\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates pattern mismatch\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"msg\");\r",
+											"    pm.expect(firstError.msg).to.include(\"String should match pattern\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context contains the expected pattern\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"ctx\");\r",
+											"    pm.expect(firstError.ctx).to.have.property(\"pattern\", \"^[0-9a-fA-F]{24}$\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Invalid author_id does not match MongoDB ID pattern\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    const mongoIdPattern = /^[0-9a-fA-F]{24}$/;\r",
+											"    pm.expect(mongoIdPattern.test(firstError.input)).to.be.false;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is fast for validation error\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No successful creation message in response\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.not.have.property(\"message\");\r",
+											"    pm.expect(response).to.not.have.property(\"id\");\r",
+											"});\r",
+											"\r",
+											"// Проверка что ошибка именно в author_id, а не в других полях\r",
+											"pm.test(\"Error is specifically for author_id field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const authorIdError = response.detail.find(error => \r",
+											"        error.loc.includes(\"author_id\")\r",
+											"    );\r",
+											"    pm.expect(authorIdError).to.exist;\r",
+											"    pm.expect(authorIdError.loc).to.deep.include(\"author_id\");\r",
+											"});\r",
+											"\r",
+											"// Проверка что другие поля не содержат ошибок (если только одна ошибка)\r",
+											"pm.test(\"Only author_id has validation error\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    if (response.detail.length === 1) {\r",
+											"        pm.expect(response.detail[0].loc).to.include(\"author_id\");\r",
+											"        pm.expect(response.detail[0].loc).to.not.include(\"project_id\");\r",
+											"        pm.expect(response.detail[0].loc).to.not.include(\"author_email\");\r",
+											"    }\r",
+											"});\r",
+											"\r",
+											"// Логирование для отладки\r",
+											"console.log(\"Author ID validation error:\", JSON.stringify(pm.response.json(), null, 2));\r",
+											"console.log(\"Expected pattern: ^[0-9a-fA-F]{24}$\");\r",
+											"console.log(\"Received input: SMTP\");"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{$randomAbbreviation}}\",\r\n    \"author_email\": \"test1@example.com\",\r\n    \"comment_text\": \"Это тестовый комментарий для проверки создания\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Empty Author Id)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error structure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"detail\");\r",
+											"    pm.expect(response.detail).to.be.an(\"array\");\r",
+											"    pm.expect(response.detail.length).to.be.greaterThan(0);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is string_pattern_mismatch\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"type\", \"string_pattern_mismatch\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to author_id field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"loc\");\r",
+											"    pm.expect(firstError.loc).to.be.an(\"array\");\r",
+											"    pm.expect(firstError.loc).to.include(\"body\", \"author_id\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates pattern mismatch\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"msg\");\r",
+											"    pm.expect(firstError.msg).to.include(\"String should match pattern\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context contains the expected pattern\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"ctx\");\r",
+											"    pm.expect(firstError.ctx).to.have.property(\"pattern\", \"^[0-9a-fA-F]{24}$\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Invalid author_id does not match MongoDB ID pattern\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    const mongoIdPattern = /^[0-9a-fA-F]{24}$/;\r",
+											"    pm.expect(mongoIdPattern.test(firstError.input)).to.be.false;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is fast for validation error\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No successful creation message in response\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.not.have.property(\"message\");\r",
+											"    pm.expect(response).to.not.have.property(\"id\");\r",
+											"});\r",
+											"\r",
+											"// Проверка что ошибка именно в author_id, а не в других полях\r",
+											"pm.test(\"Error is specifically for author_id field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const authorIdError = response.detail.find(error => \r",
+											"        error.loc.includes(\"author_id\")\r",
+											"    );\r",
+											"    pm.expect(authorIdError).to.exist;\r",
+											"    pm.expect(authorIdError.loc).to.deep.include(\"author_id\");\r",
+											"});\r",
+											"\r",
+											"// Проверка что другие поля не содержат ошибок (если только одна ошибка)\r",
+											"pm.test(\"Only author_id has validation error\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    if (response.detail.length === 1) {\r",
+											"        pm.expect(response.detail[0].loc).to.include(\"author_id\");\r",
+											"        pm.expect(response.detail[0].loc).to.not.include(\"project_id\");\r",
+											"        pm.expect(response.detail[0].loc).to.not.include(\"author_email\");\r",
+											"    }\r",
+											"});\r",
+											"\r",
+											"// Логирование для отладки\r",
+											"console.log(\"Author ID validation error:\", JSON.stringify(pm.response.json(), null, 2));\r",
+											"console.log(\"Expected pattern: ^[0-9a-fA-F]{24}$\");\r",
+											"console.log(\"Received input: SMTP\");"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"\",\r\n    \"author_email\": \"test1@example.com\",\r\n    \"comment_text\": \"Это тестовый комментарий для проверки создания\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Invalid Email)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Tests for 422 validation error - invalid email format\r",
+											"\r",
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error structure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"detail\");\r",
+											"    pm.expect(response.detail).to.be.an(\"array\");\r",
+											"    pm.expect(response.detail.length).to.be.greaterThan(0);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is value_error\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"type\", \"value_error\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to author_email field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"loc\");\r",
+											"    pm.expect(firstError.loc).to.be.an(\"array\");\r",
+											"    pm.expect(firstError.loc).to.include(\"body\", \"author_email\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates email validation failure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"msg\");\r",
+											"    pm.expect(firstError.msg).to.include(\"valid email address\");\r",
+											"    pm.expect(firstError.msg).to.include(\"@-sign\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context contains the reason for failure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"ctx\");\r",
+											"    pm.expect(firstError.ctx).to.have.property(\"reason\");\r",
+											"    pm.expect(firstError.ctx.reason).to.include(\"@-sign\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Invalid input does not contain @ symbol\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError.input).to.not.include(\"@\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is fast for validation error\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No successful creation message in response\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.not.have.property(\"message\");\r",
+											"    pm.expect(response).to.not.have.property(\"id\");\r",
+											"});\r",
+											"\r",
+											"// Проверка что ошибка именно в email, а не в других полях\r",
+											"pm.test(\"Error is specifically for author_email field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const emailError = response.detail.find(error => \r",
+											"        error.loc.includes(\"author_email\")\r",
+											"    );\r",
+											"    pm.expect(emailError).to.exist;\r",
+											"    pm.expect(emailError.loc).to.deep.include(\"author_email\");\r",
+											"});\r",
+											"\r",
+											"// Проверка формата ошибки email\r",
+											"pm.test(\"Email error has correct format\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const emailError = response.detail.find(error => error.loc.includes(\"author_email\"));\r",
+											"    \r",
+											"    if (emailError) {\r",
+											"        pm.expect(emailError.msg).to.match(/value is not a valid email address:/);\r",
+											"        pm.expect(emailError.ctx).to.have.property(\"reason\");\r",
+											"        pm.expect(emailError.input).to.be.a(\"string\");\r",
+											"    }\r",
+											"});\r",
+											"\r",
+											"// Логирование для отладки\r",
+											"console.log(\"Email validation error:\", JSON.stringify(pm.response.json(), null, 2));\r",
+											"console.log(\"Invalid email input: SMTP\");\r",
+											"console.log(\"Expected: email with @ symbol and domain\");"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{$randomAbbreviation}}\",\r\n    \"comment_text\": \"Это тестовый комментарий для проверки создания\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Too long Email)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Tests for 422 validation error - invalid email format\r",
+											"\r",
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error structure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"detail\");\r",
+											"    pm.expect(response.detail).to.be.an(\"array\");\r",
+											"    pm.expect(response.detail.length).to.be.greaterThan(0);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is value_error\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"type\", \"value_error\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to author_email field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"loc\");\r",
+											"    pm.expect(firstError.loc).to.be.an(\"array\");\r",
+											"    pm.expect(firstError.loc).to.include(\"body\", \"author_email\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is fast for validation error\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No successful creation message in response\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.not.have.property(\"message\");\r",
+											"    pm.expect(response).to.not.have.property(\"id\");\r",
+											"});\r",
+											"\r",
+											"// Проверка что ошибка именно в email, а не в других полях\r",
+											"pm.test(\"Error is specifically for author_email field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const emailError = response.detail.find(error => \r",
+											"        error.loc.includes(\"author_email\")\r",
+											"    );\r",
+											"    pm.expect(emailError).to.exist;\r",
+											"    pm.expect(emailError.loc).to.deep.include(\"author_email\");\r",
+											"});\r",
+											"\r",
+											"// Проверка формата ошибки email\r",
+											"pm.test(\"Email error has correct format\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const emailError = response.detail.find(error => error.loc.includes(\"author_email\"));\r",
+											"    \r",
+											"    if (emailError) {\r",
+											"        pm.expect(emailError.msg).to.match(/value is not a valid email address:/);\r",
+											"        pm.expect(emailError.ctx).to.have.property(\"reason\");\r",
+											"        pm.expect(emailError.input).to.be.a(\"string\");\r",
+											"    }\r",
+											"});\r",
+											"\r",
+											"// Логирование для отладки\r",
+											"console.log(\"Email validation error:\", JSON.stringify(pm.response.json(), null, 2));\r",
+											"console.log(\"Invalid email input: SMTP\");\r",
+											"console.log(\"Expected: email with @ symbol and domain\");"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{longEmail}}\",\r\n    \"comment_text\": \"Это тестовый комментарий для проверки создания\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (No Domain Email) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Tests for 422 validation error - invalid email format\r",
+											"\r",
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error structure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"detail\");\r",
+											"    pm.expect(response.detail).to.be.an(\"array\");\r",
+											"    pm.expect(response.detail.length).to.be.greaterThan(0);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is value_error\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"type\", \"value_error\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to author_email field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"loc\");\r",
+											"    pm.expect(firstError.loc).to.be.an(\"array\");\r",
+											"    pm.expect(firstError.loc).to.include(\"body\", \"author_email\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates email validation failure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"msg\");\r",
+											"    pm.expect(firstError.msg).to.include(\"valid email address\");\r",
+											"    pm.expect(firstError.msg).to.include(\"@-sign\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context contains the reason for failure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"ctx\");\r",
+											"    pm.expect(firstError.ctx).to.have.property(\"reason\");\r",
+											"    pm.expect(firstError.ctx.reason).to.include(\"@-sign\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is fast for validation error\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No successful creation message in response\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.not.have.property(\"message\");\r",
+											"    pm.expect(response).to.not.have.property(\"id\");\r",
+											"});\r",
+											"\r",
+											"// Проверка что ошибка именно в email, а не в других полях\r",
+											"pm.test(\"Error is specifically for author_email field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const emailError = response.detail.find(error => \r",
+											"        error.loc.includes(\"author_email\")\r",
+											"    );\r",
+											"    pm.expect(emailError).to.exist;\r",
+											"    pm.expect(emailError.loc).to.deep.include(\"author_email\");\r",
+											"});\r",
+											"\r",
+											"// Проверка формата ошибки email\r",
+											"pm.test(\"Email error has correct format\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const emailError = response.detail.find(error => error.loc.includes(\"author_email\"));\r",
+											"    \r",
+											"    if (emailError) {\r",
+											"        pm.expect(emailError.msg).to.match(/value is not a valid email address:/);\r",
+											"        pm.expect(emailError.ctx).to.have.property(\"reason\");\r",
+											"        pm.expect(emailError.input).to.be.a(\"string\");\r",
+											"    }\r",
+											"});\r",
+											"\r",
+											"// Логирование для отладки\r",
+											"console.log(\"Email validation error:\", JSON.stringify(pm.response.json(), null, 2));\r",
+											"console.log(\"Invalid email input: SMTP\");\r",
+											"console.log(\"Expected: email with @ symbol and domain\");"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"admin@admin\",\r\n    \"comment_text\": \"Это тестовый комментарий для проверки создания\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Special Symbols Email)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Tests for 422 validation error - invalid email format\r",
+											"\r",
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error structure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.have.property(\"detail\");\r",
+											"    pm.expect(response.detail).to.be.an(\"array\");\r",
+											"    pm.expect(response.detail.length).to.be.greaterThan(0);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error type is value_error\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"type\", \"value_error\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error location points to author_email field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"loc\");\r",
+											"    pm.expect(firstError.loc).to.be.an(\"array\");\r",
+											"    pm.expect(firstError.loc).to.include(\"body\", \"author_email\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error message indicates email validation failure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"msg\");\r",
+											"    pm.expect(firstError.msg).to.include(\"valid email address\");\r",
+											"    pm.expect(firstError.msg).to.include(\"@-sign\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Error context contains the reason for failure\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const firstError = response.detail[0];\r",
+											"    pm.expect(firstError).to.have.property(\"ctx\");\r",
+											"    pm.expect(firstError.ctx).to.have.property(\"reason\");\r",
+											"    pm.expect(firstError.ctx.reason).to.include(\"@-sign\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response time is fast for validation error\", function() {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"No successful creation message in response\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response).to.not.have.property(\"message\");\r",
+											"    pm.expect(response).to.not.have.property(\"id\");\r",
+											"});\r",
+											"\r",
+											"// Проверка что ошибка именно в email, а не в других полях\r",
+											"pm.test(\"Error is specifically for author_email field\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const emailError = response.detail.find(error => \r",
+											"        error.loc.includes(\"author_email\")\r",
+											"    );\r",
+											"    pm.expect(emailError).to.exist;\r",
+											"    pm.expect(emailError.loc).to.deep.include(\"author_email\");\r",
+											"});\r",
+											"\r",
+											"// Проверка формата ошибки email\r",
+											"pm.test(\"Email error has correct format\", function() {\r",
+											"    const response = pm.response.json();\r",
+											"    const emailError = response.detail.find(error => error.loc.includes(\"author_email\"));\r",
+											"    \r",
+											"    if (emailError) {\r",
+											"        pm.expect(emailError.msg).to.match(/value is not a valid email address:/);\r",
+											"        pm.expect(emailError.ctx).to.have.property(\"reason\");\r",
+											"        pm.expect(emailError.input).to.be.a(\"string\");\r",
+											"    }\r",
+											"});\r",
+											"\r",
+											"// Логирование для отладки\r",
+											"console.log(\"Email validation error:\", JSON.stringify(pm.response.json(), null, 2));\r",
+											"console.log(\"Invalid email input: SMTP\");\r",
+											"console.log(\"Expected: email with @ symbol and domain\");"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"user@name@example.com\",\r\n    \"comment_text\": \"Это тестовый комментарий для проверки создания\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Empty Comments Text)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{$randomEmail}}\",\r\n    \"comment_text\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Too Long Comments Text)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{$randomEmail}}\",\r\n    \"comment_text\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Only Spaces Comments Text)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{$randomEmail}}\",\r\n    \"comment_text\": \"     \"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/comments - 422 (Negative Parent Comment ID)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 422 Unprocessable Entity\", function() {\r",
+											"    pm.response.to.have.status(422);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"{{project_id_1}}\",\r\n    \"author_id\": \"{{author_id_1}}\",\r\n    \"author_email\": \"{{$randomEmail}}\",\r\n    \"comment_text\": \"{{$randomLoremText}} \",\r\n    \"parent_comment_id\": -1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/comments",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		}
@@ -8736,6 +9908,19 @@
 		},
 		{
 			"key": "last_created_comment_id_3",
+			"value": ""
+		},
+		{
+			"key": "has_refresh_cookie",
+			"value": ""
+		},
+		{
+			"key": "longEmail",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "xss_comment_id",
 			"value": ""
 		}
 	]
