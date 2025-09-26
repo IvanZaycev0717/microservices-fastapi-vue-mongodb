@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from bson import ObjectId
 
 from src.notification_admin.models.notification import NotificationCreate

@@ -1,11 +1,10 @@
 from datetime import datetime
 
 from bson import ObjectId
-from bson.errors import BSONError
+from bson.errors import BSONError, InvalidId
 from pymongo import DESCENDING
 from pymongo.asynchronous.database import AsyncDatabase
 from pymongo.errors import DuplicateKeyError
-from bson.errors import InvalidId
 
 from notification_admin.models.notification import NotificationCreate
 
