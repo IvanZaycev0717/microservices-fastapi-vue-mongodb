@@ -27,6 +27,10 @@ dependencies = [
     "sqlalchemy (>=2.0.43,<3.0.0)",
     "alembic (>=1.16.5,<2.0.0)",
     "fastapi-mail[httpx] (>=1.5.0,<2.0.0)",
+    "mimesis (>=18.0.0,<19.0.0)",
+    "pytest-env (>=1.1.5,<2.0.0)",
+    "pytest-asyncio (>=1.2.0,<2.0.0)",
+    "mongomock-motor (>=0.0.36,<0.0.37)",
 ]
 
 
@@ -44,3 +48,52 @@ line-length = 79
 [tool.poetry.dependencies]
 python = ">=3.12,<4.0"
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+addopts = [
+    "--import-mode=importlib",
+]
+pythonpath = ["src"]
+
+env = [
+    "BASE_HOST=localhost",
+    "BASE_PORT=8000",
+    "SECRET_KEY=test-secret-key",
+    "ALGORITHM=HS256",
+    "CONTENT_ADMIN_MONGO_ROOT_USERNAME=test",
+    "CONTENT_ADMIN_MONGO_ROOT_PASSWORD=test",
+    "CONTENT_ADMIN_MONGODB_URL=mongodb://localhost:27017",
+    "CONTENT_ADMIN_MONGO_DATABASE_NAME=test",
+    "CONTENT_ADMIN_MONGO_PORT=27017",
+    "CONTENT_ADMIN_ME_CONFIG_MONGODB_URL=mongodb://localhost:27017",
+    "POSTGRES_USER=test",
+    "POSTGRES_PASSWORD=test",
+    "COMMENTS_ADMIN_POSTGRES_ROOT_NAME=test",
+    "COMMENTS_ADMIN_POSTGRES_PORT=5432",
+    "COMMENTS_ADMIN_POSTGRES_DB_NAME=test",
+    "COMMENTS_ADMIN_POSTGRES_DB_URL=postgresql://test:test@localhost:5432/test",
+    "AUTH_ADMIN_MONGO_ROOT_USERNAME=test",
+    "AUTH_ADMIN_MONGO_ROOT_PASSWORD=test",
+    "AUTH_ADMIN_MONGODB_URL=mongodb://localhost:27017",
+    "AUTH_ADMIN_MONGO_DATABASE_NAME=test",
+    "AUTH_ADMIN_MONGO_PORT=27017",
+    "AUTH_ADMIN_ME_CONFIG_MONGODB_URL=mongodb://localhost:27017",
+    "ADMIN_EMAIL=admin@test.com",
+    "ADMIN_PASSWORD=test",
+    "NOTIFICATION_ADMIN_MONGO_ROOT_USERNAME=test",
+    "NOTIFICATION_ADMIN_MONGO_ROOT_PASSWORD=test",
+    "NOTIFICATION_ADMIN_MONGODB_URL=mongodb://localhost:27017",
+    "NOTIFICATION_ADMIN_MONGO_DATABASE_NAME=test",
+    "NOTIFICATION_ADMIN_MONGO_PORT=27017",
+    "NOTIFICATION_ADMIN_ME_CONFIG_MONGODB_URL=mongodb://localhost:27017",
+    "MINIO_ROOT_USER=test",
+    "MINIO_ROOT_PASSWORD=test",
+    "MINIO_HOST=localhost",
+    "MINIO_PORT=9000",
+    "SMTP_USERNAME=test",
+    "SMTP_PASSWORD=test",
+    "SMTP_FROM=test@test.com"
+]
