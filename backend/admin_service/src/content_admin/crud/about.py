@@ -41,7 +41,7 @@ class AboutCRUD:
                     }
                 }
             ]
-            cursor = self.collection.aggregate(pipeline)
+            cursor = await self.collection.aggregate(pipeline)
             results = await cursor.to_list(length=None)
             return [
                 AboutTranslatedResponse(**item).model_dump()

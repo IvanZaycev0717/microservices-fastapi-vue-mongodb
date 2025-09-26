@@ -5,6 +5,7 @@ from bson.errors import BSONError
 from pymongo import DESCENDING
 from pymongo.asynchronous.database import AsyncDatabase
 from pymongo.errors import DuplicateKeyError
+from bson.errors import InvalidId
 
 from notification_admin.models.notification import NotificationCreate
 
@@ -60,8 +61,10 @@ class NotificationCRUD:
 
     # DELETE
     async def delete(self, notification_id: str) -> bool:
-        """Удаляет уведомление по ID"""
-        result = await self.collection.delete_one(
-            {"_id": ObjectId(notification_id)}
-        )
-        return result.deleted_count > 0
+        try:
+            result = await self.collection.delete_one(
+                {"_id": ObjectId(notification_id)}
+            )
+            return result.deleted_count > 0
+        except InvalidId:
+            return False
