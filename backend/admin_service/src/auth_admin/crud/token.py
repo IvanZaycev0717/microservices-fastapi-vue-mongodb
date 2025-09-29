@@ -37,7 +37,7 @@ class TokenCRUD:
     # UPDATE
     async def mark_token_as_used(self, token: str):
         result = await self.collection.update_one(
-            {"token": token},
+            {"token": token, "used": False},
             {"$set": {"used": True, "used_at": datetime.now()}},
         )
         return result.modified_count > 0

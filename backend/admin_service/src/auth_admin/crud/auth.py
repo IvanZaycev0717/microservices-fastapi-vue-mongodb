@@ -23,7 +23,7 @@ class AuthCRUD:
             if roles
             else [UserRole.USER.value],
             "is_banned": False,
-            "created_at": datetime.now(timezone.utc),
+            "created_at": datetime.now(),
             "last_login_at": None,
         }
 
@@ -76,7 +76,7 @@ class AuthCRUD:
     async def update_user_last_login(self, email: str) -> Optional[UserDB]:
         """Update user's last login time and return UserDB model."""
         return await self.update_user(
-            email, {"last_login_at": datetime.now(timezone.utc)}
+            email, {"last_login_at": datetime.now()}
         )
 
     # DELETE

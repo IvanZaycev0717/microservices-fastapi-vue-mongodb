@@ -1,24 +1,85 @@
-import { defineBoot } from '#q-app/wrappers'
+import { boot } from 'quasar/wrappers'
 import axios from 'axios'
 
-// Be careful when using SSR for cross-request state pollution
-// due to creating a Singleton instance here;
-// If any client changes this (global) instance, it might be a
-// good idea to move this instance creation inside of the
-// "export default () => {}" function below (which runs individually
-// for each client)
-const api = axios.create({ baseURL: 'https://api.example.com' })
-
-export default defineBoot(({ app }) => {
-  // for use inside Vue files (Options API) through this.$axios and this.$api
-
-  app.config.globalProperties.$axios = axios
-  // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
-  //       so you won't necessarily have to import axios in each vue file
-
-  app.config.globalProperties.$api = api
-  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
-  //       so you can easily perform requests against your app's API
+const api = axios.create({
+  baseURL: 'http://localhost:8000',
+  withCredentials: true,
 })
 
-export { api }
+let isRefreshing = false
+let failedQueue = []
+
+export default boot(({ app, router }) => {
+  app.config.globalProperties.$axios = axios
+  app.config.globalProperties.$api = api
+
+  api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config
+
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        !originalRequest.url.includes('/auth/refresh')
+      ) {
+        if (isRefreshing) {
+          return new Promise((resolve) => {
+            failedQueue.push(() => resolve(api(originalRequest)))
+          })
+        }
+
+        originalRequest._retry = true
+        isRefreshing = true
+
+        try {
+          const response = await api.post('/auth/refresh', {}, { withCredentials: true })
+          const newToken = response.data.access_token
+
+          localStorage.setItem('access_token', newToken)
+          originalRequest.headers.Authorization = `Bearer ${newToken}`
+
+          failedQueue.forEach((cb) => cb())
+          failedQueue = []
+
+          return api(originalRequest)
+        } catch (refreshError) {
+          failedQueue.forEach((cb) => cb())
+          failedQueue = []
+          localStorage.removeItem('access_token')
+
+          router.push('/login')
+          return Promise.reject(refreshError)
+        } finally {
+          isRefreshing = false
+        }
+      }
+
+      return Promise.reject(error)
+    },
+  )
+})
+
+export function loginUser(credentials) {
+  const formData = new URLSearchParams()
+  formData.append('email', credentials.email)
+  formData.append('password', credentials.password)
+
+  return api.post('/auth/login', formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  })
+}
+
+export function logoutUser() {
+  return api.post(
+    '/auth/logout',
+    {},
+    {
+      withCredentials: true,
+    },
+  )
+}
+
+export { axios, api }

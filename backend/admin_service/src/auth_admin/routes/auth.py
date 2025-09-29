@@ -10,6 +10,7 @@ from fastapi import (
     Form,
     HTTPException,
     Path,
+    Request,
     Response,
     status,
 )
@@ -162,8 +163,7 @@ async def register_user(
             secure=False,
             samesite="lax",
             max_age=int(settings.REFRESH_TOKEN_EXPIRES_AT.total_seconds()),
-            path="/auth/refresh",
-            domain="localhost",
+            path="/",
         )
 
         return {
@@ -242,7 +242,7 @@ async def login_for_access_token(
 
         token_crud = TokenCRUD(db)
         refresh_token_expires = (
-            datetime.now(timezone.utc) + settings.REFRESH_TOKEN_EXPIRES_AT
+            datetime.now() + settings.REFRESH_TOKEN_EXPIRES_AT
         )
 
         await token_crud.create_refresh_token(
@@ -257,7 +257,7 @@ async def login_for_access_token(
             secure=False,
             samesite="lax",
             max_age=int(settings.REFRESH_TOKEN_EXPIRES_AT.total_seconds()),
-            path="/auth/refresh",
+            path="/",
         )
         logger.info(f"User logged in successfully: {form_data.email}")
 
@@ -437,13 +437,10 @@ async def refresh_tokens(
         logging.Logger,
         Depends(get_logger_factory(settings.AUTH_ADMIN_NAME)),
     ],
-    refresh_token: str = Cookie(alias="refresh_token"),
+    refresh_token: str = Cookie(None),
 ):
     """Refresh access token using refresh token."""
     try:
-        auth_crud = AuthCRUD(db)
-        token_crud = TokenCRUD(db)
-
         if not refresh_token:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -464,6 +461,7 @@ async def refresh_tokens(
                 detail="Invalid token type",
             )
 
+        token_crud = TokenCRUD(db)
         stored_token = await token_crud.get_refresh_token(refresh_token)
         if not stored_token:
             raise HTTPException(
@@ -471,14 +469,16 @@ async def refresh_tokens(
                 detail="Refresh token not found or already used",
             )
 
-        if datetime.fromtimestamp(payload["exp"]) < datetime.now():
+        current_time = datetime.now()
+        if datetime.fromtimestamp(payload["exp"]) < current_time:
             await token_crud.mark_token_as_used(refresh_token)
-            raise HTTPException(401, detail="Refresh token expired")
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired")
 
-        if stored_token["expired_at"] < datetime.now():
+        if stored_token["expired_at"] < current_time:
             await token_crud.mark_token_as_used(refresh_token)
-            raise HTTPException(401, detail="Refresh token expired")
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired")
 
+        auth_crud = AuthCRUD(db)
         user = await auth_crud.get_user_by_email(payload["email"])
         if not user:
             raise HTTPException(
@@ -502,8 +502,30 @@ async def refresh_tokens(
             data=token_data, expires_delta=settings.ACCESS_TOKEN_EXPIRE_AT
         )
 
+        refresh_token_data = token_data.copy()
+        refresh_token_data["type"] = "refresh"
+        new_refresh_token = create_jwt_token(
+            data=refresh_token_data,
+            expires_delta=settings.REFRESH_TOKEN_EXPIRES_AT,
+        )
+
+        refresh_token_expires = datetime.now() + settings.REFRESH_TOKEN_EXPIRES_AT
+        await token_crud.create_refresh_token(
+            user_id=user.id,
+            token=new_refresh_token,
+            expired_at=refresh_token_expires,
+        )
         await token_crud.mark_token_as_used(refresh_token)
-        response.delete_cookie(key="refresh_token", path="/auth/refresh")
+
+        response.set_cookie(
+            key="refresh_token",
+            value=new_refresh_token,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+            max_age=int(settings.REFRESH_TOKEN_EXPIRES_AT.total_seconds()),
+            path="/",
+        )
 
         logger.info(f"Tokens refreshed successfully for user: {user.email}")
 
@@ -513,12 +535,9 @@ async def refresh_tokens(
             "expires_in": settings.ACCESS_TOKEN_EXPIRE_AT.total_seconds(),
         }
 
-    except HTTPException as e:
-        response.delete_cookie(key="refresh_token", path="/auth/refresh")
-        raise e
-
+    except HTTPException:
+        raise
     except Exception as e:
-        response.delete_cookie(key="refresh_token", path="/auth/refresh")
         logger.exception(f"Token refresh failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -534,31 +553,32 @@ async def logout(
         logging.Logger,
         Depends(get_logger_factory(settings.AUTH_ADMIN_NAME)),
     ],
-    refresh_token: str = Cookie(alias="refresh_token"),
+    refresh_token: str = Cookie(None),
 ):
     """Invalidate refresh token on logout."""
-    try:
-        token_crud = TokenCRUD(db)
+    response.delete_cookie(
+        key="refresh_token",
+        path="/",
+        secure=False,
+        httponly=True,
+        samesite="lax",
+    )
 
-        success = await token_crud.mark_token_as_used(refresh_token)
-
-        if not success:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid refresh token",
-            )
-
-        logger.info("User logged out successfully")
+    if not refresh_token:
+        logger.warning("Logout attempted without refresh token")
         return {"message": "Logged out successfully"}
 
-    except HTTPException:
-        raise
+    try:
+        token_crud = TokenCRUD(db)
+        success = await token_crud.mark_token_as_used(refresh_token)
+
+        if success:
+            logger.info("Refresh token invalidated successfully")
+        else:
+            logger.warning("Refresh token already used or not found")
+
+        return {"message": "Logged out successfully"}
 
     except Exception as e:
-        logger.exception(f"Logout failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error during logout",
-        )
-    finally:
-        response.delete_cookie(key="refresh_token", path="/auth/refresh")
+        logger.exception(f"Error during token invalidation: {e}")
+        return {"message": "Logged out successfully"}

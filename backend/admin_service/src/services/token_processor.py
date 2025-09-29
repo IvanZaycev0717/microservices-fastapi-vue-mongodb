@@ -28,7 +28,7 @@ def create_jwt_token(
     )
 
     payload = data.copy()
-    now = datetime.now(timezone.utc)
+    now = datetime.now()
 
     payload.update(
         {
