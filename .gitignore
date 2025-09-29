@@ -354,3 +354,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Ignore common VS Code files
+.vscode/
