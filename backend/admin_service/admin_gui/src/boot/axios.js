@@ -90,4 +90,87 @@ export function logoutUser() {
   )
 }
 
+
+// ABOUT
+export function getAboutCardById(document_id) {
+  return api.get(`/about/${document_id}`)
+}
+
+export function updateAboutText(document_id, textData) {
+  const formData = new URLSearchParams()
+  formData.append('title_en', textData.title_en)
+  formData.append('description_en', textData.description_en)
+  formData.append('title_ru', textData.title_ru)
+  formData.append('description_ru', textData.description_ru)
+  
+  return api.patch(`/about/${document_id}`, formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+export function updateAboutImage(document_id, imageFile) {
+  const formData = new FormData()
+  formData.append('image', imageFile)
+  
+  return api.patch(`/about/${document_id}/image`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+export function updateTechSkills(kingdomName, skillsData) {
+  return api.patch(`/technologies/${kingdomName}`, skillsData)
+}
+
+export function getProjects() {
+  return api.get('/projects')
+}
+
+export function createProject(formData) {
+  return api.post('/projects', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+export function deleteProject(documentId) {
+  return api.delete(`/projects/${documentId}`)
+}
+
+
+export function getProjectById(documentId) {
+  return api.get(`/projects/${documentId}`)
+}
+
+export function updateProjectText(documentId, textData) {
+  const formData = new URLSearchParams()
+  formData.append('title_en', textData.title_en)
+  formData.append('title_ru', textData.title_ru)
+  formData.append('description_en', textData.description_en)
+  formData.append('description_ru', textData.description_ru)
+  formData.append('link', textData.link)
+  formData.append('popularity', textData.popularity.toString())
+  
+  return api.patch(`/projects/${documentId}`, formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+export function updateProjectImage(documentId, imageFile) {
+  const formData = new FormData()
+  formData.append('image', imageFile)
+  
+  return api.patch(`/projects/${documentId}/image`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
 export { axios, api }

@@ -9,8 +9,9 @@
         @click="openCreateModal" 
       />
     </div>
-    <AboutCard ref="aboutCardRef" />
+    <AboutCard ref="aboutCardRef" @edit-card="openEditModal" />
     <AboutCreateModal ref="createModalRef" @created="refreshAboutCards" />
+    <AboutEditModal ref="editModalRef" @updated="refreshAboutCards" />
   </q-page>
 </template>
 
@@ -18,12 +19,18 @@
 import { ref } from 'vue'
 import AboutCard from 'components/AboutCard.vue'
 import AboutCreateModal from 'components/AboutCreateModal.vue'
+import AboutEditModal from 'components/AboutEditModal.vue'
 
 const aboutCardRef = ref(null)
 const createModalRef = ref(null)
+const editModalRef = ref(null)
 
 const openCreateModal = () => {
   createModalRef.value?.open()
+}
+
+const openEditModal = (cardId) => {
+  editModalRef.value?.open(cardId)
 }
 
 const refreshAboutCards = () => {

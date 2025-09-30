@@ -65,9 +65,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { api } from 'boot/axios'
 import { useQuasar } from 'quasar'
+import { api } from 'boot/axios'
 
+// defineEmits больше не нужно импортировать
+const emit = defineEmits(['edit-card'])
 const $q = useQuasar()
 const cards = ref([])
 const loading = ref(true)
@@ -86,7 +88,7 @@ const fetchAboutData = async () => {
 }
 
 const handleEdit = (card) => {
-  console.log('Edit card:', card)
+  emit('edit-card', card._id)
 }
 
 const confirmDelete = (card) => {
