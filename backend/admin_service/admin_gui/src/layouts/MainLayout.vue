@@ -2,6 +2,14 @@
   <q-layout>
     <q-header elevated>
       <q-toolbar>
+        <q-btn
+          flat
+          dense
+          round
+          icon="menu"
+          aria-label="Menu"
+          @click="leftDrawerOpen = !leftDrawerOpen"
+        />
         <q-toolbar-title>IvanZaycev0717 | Personal Site Microservices | Admin GUI</q-toolbar-title>
 
         <q-btn href="https://github.com/IvanZaycev0717/" target="_blank" flat>
@@ -20,6 +28,8 @@
       </q-toolbar>
     </q-header>
 
+    <SideBarPanel v-model="leftDrawerOpen" />
+
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -27,14 +37,17 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import GitHubIcon from 'components/icons/GitHubIcon.vue'
 import TelegramIcon from 'components/icons/TelegramIcon.vue'
+import SideBarPanel from 'components/SideBarPanel.vue'
 import { useQuasar } from 'quasar'
 import { watchEffect } from 'vue'
 import { useAuthStore } from 'stores/auth'
 import { logoutUser } from 'boot/axios'
 
 const $q = useQuasar()
+const leftDrawerOpen = ref(false)
 const darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false')
 const authStore = useAuthStore()
 

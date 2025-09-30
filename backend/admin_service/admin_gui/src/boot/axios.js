@@ -60,6 +60,14 @@ export default boot(({ app, router }) => {
   )
 })
 
+export function createAboutCard(formData) {
+  return api.post('/about', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
 export function loginUser(credentials) {
   const formData = new URLSearchParams()
   formData.append('email', credentials.email)
