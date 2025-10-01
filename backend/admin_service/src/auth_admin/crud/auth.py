@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
 
 from pymongo.asynchronous.database import AsyncDatabase
@@ -75,9 +75,7 @@ class AuthCRUD:
 
     async def update_user_last_login(self, email: str) -> Optional[UserDB]:
         """Update user's last login time and return UserDB model."""
-        return await self.update_user(
-            email, {"last_login_at": datetime.now()}
-        )
+        return await self.update_user(email, {"last_login_at": datetime.now()})
 
     # DELETE
     async def delete_user_by_email(self, email: str) -> bool:

@@ -115,6 +115,40 @@ async def get_comment(
         )
 
 
+@router.get("/project/{project_id}", response_model=list[CommentResponse])
+async def get_comments_by_project_id(
+    project_id: Annotated[str, Path(regex=settings.MONGO_ID_VALID_ID_REGEXP)],
+    db_session: Annotated[AsyncSession, Depends(get_db_session)],
+    logger: Annotated[
+        logging.Logger,
+        Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
+    ],
+):
+    """Получить все комментарии для конкретного проекта"""
+    try:
+        crud = CommentsCRUD(db_session)
+        comments = await crud.get_comments_by_project_id(project_id)
+        logger.info(
+            f"Retrieved {len(comments)} comments for project {project_id}"
+        )
+        return comments
+    except ValueError as e:
+        logger.error(
+            f"Error retrieving comments for project {project_id}: {str(e)}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+        )
+    except Exception as e:
+        logger.error(
+            f"Unexpected error retrieving comments for project {project_id}: {str(e)}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
+
+
 @router.patch("/{comment_id}", response_model=dict)
 async def update_comment(
     comment_id: Annotated[int, Path(ge=1)],

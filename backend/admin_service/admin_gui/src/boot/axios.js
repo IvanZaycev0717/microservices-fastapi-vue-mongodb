@@ -257,4 +257,125 @@ export function deletePublication(documentId) {
   return api.delete(`/publications/${documentId}`)
 }
 
+// AUTH - User Management
+export function getUsers() {
+  return api.get('/auth')
+}
+
+export function registerUser(userData) {
+  const formData = new URLSearchParams()
+  formData.append('email', userData.email)
+  formData.append('password', userData.password)
+  
+  // roles должен быть массивом строк
+  if (userData.roles && userData.roles.length > 0) {
+    userData.roles.forEach(role => {
+      formData.append('roles', role)
+    })
+  }
+
+  return api.post('/auth/register', formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+export function updateUser(email, updateData) {
+  const formData = new URLSearchParams()
+  
+  if (updateData.is_banned !== undefined) {
+    formData.append('is_banned', updateData.is_banned.toString())
+  }
+  
+  if (updateData.roles !== undefined) {
+    // roles должен быть массивом строк
+    updateData.roles.forEach(role => {
+      formData.append('roles', role)
+    })
+  }
+
+  return api.patch(`/auth/update/${email}`, formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+export function deleteUser(email) {
+  const formData = new URLSearchParams()
+  formData.append('email', email)
+
+  console.log('Sending delete request for email:', email) // Лог для отладки
+
+  return api.delete('/auth/delete', {
+    data: formData,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+// COMMENTS
+export function getComments() {
+  return api.get('/comments')
+}
+
+export function getCommentsByProjectId(projectId) {
+  return api.get(`/comments/project/${projectId}`)
+}
+
+export function getCommentById(commentId) {
+  return api.get(`/comments/${commentId}`)
+}
+
+export function createComment(commentData) {
+  return api.post('/comments', commentData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+export function updateComment(commentId, updateData) {
+  return api.patch(`/comments/${commentId}`, updateData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+export function deleteComment(commentId) {
+  return api.delete(`/comments/${commentId}`)
+}
+
+export function banUserComments(authorId) {
+  return api.patch(`/comments/ban_user/${authorId}`)
+}
+
+
+
+// NOTIFICATIONS
+export function getNotifications() {
+  return api.get('/notifications')
+}
+
+export function getNotificationsByEmail(email) {
+  return api.get(`/notifications/by-email/${email}`)
+}
+
+export function deleteNotification(notificationId) {
+  return api.delete(`/notifications/${notificationId}`)
+}
+
+export function createNotification(notificationData) {
+  return api.post('/notifications', notificationData, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+}
+
+
+
 export { axios, api }

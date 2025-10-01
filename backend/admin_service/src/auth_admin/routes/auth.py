@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import (
@@ -10,7 +10,6 @@ from fastapi import (
     Form,
     HTTPException,
     Path,
-    Request,
     Response,
     status,
 )
@@ -472,11 +471,15 @@ async def refresh_tokens(
         current_time = datetime.now()
         if datetime.fromtimestamp(payload["exp"]) < current_time:
             await token_crud.mark_token_as_used(refresh_token)
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired")
+            raise HTTPException(
+                status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired"
+            )
 
         if stored_token["expired_at"] < current_time:
             await token_crud.mark_token_as_used(refresh_token)
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired")
+            raise HTTPException(
+                status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired"
+            )
 
         auth_crud = AuthCRUD(db)
         user = await auth_crud.get_user_by_email(payload["email"])
@@ -509,7 +512,9 @@ async def refresh_tokens(
             expires_delta=settings.REFRESH_TOKEN_EXPIRES_AT,
         )
 
-        refresh_token_expires = datetime.now() + settings.REFRESH_TOKEN_EXPIRES_AT
+        refresh_token_expires = (
+            datetime.now() + settings.REFRESH_TOKEN_EXPIRES_AT
+        )
         await token_crud.create_refresh_token(
             user_id=user.id,
             token=new_refresh_token,

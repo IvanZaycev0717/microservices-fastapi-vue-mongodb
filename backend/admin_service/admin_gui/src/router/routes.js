@@ -36,6 +36,21 @@ const routes = [
         path: '/publications',
         component: () => import('pages/PublicationsPage.vue'),
         meta: { requiresAuth: true },
+      },
+      {
+        path: '/auth',
+        component: () => import('pages/AuthPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/notifications',
+        component: () => import('pages/NotificationsPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/comments',
+        component: () => import('pages/CommentsPage.vue'),
+        meta: { requiresAuth: true },
       }
     ],
   },

@@ -42,6 +42,25 @@ class CommentsCRUD:
         except SQLAlchemyError as e:
             raise ValueError(f"Database error reading comment: {str(e)}")
 
+    async def get_comments_by_project_id(
+        self, project_id: str
+    ) -> list[Comment]:
+        """
+        Получить все комментарии для конкретного проекта
+        """
+        try:
+            stmt = (
+                select(Comment)
+                .where(Comment.project_id == project_id)
+                .order_by(Comment.created_at.desc())
+            )
+            result = await self.db_session.execute(stmt)
+            return result.scalars().all()
+        except SQLAlchemyError as e:
+            raise ValueError(
+                f"Database error reading comments for project {project_id}: {str(e)}"
+            )
+
     # UPDATE
     async def update_comment(self, comment_id: int, new_text: str) -> int:
         try:

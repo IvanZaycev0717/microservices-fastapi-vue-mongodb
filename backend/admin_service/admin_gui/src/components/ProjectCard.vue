@@ -9,7 +9,7 @@
     <div v-else-if="projects.length" class="row q-col-gutter-md">
       <div 
         v-for="project in projects" 
-        :key="project._id"
+        :key="project.id"
         class="col-12 col-sm-6 col-lg-4"
       >
         <q-card class="project-card">
@@ -104,8 +104,8 @@ const fetchProjectsData = async () => {
     const response = await getProjects()
     projects.value = response.data
     // Минимальная отладка для production
-    if (projects.value.length > 0 && !projects.value[0]._id) {
-      console.warn('Project structure warning: _id not found')
+    if (projects.value.length > 0 && !projects.value[0].id) {
+      console.warn('Project structure warning: id not found')
     }
   } catch (error) {
     $q.notify({
@@ -134,7 +134,7 @@ const handleEdit = (project) => {
 
 const confirmDelete = (project) => {
   // Проверить все возможные варианты ID
-  const projectId = project._id || project.id
+  const projectId = project.id
   
   if (!projectId) {
     // Минимальная отладка для разработки
@@ -165,7 +165,7 @@ const deleteProjectHandler = async (project, projectId) => {
       message: 'Project deleted successfully!'
     })
     
-    projects.value = projects.value.filter(p => (p._id || p.id) !== projectId)
+    projects.value = projects.value.filter(p => p.id !== projectId)
     
   } catch (error) {
     $q.notify({
