@@ -173,4 +173,88 @@ export function updateProjectImage(documentId, imageFile) {
   })
 }
 
+// CERTIFICATES
+export function getCertificates(sort = 'date_desc') {
+  return api.get(`/certificates?sort=${sort}`)
+}
+
+export function getCertificateById(certificateId) {
+  return api.get(`/certificates/${certificateId}`)
+}
+
+export function createCertificate(formData) {
+  return api.post('/certificates', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+export function updateCertificateImage(certificateId, formData) {
+  return api.patch(`/certificates/${certificateId}/image`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+export function updateCertificatePopularity(certificateId, popularity) {
+  const formData = new URLSearchParams()
+  formData.append('popularity', popularity.toString())
+  
+  return api.patch(`/certificates/${certificateId}`, formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+export function deleteCertificate(certificateId) {
+  return api.delete(`/certificates/${certificateId}`)
+}
+
+// PUBLICATIONS
+export function getPublications(lang = 'Each lang', sort = 'date_desc') {
+  return api.get(`/publications?lang=${lang}&sort=${sort}`)
+}
+
+export function getPublicationById(documentId) {
+  return api.get(`/publications/${documentId}`)
+}
+
+export function createPublication(publicationData) {
+  const formData = new URLSearchParams()
+  formData.append('title_en', publicationData.title_en)
+  formData.append('title_ru', publicationData.title_ru)
+  formData.append('page', publicationData.page)
+  formData.append('site', publicationData.site)
+  formData.append('rating', publicationData.rating.toString())
+  formData.append('date', publicationData.date)
+
+  return api.post('/publications', formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+export function updatePublication(documentId, publicationData) {
+  const formData = new URLSearchParams()
+  formData.append('title_en', publicationData.title_en)
+  formData.append('title_ru', publicationData.title_ru)
+  formData.append('page', publicationData.page)
+  formData.append('site', publicationData.site)
+  formData.append('rating', publicationData.rating.toString())
+
+  return api.patch(`/publications/${documentId}`, formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+export function deletePublication(documentId) {
+  return api.delete(`/publications/${documentId}`)
+}
+
 export { axios, api }

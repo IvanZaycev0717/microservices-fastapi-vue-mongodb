@@ -27,6 +27,16 @@ const routes = [
         component: () => import('pages/ProjectsPage.vue'),
         meta: { requiresAuth: true },
       },
+      {
+        path: '/certificates',
+        component: () => import('pages/CertificatesPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: '/publications',
+        component: () => import('pages/PublicationsPage.vue'),
+        meta: { requiresAuth: true },
+      }
     ],
   },
 
