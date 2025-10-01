@@ -7,16 +7,25 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    # From .env file
     BASE_HOST: str
     BASE_PORT: int
 
+    # Secrets
     SECRET_KEY: SecretStr
     ALGORITHM: str
+    ADMIN_EMAIL: SecretStr
+    ADMIN_PASSWORD: SecretStr
     MIN_PASSWORD_LENGTH: int = 5
     MAX_PASSWORD_LENGTH: int = 31
     MIN_EMAIL_LENGTH: int = 3
     MAX_EMAIL_LENGHT: int = 255
+
+    # Cookie Settings
+    COOKIE_KEY: str = "refresh_token"
+    COOKIE_HTTPONLY: bool = True
+    COOKIE_SECURE: bool = False
+    COOKIE_SAMESITE: str = "lax"
+    COOKIE_PATH: str = "/"
 
     # MondoDB Settings
     CONTENT_ADMIN_MONGO_ROOT_USERNAME: str = Field(
@@ -68,10 +77,6 @@ class Settings(BaseSettings):
     AUTH_ADMIN_ME_CONFIG_MONGODB_URL: str = Field(
         description="Mongo Express connection URL for auth database"
     )
-
-    # Admin credentials
-    ADMIN_EMAIL: SecretStr
-    ADMIN_PASSWORD: SecretStr
 
     # Tokens Settings
     ACCESS_TOKEN_EXPIRE_AT: timedelta = timedelta(minutes=30)

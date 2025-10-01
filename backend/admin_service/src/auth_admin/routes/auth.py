@@ -157,13 +157,13 @@ async def register_user(
         logger.info(f"User registered successfully: {user_data.email}")
 
         response.set_cookie(
-            key="refresh_token",
+            key=settings.COOKIE_KEY,
             value=refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
+            httponly=settings.COOKIE_HTTPONLY,
+            secure=settings.COOKIE_SECURE,
+            samesite=settings.COOKIE_SAMESITE,
             max_age=int(settings.REFRESH_TOKEN_EXPIRES_AT.total_seconds()),
-            path="/",
+            path=settings.COOKIE_PATH,
         )
 
         return {
@@ -251,13 +251,13 @@ async def login_for_access_token(
             expired_at=refresh_token_expires,
         )
         response.set_cookie(
-            key="refresh_token",
+            key=settings.COOKIE_KEY,
             value=refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
+            httponly=settings.COOKIE_HTTPONLY,
+            secure=settings.COOKIE_SECURE,
+            samesite=settings.COOKIE_SAMESITE,
             max_age=int(settings.REFRESH_TOKEN_EXPIRES_AT.total_seconds()),
-            path="/",
+            path=settings.COOKIE_PATH,
         )
         logger.info(f"User logged in successfully: {form_data.email}")
 
@@ -518,15 +518,14 @@ async def refresh_tokens(
         await token_crud.mark_token_as_used(refresh_token)
 
         response.set_cookie(
-            key="refresh_token",
+            key=settings.COOKIE_KEY,
             value=new_refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
+            httponly=settings.COOKIE_HTTPONLY,
+            secure=settings.COOKIE_SECURE,
+            samesite=settings.COOKIE_SAMESITE,
             max_age=int(settings.REFRESH_TOKEN_EXPIRES_AT.total_seconds()),
-            path="/",
+            path=settings.COOKIE_PATH,
         )
-
         logger.info(f"Tokens refreshed successfully for user: {user.email}")
 
         return {
@@ -557,11 +556,11 @@ async def logout(
 ):
     """Invalidate refresh token on logout."""
     response.delete_cookie(
-        key="refresh_token",
-        path="/",
-        secure=False,
-        httponly=True,
-        samesite="lax",
+        key=settings.COOKIE_KEY,
+        path=settings.COOKIE_PATH,
+        secure=settings.COOKIE_SECURE,
+        httponly=settings.COOKIE_HTTPONLY,
+        samesite=settings.COOKIE_SAMESITE,
     )
 
     if not refresh_token:
