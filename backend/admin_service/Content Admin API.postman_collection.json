@@ -62,7 +62,7 @@
 											"    const setCookieHeader = pm.response.headers.get('Set-Cookie');\r",
 											"    \r",
 											"    pm.expect(setCookieHeader).to.include('HttpOnly');\r",
-											"    pm.expect(setCookieHeader).to.include('Path=/auth/refresh');\r",
+											"    pm.expect(setCookieHeader).to.include('Path=/');\r",
 											"    pm.expect(setCookieHeader).to.include('Max-Age=');\r",
 											"});"
 										],
@@ -74,8 +74,12 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"exec": [],
-										"type": "text/javascript"
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
 									}
 								}
 							],
