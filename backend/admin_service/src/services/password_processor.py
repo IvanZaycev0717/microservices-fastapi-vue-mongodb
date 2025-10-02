@@ -7,6 +7,17 @@ logger = get_logger("password-processor")
 
 
 def get_password_hash(password: str) -> str | None:
+    """Generate bcrypt hash for password.
+
+    Args:
+        password (str): Plain text password to hash.
+
+    Returns:
+        str | None: Hashed password string if successful, None otherwise.
+
+    Raises:
+        ValueError: If password is empty.
+    """
     if not password:
         error_message = "Password cannot be empty"
         logger.exception(error_message)

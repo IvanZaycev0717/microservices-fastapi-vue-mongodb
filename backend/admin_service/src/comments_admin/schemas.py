@@ -7,8 +7,6 @@ from settings import settings
 
 
 class CreateCommentForm(BaseModel):
-    """Модель для создания нового комментария"""
-
     project_id: str = Field(
         pattern=settings.MONGO_ID_VALID_ID_REGEXP,
         description="ID проекта, к которому относится комментарий",

@@ -50,6 +50,20 @@ async def get_projects(
     lang: Language = Language.EACH,
     sort: SortOrder = SortOrder.DATE_DESC,
 ):
+    """Retrieve all projects with language and sorting options.
+
+    Args:
+        projects_crud: Injected projects CRUD dependency.
+        logger: Injected logger instance for projects admin.
+        lang: Language preference for project data.
+        sort: Sorting order for projects.
+
+    Returns:
+        list: List of project data.
+
+    Raises:
+        HTTPException: If projects not found or internal error occurs.
+    """
     try:
         result = await projects_crud.read_all(lang=lang.value, sort=sort.value)
         if not result:
@@ -73,6 +87,20 @@ async def get_project_by_id(
     ],
     lang: Language = Language.EACH,
 ):
+    """Retrieve a specific project by ID.
+
+    Args:
+        document_id: ID of the project to retrieve.
+        projects_crud: Injected projects CRUD dependency.
+        logger: Injected logger instance for projects admin.
+        lang: Language preference for project data.
+
+    Returns:
+        dict: Project data if found.
+
+    Raises:
+        HTTPException: If project not found or internal error occurs.
+    """
     try:
         result = await projects_crud.read_by_id(document_id, lang.value)
         if not result:
@@ -99,6 +127,21 @@ async def create_project(
     ],
     image: UploadFile = File(description="Project image"),
 ):
+    """Create a new project with image processing and storage.
+
+    Args:
+        form_data: Form data containing project information.
+        projects_crud: Injected projects CRUD dependency.
+        minio_crud: Injected MinIO CRUD dependency for file storage.
+        logger: Injected logger instance for projects admin.
+        image: Uploaded project image file.
+
+    Returns:
+        str: Success message with created project ID.
+
+    Raises:
+        HTTPException: If file validation fails or internal error occurs.
+    """
     try:
         if not await has_image_allowed_extention(image):
             raise HTTPException(400, "Invalid image format")
@@ -166,7 +209,21 @@ async def update_project_image(
     ],
     image: UploadFile = File(description="New project image"),
 ):
-    """Update project image and thumbnail in MinIO and database."""
+    """Update project image with processing and storage.
+
+    Args:
+        document_id: ID of the project to update.
+        projects_crud: Injected projects CRUD dependency.
+        minio_crud: Injected MinIO CRUD dependency for file storage.
+        logger: Injected logger instance for projects admin.
+        image: New project image file to upload.
+
+    Returns:
+        str: Success message.
+
+    Raises:
+        HTTPException: If project not found, file validation fails, or internal error occurs.
+    """
     try:
         project = await projects_crud.read_by_id(document_id, "en")
         if not project:
@@ -243,6 +300,21 @@ async def update_project(
         Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
+    """Update project information.
+
+    Args:
+        document_id: ID of the project to update.
+        request: FastAPI Request object for content type validation.
+        form_data: Form data containing project update information.
+        projects_crud: Injected projects CRUD dependency.
+        logger: Injected logger instance for projects admin.
+
+    Returns:
+        dict: Success message.
+
+    Raises:
+        HTTPException: If project not found, content type invalid, or internal error occurs.
+    """
     try:
         content_type = request.headers.get("content-type", "")
         if "application/x-www-form-urlencoded" not in content_type:
@@ -304,6 +376,17 @@ async def delete_project(
         Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
+    """Delete project and associated images from storage.
+
+    Args:
+        document_id: ID of the project to delete.
+        projects_crud: Injected projects CRUD dependency.
+        minio_crud: Injected MinIO CRUD dependency for file storage.
+        logger: Injected logger instance for projects admin.
+
+    Raises:
+        HTTPException: If project not found or internal error occurs.
+    """
     try:
         if not ObjectId.is_valid(document_id):
             raise HTTPException(400, "Invalid document ID format")

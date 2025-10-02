@@ -46,6 +46,19 @@ async def get_certificates(
     ],
     sort: SortOrder = SortOrder.DATE_DESC,
 ) -> List[Dict[str, Any]]:
+    """Retrieve all certificates with sorting option.
+
+    Args:
+        logger: Injected logger instance for certificates admin.
+        certificates_crud: Injected certificates CRUD dependency.
+        sort: Sorting order for certificates.
+
+    Returns:
+        List[Dict[str, Any]]: List of certificate data.
+
+    Raises:
+        HTTPException: If certificates not found or internal error occurs.
+    """
     try:
         results = await certificates_crud.read_all(sort=sort.value)
         if not results:
@@ -76,6 +89,21 @@ async def create_certificate(
     ],
     file: Annotated[UploadFile, File(description="Certificate PDF or image")],
 ):
+    """Create a new certificate with image processing and storage.
+
+    Args:
+        form_data: Form data containing certificate information.
+        certificates_crud: Injected certificates CRUD dependency.
+        minio_crud: Injected MinIO CRUD dependency for file storage.
+        logger: Injected logger instance for certificates admin.
+        file: Uploaded certificate file (PDF or image).
+
+    Returns:
+        str: Success message with created certificate ID.
+
+    Raises:
+        HTTPException: If file validation fails or internal error occurs.
+    """
     try:
         file_bytes = await file.read()
 
@@ -160,7 +188,19 @@ async def get_certificate_by_id(
         Depends(get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)),
     ],
 ):
-    """Get single certificate by ID."""
+    """Retrieve a specific certificate by ID.
+
+    Args:
+        certificate_id: ID of the certificate to retrieve.
+        certificates_crud: Injected certificates CRUD dependency.
+        logger: Injected logger instance for certificates admin.
+
+    Returns:
+        dict: Certificate data if found.
+
+    Raises:
+        HTTPException: If certificate not found or internal error occurs.
+    """
     try:
         certificate = await certificates_crud.read_one_by_id(certificate_id)
         if not certificate:
@@ -197,7 +237,21 @@ async def update_certificate_image(
     ],
     file: Annotated[UploadFile, File(description="New certificate image")],
 ):
-    """Update only certificate image."""
+    """Update certificate image with processing and storage.
+
+    Args:
+        certificate_id: ID of the certificate to update.
+        certificates_crud: Injected certificates CRUD dependency.
+        minio_crud: Injected MinIO CRUD dependency for file storage.
+        logger: Injected logger instance for certificates admin.
+        file: New certificate image file to upload.
+
+    Returns:
+        str: Success message.
+
+    Raises:
+        HTTPException: If certificate not found, file validation fails, or internal error occurs.
+    """
     try:
         current_cert = await certificates_crud.read_one_by_id(certificate_id)
         if not current_cert:
@@ -302,7 +356,20 @@ async def update_certificate_popularity(
         get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)
     ),
 ):
-    """Update only certificate popularity."""
+    """Update certificate popularity value.
+
+    Args:
+        certificates_crud: Injected certificates CRUD dependency.
+        certificate_id: ID of the certificate to update.
+        popularity: New popularity value within defined boundaries.
+        logger: Injected logger instance for certificates admin.
+
+    Returns:
+        str: Success message.
+
+    Raises:
+        HTTPException: If certificate not found or internal error occurs.
+    """
     try:
         current_cert = await certificates_crud.read_one_by_id(certificate_id)
         if not current_cert:
@@ -339,7 +406,17 @@ async def delete_certificate(
         Depends(get_logger_factory(settings.CONTENT_ADMIN_CERTIFICATES_NAME)),
     ],
 ):
-    """Delete certificate and associated images from storage."""
+    """Delete certificate and associated images from storage.
+
+    Args:
+        certificate_id: ID of the certificate to delete.
+        certificates_crud: Injected certificates CRUD dependency.
+        minio_crud: Injected MinIO CRUD dependency for file storage.
+        logger: Injected logger instance for certificates admin.
+
+    Raises:
+        HTTPException: If certificate not found or internal error occurs.
+    """
     try:
         certificate = await certificates_crud.read_one_by_id(certificate_id)
         if not certificate:

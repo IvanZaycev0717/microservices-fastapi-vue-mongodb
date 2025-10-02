@@ -8,6 +8,17 @@ from settings import settings
 
 
 class NotificationCreate(BaseModel):
+    """Request model for creating notifications.
+
+    Attributes:
+        to_email (EmailStr): Recipient email address.
+        subject (str): Email subject within length boundaries.
+        message (str): Email message within length boundaries.
+
+    Note:
+        Automatically escapes HTML in subject and message fields.
+    """
+
     to_email: EmailStr  # получатель письма
     subject: str = Field(
         min_length=settings.MIN_EMAIL_SUBJECT_LENGHT,
@@ -25,6 +36,18 @@ class NotificationCreate(BaseModel):
 
 
 class NotificationResponse(BaseModel):
+    """Response model for notification data.
+
+    Attributes:
+        id (str): Notification identifier.
+        to_email (EmailStr): Recipient email address.
+        subject (str): Email subject.
+        message (str): Email message content.
+        status (str): Current notification status.
+        created_at (datetime): Creation timestamp.
+        sent_at (datetime | None): Sent timestamp if applicable.
+    """
+
     model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(alias="_id")
@@ -42,6 +65,14 @@ class NotificationResponse(BaseModel):
 
 
 class BanNotification(BaseModel):
+    """Model for ban notification data.
+
+    Attributes:
+        email (EmailStr): Banned user's email address.
+        subject (str): Notification subject.
+        message (str): Notification message content.
+    """
+
     email: EmailStr
     subject: str
     message: str

@@ -11,6 +11,15 @@ async def send_email_task(
     message: str,
     db: AsyncDatabase,
 ):
+    """Background task to send email and update notification status.
+
+    Args:
+        notification_id (str): ID of the notification to update.
+        to_email (str): Recipient email address.
+        subject (str): Email subject.
+        message (str): Email message content.
+        db (AsyncDatabase): Async database instance.
+    """
     try:
         crud = NotificationCRUD(db)
 
@@ -21,5 +30,5 @@ async def send_email_task(
         else:
             await crud.update_status(notification_id, "failed")
 
-    except Exception as e:
+    except Exception:
         pass

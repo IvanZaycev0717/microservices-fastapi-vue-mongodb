@@ -68,7 +68,20 @@ async def has_image_proper_size_kb(image: UploadFile, max_size: int) -> bool:
 async def resize_image(
     image: UploadFile, width: int, height: int, is_gif: bool = False
 ) -> UploadFile:
-    """Resize image with aspect ratio preservation and padding."""
+    """Resize and process image for optimal display.
+
+    Args:
+        image (UploadFile): Image file to process.
+        width (int): Target width for resizing.
+        height (int): Target height for resizing.
+        is_gif (bool): Whether the image is a GIF format.
+
+    Returns:
+        UploadFile: Processed image in WEBP format.
+
+    Raises:
+        HTTPException: If image format is invalid or cannot be processed.
+    """
     image_data = await image.read()
     await image.seek(0)
 

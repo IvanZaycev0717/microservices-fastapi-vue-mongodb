@@ -4,7 +4,11 @@ from settings import settings
 
 
 def get_email_config() -> ConnectionConfig:
-    """Создает и возвращает конфигурацию для Яндекс почты"""
+    """Get email configuration for FastAPI-Mail.
+
+    Returns:
+        ConnectionConfig: Email connection configuration object.
+    """
     return ConnectionConfig(
         MAIL_USERNAME=settings.SMTP_USERNAME.get_secret_value(),
         MAIL_PASSWORD=settings.SMTP_PASSWORD.get_secret_value(),
@@ -19,6 +23,16 @@ def get_email_config() -> ConnectionConfig:
 
 
 async def send_email(to_email: str, subject: str, message: str) -> bool:
+    """Send email using FastAPI-Mail service.
+
+    Args:
+        to_email (str): Recipient email address.
+        subject (str): Email subject.
+        message (str): Email message content.
+
+    Returns:
+        bool: True if email was sent successfully, False otherwise.
+    """
     try:
         conf = get_email_config()
         email_message = MessageSchema(

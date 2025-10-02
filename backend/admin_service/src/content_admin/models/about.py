@@ -21,12 +21,12 @@ class Translation(BaseModel):
     """
 
     title: str = Field(
-        min_length=1,
+        min_length=settings.MIN_TITLE_LENGTH,
         max_length=settings.MAX_TITLE_LENGTH,
         example="Заголовок на языке",
     )
     description: str = Field(
-        min_length=1,
+        min_length=settings.MIN_TITLE_LENGTH,
         max_length=settings.MAX_DESCRIPTION_LENGTH,
         example="Описание на языке",
     )

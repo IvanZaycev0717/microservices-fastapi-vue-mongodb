@@ -92,16 +92,40 @@ async def get_tech_crud(db: AsyncDatabase = Depends(get_db)) -> TechCRUD:
 async def get_projects_crud(
     db: AsyncDatabase = Depends(get_db),
 ) -> ProjectsCRUD:
+    """Get ProjectsCRUD instance for dependency injection.
+
+    Args:
+        db: Injected async database dependency.
+
+    Returns:
+        ProjectsCRUD: Projects CRUD operations instance.
+    """
     return ProjectsCRUD(db)
 
 
 async def get_certificates_crud(
     db: AsyncDatabase = Depends(get_db),
 ) -> CertificatesCRUD:
+    """Get CertificatesCRUD instance for dependency injection.
+
+    Args:
+        db: Injected async database dependency.
+
+    Returns:
+        CertificatesCRUD: Certificates CRUD operations instance.
+    """
     return CertificatesCRUD(db)
 
 
 async def get_publications_crud(
     db: AsyncDatabase = Depends(get_db),
 ) -> PublicationsCRUD:
+    """Get PublicationsCRUD instance for dependency injection.
+
+    Args:
+        db: Injected async database dependency.
+
+    Returns:
+        PublicationsCRUD: Publications CRUD operations instance.
+    """
     return PublicationsCRUD(db)

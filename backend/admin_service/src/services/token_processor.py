@@ -23,6 +23,17 @@ def create_jwt_token(
     secret_key: SecretStr | None = SECRET_KEY,
     algorithm: str = ALGORITHM,
 ) -> str:
+    """Create JWT token with specified payload and expiration.
+
+    Args:
+        data (dict[str, Any]): Payload data to include in token.
+        expires_delta (timedelta): Token expiration time delta.
+        secret_key (SecretStr | None): Secret key for signing.
+        algorithm (str): Algorithm to use for signing.
+
+    Returns:
+        str: Encoded JWT token string.
+    """
     signing_key = jwk_from_dict(
         {"kty": "oct", "k": secret_key.get_secret_value()}
     )
@@ -49,6 +60,19 @@ def verify_jwt_token(
     secret_key: SecretStr | None = SECRET_KEY,
     algorithm: str = ALGORITHM,
 ) -> dict:
+    """Verify and decode JWT token.
+
+    Args:
+        token (str): JWT token string to verify.
+        secret_key (SecretStr | None): Secret key for verification.
+        algorithm (str): Algorithm to use for verification.
+
+    Returns:
+        dict: Decoded token payload.
+
+    Raises:
+        JWTException: If token verification fails.
+    """
     verifying_key = jwk_from_dict(
         {"kty": "oct", "k": secret_key.get_secret_value()}
     )
@@ -70,6 +94,17 @@ def create_token_for_user(
     expires_delta: timedelta,
     roles: list | None = None,
 ) -> str:
+    """Create JWT token for user authentication.
+
+    Args:
+        user_id (str): User identifier.
+        email (str): User's email address.
+        expires_delta (timedelta): Token expiration time delta.
+        roles (list | None): List of user roles.
+
+    Returns:
+        str: Encoded JWT token string.
+    """
     if roles is None:
         roles = ["user"]
 
@@ -85,6 +120,14 @@ def create_token_for_user(
 
 
 def get_user_id_from_token(token: str) -> str | None:
+    """Extract user ID from JWT token without verification.
+
+    Args:
+        token (str): JWT token string.
+
+    Returns:
+        str | None: User ID if found, None otherwise.
+    """
     try:
         payload = _jwt_instance.decode(token, do_verify=False)
         return payload.get("sub")

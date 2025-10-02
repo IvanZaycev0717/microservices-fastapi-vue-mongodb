@@ -81,7 +81,15 @@ class ProjectsCRUD:
         return transformed_results
 
     async def read_by_id(self, project_id: str, lang: str) -> Dict[str, Any]:
-        """Get single project by ID with language support."""
+        """Retrieve a project by ID with optional language translation.
+
+        Args:
+            project_id (str): ID of the project to retrieve.
+            lang (str): Language code for translation ('en' or 'ru').
+
+        Returns:
+            Dict[str, Any]: Project data as dictionary if found, None otherwise.
+        """
         try:
             object_id = ObjectId(project_id)
             item = await self.collection.find_one({"_id": object_id})
@@ -122,7 +130,12 @@ class ProjectsCRUD:
     async def update(
         self, project_id: str, update_data: Dict[str, Any]
     ) -> None:
-        """Update project document by ID."""
+        """Update project document by ID.
+
+        Args:
+            project_id (str): ID of the project to update.
+            update_data (Dict[str, Any]): Dictionary containing fields to update.
+        """
         await self.collection.update_one(
             {"_id": ObjectId(project_id)}, {"$set": update_data}
         )

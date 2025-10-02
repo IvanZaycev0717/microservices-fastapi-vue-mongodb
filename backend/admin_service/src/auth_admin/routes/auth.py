@@ -51,7 +51,18 @@ async def get_all_users(
     ],
     db: Annotated[AsyncDatabase, Depends(get_db)],
 ):
-    """Get all users (admin only)."""
+    """Retrieve all users from the system.
+
+    Args:
+        logger: Injected logger instance for authentication admin.
+        db: Injected async database dependency.
+
+    Returns:
+        list[UserResponse]: List of user response models.
+
+    Raises:
+        HTTPException: If there's an internal server error while fetching users.
+    """
     try:
         logger.info("Fetching all users")
         auth_crud = AuthCRUD(db)
@@ -93,7 +104,20 @@ async def register_user(
     user_data: Annotated[CreateUserForm, Form()],
     db: Annotated[AsyncDatabase, Depends(get_db)],
 ):
-    """Register new user and return access token with refresh token."""
+    """Register a new user in the system.
+
+    Args:
+        response: FastAPI Response object for setting cookies.
+        logger: Injected logger instance for authentication admin.
+        user_data: Form data containing user registration information.
+        db: Injected async database dependency.
+
+    Returns:
+        dict: Authentication tokens and user information.
+
+    Raises:
+        HTTPException: If user already exists, password hashing fails, or internal error occurs.
+    """
     try:
         logger.info(f"Registration attempt for email: {user_data.email}")
         auth_crud = AuthCRUD(db)
@@ -192,7 +216,20 @@ async def login_for_access_token(
     form_data: Annotated[LoginForm, Form()],
     db: Annotated[AsyncDatabase, Depends(get_db)],
 ):
-    """Login user and return access token with refresh token."""
+    """Authenticate user and generate access/refresh tokens.
+
+    Args:
+        response: FastAPI Response object for setting cookies.
+        logger: Injected logger instance for authentication admin.
+        form_data: Form data containing login credentials.
+        db: Injected async database dependency.
+
+    Returns:
+        dict: Authentication tokens and user information.
+
+    Raises:
+        HTTPException: If authentication fails, user is banned, or internal error occurs.
+    """
     try:
         logger.info(f"Login attempt for username: {form_data.email}")
         user_dict = await authenticate_user(
@@ -286,7 +323,18 @@ async def read_users_me(
     ],
     current_user: Annotated[dict, Depends(get_current_active_user)],
 ):
-    """Get current user information."""
+    """Retrieve current authenticated user's profile information.
+
+    Args:
+        logger: Injected logger instance for authentication admin.
+        current_user: Currently authenticated user data from dependency.
+
+    Returns:
+        UserResponse: Current user's profile data.
+
+    Raises:
+        HTTPException: If there's an internal server error while fetching profile.
+    """
     try:
         logger.info(f"Fetching user profile for: {current_user.get('email')}")
 
@@ -334,7 +382,21 @@ async def update_user(
         ),
     ],
 ):
-    """Update user fields (is_banned, roles)."""
+    """Update user information and handle related notifications.
+
+    Args:
+        background_tasks: FastAPI background tasks for async operations.
+        logger: Injected logger instance for authentication admin.
+        update_data: Form data containing user update information.
+        db: Injected async database dependency.
+        email: Email address of the user to update.
+
+    Returns:
+        dict: Success message and update details.
+
+    Raises:
+        HTTPException: If user not found, update fails, or internal error occurs.
+    """
     try:
         auth_crud = AuthCRUD(db)
 
@@ -399,6 +461,17 @@ async def delete_user_by_email(
     ],
     db=Depends(get_db),
 ):
+    """Delete user account and associated tokens.
+
+    Args:
+        background_tasks: FastAPI background tasks for async operations.
+        logger: Injected logger instance for authentication admin.
+        email: Email address of the user to delete.
+        db: Injected async database dependency.
+
+    Raises:
+        HTTPException: If user not found, deletion fails, or internal error occurs.
+    """
     try:
         auth_crud = AuthCRUD(db)
         token_crud = TokenCRUD(db)
@@ -438,7 +511,20 @@ async def refresh_tokens(
     ],
     refresh_token: str = Cookie(None),
 ):
-    """Refresh access token using refresh token."""
+    """Refresh access token using valid refresh token.
+
+    Args:
+        response: FastAPI Response object for setting cookies.
+        db: Injected async database dependency.
+        logger: Injected logger instance for authentication admin.
+        refresh_token: Refresh token from HTTP cookie.
+
+    Returns:
+        dict: New access token and authentication information.
+
+    Raises:
+        HTTPException: If token is missing, invalid, expired, or user is banned.
+    """
     try:
         if not refresh_token:
             raise HTTPException(
@@ -559,7 +645,17 @@ async def logout(
     ],
     refresh_token: str = Cookie(None),
 ):
-    """Invalidate refresh token on logout."""
+    """Logout user by invalidating refresh token and clearing cookie.
+
+    Args:
+        response: FastAPI Response object for clearing cookies.
+        db: Injected async database dependency.
+        logger: Injected logger instance for authentication admin.
+        refresh_token: Refresh token from HTTP cookie.
+
+    Returns:
+        dict: Success message indicating logout completion.
+    """
     response.delete_cookie(
         key=settings.COOKIE_KEY,
         path=settings.COOKIE_PATH,

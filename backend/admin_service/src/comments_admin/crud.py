@@ -11,6 +11,17 @@ class CommentsCRUD:
 
     # CREATE
     async def create_comment(self, comment_data: dict) -> int:
+        """Create a new comment in the database.
+
+        Args:
+            comment_data (dict): Dictionary containing comment attributes.
+
+        Returns:
+            int: ID of the newly created comment.
+
+        Raises:
+            ValueError: If database operation fails.
+        """
         try:
             comment = Comment(**comment_data)
             self.db_session.add(comment)
@@ -24,6 +35,14 @@ class CommentsCRUD:
 
     # READ
     async def read_all_comments(self) -> list[Comment]:
+        """Retrieve all comments from the database.
+
+        Returns:
+            list[Comment]: List of all comments ordered by creation date descending.
+
+        Raises:
+            ValueError: If database operation fails.
+        """
         try:
             stmt = select(Comment).order_by(Comment.created_at.desc())
             result = await self.db_session.execute(stmt)
@@ -32,6 +51,17 @@ class CommentsCRUD:
             raise ValueError(f"Database error reading comments: {str(e)}")
 
     async def read_one_comment(self, comment_id: int) -> Comment:
+        """Retrieve a specific comment by ID.
+
+        Args:
+            comment_id (int): ID of the comment to retrieve.
+
+        Returns:
+            Comment: Comment object with the specified ID.
+
+        Raises:
+            ValueError: If comment not found or database operation fails.
+        """
         try:
             stmt = select(Comment).where(Comment.id == comment_id)
             result = await self.db_session.execute(stmt)
@@ -45,8 +75,16 @@ class CommentsCRUD:
     async def get_comments_by_project_id(
         self, project_id: str
     ) -> list[Comment]:
-        """
-        Получить все комментарии для конкретного проекта
+        """Retrieve all comments for a specific project.
+
+        Args:
+            project_id (str): ID of the project to retrieve comments for.
+
+        Returns:
+            list[Comment]: List of comments for the project ordered by creation date descending.
+
+        Raises:
+            ValueError: If no comments found or database operation fails.
         """
         try:
             stmt = (
@@ -68,6 +106,18 @@ class CommentsCRUD:
 
     # UPDATE
     async def update_comment(self, comment_id: int, new_text: str) -> int:
+        """Update the text of a specific comment.
+
+        Args:
+            comment_id (int): ID of the comment to update.
+            new_text (str): New text content for the comment.
+
+        Returns:
+            int: ID of the updated comment.
+
+        Raises:
+            ValueError: If comment not found or database operation fails.
+        """
         try:
             stmt = (
                 update(Comment)
@@ -85,6 +135,17 @@ class CommentsCRUD:
 
     # DELETE
     async def delete_comment(self, comment_id: int) -> int:
+        """Delete a specific comment from the database.
+
+        Args:
+            comment_id (int): ID of the comment to delete.
+
+        Returns:
+            int: ID of the deleted comment.
+
+        Raises:
+            ValueError: If comment not found or database operation fails.
+        """
         try:
             stmt = delete(Comment).where(Comment.id == comment_id)
             result = await self.db_session.execute(stmt)
@@ -98,9 +159,16 @@ class CommentsCRUD:
 
     # SET DEFAULT COMMENTS OF BANNED USER
     async def set_default_comments_of_banned_user(self, author_id: str) -> int:
-        """
-        Обновляет текст всех комментариев автора на 'Пользователь был забанен'
-        Дочерние комментарии остаются нетронутыми
+        """Update all comments from a banned user to default text.
+
+        Args:
+            author_id (str): ID of the banned user.
+
+        Returns:
+            int: Number of comments that were updated.
+
+        Raises:
+            ValueError: If database operation fails.
         """
         try:
             stmt = (

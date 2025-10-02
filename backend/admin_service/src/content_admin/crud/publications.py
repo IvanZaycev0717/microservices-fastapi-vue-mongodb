@@ -13,11 +13,25 @@ logger = get_logger(settings.CONTENT_ADMIN_PROJECTS_NAME)
 
 
 class PublicationsCRUD:
+    """Handles publications database operations.
+
+    Attributes:
+        collection: MongoDB collection instance for publications data.
+    """
+
     def __init__(self, db: AsyncDatabase):
         self.collection: AsyncCollection = db.publications
 
     # CREATE
     async def create(self, publication_data: dict[str, Any]):
+        """Create a new publication in the database.
+
+        Args:
+            publication_data (dict[str, Any]): Publication data to insert.
+
+        Returns:
+            str: String representation of the inserted document's ID.
+        """
         result = await self.collection.insert_one(publication_data)
         return str(result.inserted_id)
 
@@ -25,6 +39,15 @@ class PublicationsCRUD:
     async def read_all(
         self, lang: str, sort: str = "date_desc"
     ) -> List[Dict[str, Any]]:
+        """Retrieve all publications with sorting and language options.
+
+        Args:
+            lang (str): Language code for translation ('en' or 'ru').
+            sort (str): Sorting criteria ('date_desc', 'date_asc', 'rating_desc').
+
+        Returns:
+            List[Dict[str, Any]]: List of publication data as dictionaries.
+        """
         if sort.startswith("date"):
             sort_field = "date"
             sort_direction = DESCENDING if sort.endswith("desc") else ASCENDING
@@ -66,6 +89,14 @@ class PublicationsCRUD:
         return transformed_results
 
     async def read_by_id(self, publication_id: str):
+        """Retrieve a specific publication by ID.
+
+        Args:
+            publication_id (str): ID of the publication to retrieve.
+
+        Returns:
+            dict: Publication data as dictionary if found, None otherwise.
+        """
         try:
             object_id = ObjectId(publication_id)
             item = await self.collection.find_one({"_id": object_id})
@@ -89,12 +120,26 @@ class PublicationsCRUD:
     async def update(
         self, publication_id: str, update_data: Dict[str, Any]
     ) -> None:
+        """Update publication document by ID.
+
+        Args:
+            publication_id (str): ID of the publication to update.
+            update_data (Dict[str, Any]): Dictionary containing fields to update.
+        """
         await self.collection.update_one(
             {"_id": ObjectId(publication_id)}, {"$set": update_data}
         )
 
     # DELETE
     async def delete(self, document_id: str) -> bool:
+        """Delete a specific document by ID.
+
+        Args:
+            document_id (str): ID of the document to delete.
+
+        Returns:
+            bool: True if document was successfully deleted, False otherwise.
+        """
         result = await self.collection.delete_one(
             {"_id": ObjectId(document_id)}
         )

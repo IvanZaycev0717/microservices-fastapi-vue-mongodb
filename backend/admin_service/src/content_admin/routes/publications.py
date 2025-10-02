@@ -31,7 +31,20 @@ async def get_publications(
     lang: Language = Language.EACH,
     sort: SortOrder = SortOrder.DATE_DESC,
 ) -> List[Dict[str, Any]]:
-    """Get all publications with language support and sorting."""
+    """Retrieve all publications with language and sorting options.
+
+    Args:
+        publications_crud: Injected publications CRUD dependency.
+        logger: Injected logger instance for publications admin.
+        lang: Language preference for publication data.
+        sort: Sorting order for publications.
+
+    Returns:
+        List[Dict[str, Any]]: List of publication data.
+
+    Raises:
+        HTTPException: If publications not found or internal error occurs.
+    """
     try:
         results = await publications_crud.read_all(
             lang=lang.value, sort=sort.value
@@ -62,6 +75,19 @@ async def get_publication_by_id(
         Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
+    """Retrieve a specific publication by ID.
+
+    Args:
+        document_id: ID of the publication to retrieve.
+        publications_crud: Injected publications CRUD dependency.
+        logger: Injected logger instance for publications admin.
+
+    Returns:
+        dict: Publication data if found.
+
+    Raises:
+        HTTPException: If publication not found or internal error occurs.
+    """
     try:
         result = await publications_crud.read_by_id(document_id)
         if result is None:
@@ -88,6 +114,19 @@ async def create_publication(
         Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
+    """Create a new publication.
+
+    Args:
+        publications_crud: Injected publications CRUD dependency.
+        form_data: Form data containing publication information.
+        logger: Injected logger instance for publications admin.
+
+    Returns:
+        str: Success message with created publication ID.
+
+    Raises:
+        HTTPException: If internal error occurs.
+    """
     try:
         publication_data = {
             "title": {"en": form_data.title_en, "ru": form_data.title_ru},
@@ -117,6 +156,20 @@ async def update_publication(
         Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
+    """Update publication information.
+
+    Args:
+        document_id: ID of the publication to update.
+        publications_crud: Injected publications CRUD dependency.
+        form_data: Form data containing publication update information.
+        logger: Injected logger instance for publications admin.
+
+    Returns:
+        dict: Success message.
+
+    Raises:
+        HTTPException: If publication not found or internal error occurs.
+    """
     try:
         if not ObjectId.is_valid(document_id):
             raise HTTPException(404, f"Invalid Document ID': {document_id}")
@@ -169,6 +222,19 @@ async def delete_publication(
         Depends(get_logger_factory(settings.CONTENT_ADMIN_PROJECTS_NAME)),
     ],
 ):
+    """Delete a specific publication by ID.
+
+    Args:
+        document_id: ID of the publication to delete.
+        publications_crud: Injected publications CRUD dependency.
+        logger: Injected logger instance for publications admin.
+
+    Returns:
+        str: Success message.
+
+    Raises:
+        HTTPException: If publication not found or internal error occurs.
+    """
     try:
         publication = await publications_crud.read_by_id(document_id)
         if not publication:

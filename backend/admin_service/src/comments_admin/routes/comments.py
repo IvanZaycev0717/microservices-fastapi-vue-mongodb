@@ -30,6 +30,19 @@ async def create_comment(
         Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
     ],
 ):
+    """Create a new comment in the system.
+
+    Args:
+        db_session: Injected database session dependency.
+        comment: Form data containing comment information.
+        logger: Injected logger instance for comments admin.
+
+    Returns:
+        dict: Success message with created comment ID.
+
+    Raises:
+        HTTPException: If validation fails or internal error occurs.
+    """
     try:
         comments_crud = CommentsCRUD(db_session)
         comment_data = {
@@ -68,6 +81,18 @@ async def get_all_comments(
         Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
     ],
 ):
+    """Retrieve all comments from the system.
+
+    Args:
+        db_session: Injected database session dependency.
+        logger: Injected logger instance for comments admin.
+
+    Returns:
+        list[CommentResponse]: List of all comment responses.
+
+    Raises:
+        HTTPException: If retrieval fails or internal error occurs.
+    """
     try:
         crud = CommentsCRUD(db_session)
         comments = await crud.read_all_comments()
@@ -95,6 +120,19 @@ async def get_comment(
         Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
     ],
 ):
+    """Retrieve a specific comment by ID.
+
+    Args:
+        comment_id: ID of the comment to retrieve (must be >= 1).
+        db_session: Injected database session dependency.
+        logger: Injected logger instance for comments admin.
+
+    Returns:
+        CommentResponse: Requested comment data.
+
+    Raises:
+        HTTPException: If comment not found or internal error occurs.
+    """
     try:
         crud = CommentsCRUD(db_session)
         comment = await crud.read_one_comment(comment_id)
@@ -124,7 +162,19 @@ async def get_comments_by_project_id(
         Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
     ],
 ):
-    """Получить все комментарии для конкретного проекта"""
+    """Retrieve all comments for a specific project.
+
+    Args:
+        project_id: ID of the project to retrieve comments for.
+        db_session: Injected database session dependency.
+        logger: Injected logger instance for comments admin.
+
+    Returns:
+        list[CommentResponse]: List of comment responses for the project.
+
+    Raises:
+        HTTPException: If project not found or internal error occurs.
+    """
     try:
         crud = CommentsCRUD(db_session)
         comments = await crud.get_comments_by_project_id(project_id)
@@ -159,6 +209,20 @@ async def update_comment(
         Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
     ],
 ):
+    """Update comment text for a specific comment.
+
+    Args:
+        comment_id: ID of the comment to update (must be >= 1).
+        update_data: Request data containing new comment text.
+        db_session: Injected database session dependency.
+        logger: Injected logger instance for comments admin.
+
+    Returns:
+        dict: Success message with updated comment ID.
+
+    Raises:
+        HTTPException: If comment not found or internal error occurs.
+    """
     try:
         crud = CommentsCRUD(db_session)
         updated_id = await crud.update_comment(
@@ -190,6 +254,19 @@ async def delete_comment(
         Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
     ],
 ):
+    """Delete a specific comment by ID.
+
+    Args:
+        comment_id: ID of the comment to delete (must be >= 1).
+        db_session: Injected database session dependency.
+        logger: Injected logger instance for comments admin.
+
+    Returns:
+        dict: Success message with deleted comment ID.
+
+    Raises:
+        HTTPException: If comment not found or internal error occurs.
+    """
     try:
         crud = CommentsCRUD(db_session)
         deleted_id = await crud.delete_comment(comment_id)
@@ -219,6 +296,19 @@ async def ban_user_comments(
         Depends(get_logger_factory(settings.COMMENTS_ADMIN_NAME)),
     ],
 ):
+    """Ban user and update all their comments to default state.
+
+    Args:
+        author_id: ID of the user to ban.
+        db_session: Injected database session dependency.
+        logger: Injected logger instance for comments admin.
+
+    Returns:
+        dict: Success message with count of updated comments.
+
+    Raises:
+        HTTPException: If operation fails or internal error occurs.
+    """
     try:
         crud = CommentsCRUD(db_session)
         updated_count = await crud.set_default_comments_of_banned_user(

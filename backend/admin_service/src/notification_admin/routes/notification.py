@@ -35,7 +35,18 @@ async def get_all_notifications(
         Depends(get_logger_factory(settings.NOTIFICATION_ADMIN_NAME)),
     ],
 ):
-    """Получить все уведомления"""
+    """Retrieve all notifications from the system.
+
+    Args:
+        db: Injected async database dependency.
+        logger: Injected logger instance for notification admin.
+
+    Returns:
+        list[NotificationResponse]: List of notification responses.
+
+    Raises:
+        HTTPException: If internal error occurs while fetching notifications.
+    """
     try:
         crud = NotificationCRUD(db)
         notifications_data = await crud.get_all()
@@ -64,7 +75,19 @@ async def get_notifications_by_email(
         Depends(get_logger_factory(settings.NOTIFICATION_ADMIN_NAME)),
     ],
 ):
-    """Получить все уведомления по email получателя"""
+    """Retrieve notifications for a specific email address.
+
+    Args:
+        email: Email address to filter notifications by.
+        db: Injected async database dependency.
+        logger: Injected logger instance for notification admin.
+
+    Returns:
+        list[NotificationResponse]: List of notification responses for the email.
+
+    Raises:
+        HTTPException: If no notifications found or internal error occurs.
+    """
     try:
         crud = NotificationCRUD(db)
         notifications_data = await crud.get_by_email(email)
@@ -72,7 +95,8 @@ async def get_notifications_by_email(
         if not notifications_data:
             logger.info(f"No notifications found for {email}")
             raise HTTPException(
-                status_code=404, detail="No notifications found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No notifications found",
             )
 
         logger.info(
@@ -85,7 +109,8 @@ async def get_notifications_by_email(
     except Exception as e:
         logger.error(f"Error getting notifications for {email}: {e}")
         raise HTTPException(
-            status_code=500, detail="Error getting notifications"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error getting notifications",
         )
 
 
@@ -102,6 +127,19 @@ async def create_notification(
     ],
     db: Annotated[AsyncDatabase, Depends(get_notification_db)],
 ):
+    """Create a new notification.
+
+    Args:
+        notification: Notification data to create.
+        logger: Injected logger instance for notification admin.
+        db: Injected async database dependency.
+
+    Returns:
+        NotificationResponse: Created notification response.
+
+    Raises:
+        HTTPException: If validation fails or internal error occurs.
+    """
     crud = NotificationCRUD(db)
 
     try:
@@ -141,14 +179,27 @@ async def delete_notification(
         Depends(get_logger_factory(settings.NOTIFICATION_ADMIN_NAME)),
     ],
 ):
-    """Удалить уведомление по ID"""
+    """Delete a specific notification by ID.
+
+    Args:
+        notification_id: ID of the notification to delete.
+        db: Injected async database dependency.
+        logger: Injected logger instance for notification admin.
+
+    Returns:
+        dict: Success message.
+
+    Raises:
+        HTTPException: If notification not found or internal error occurs.
+    """
     try:
         crud = NotificationCRUD(db)
         deleted = await crud.delete(notification_id)
 
         if not deleted:
             raise HTTPException(
-                status_code=404, detail="Notification not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Notification not found",
             )
 
         logger.info(f"Notification {notification_id} deleted successfully")
@@ -159,7 +210,8 @@ async def delete_notification(
     except Exception as e:
         logger.error(f"Error deleting notification {notification_id}: {e}")
         raise HTTPException(
-            status_code=500, detail="Error deleting notification"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error deleting notification",
         )
 
 
@@ -174,7 +226,20 @@ async def ban_notification(
         Depends(get_logger_factory(settings.NOTIFICATION_ADMIN_NAME)),
     ],
 ):
-    """Эндпоинт для получения вебхука о блокировке пользователя"""
+    """Create a ban notification and optionally send email.
+
+    Args:
+        ban_data: Ban notification data.
+        background_tasks: FastAPI background tasks for async operations.
+        db: Injected async database dependency.
+        logger: Injected logger instance for notification admin.
+
+    Returns:
+        dict: Success message.
+
+    Raises:
+        HTTPException: If internal error occurs.
+    """
     try:
         notification = NotificationCreate(
             to_email=ban_data.email,
@@ -200,7 +265,10 @@ async def ban_notification(
 
     except Exception as e:
         logger.error(f"Error creating ban notification: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post("/account-deleted")
@@ -213,7 +281,20 @@ async def account_deleted_notification(
         Depends(get_logger_factory(settings.NOTIFICATION_ADMIN_NAME)),
     ],
 ):
-    """Эндпоинт для получения вебхука об удалении аккаунта пользователя"""
+    """Create an account deletion notification and optionally send email.
+
+    Args:
+        notification_data: Account deletion notification data.
+        background_tasks: FastAPI background tasks for async operations.
+        db: Injected async database dependency.
+        logger: Injected logger instance for notification admin.
+
+    Returns:
+        dict: Success message.
+
+    Raises:
+        HTTPException: If internal error occurs.
+    """
     try:
         notification = NotificationCreate(
             to_email=notification_data.email,
@@ -241,4 +322,7 @@ async def account_deleted_notification(
 
     except Exception as e:
         logger.error(f"Error creating account deletion notification: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )

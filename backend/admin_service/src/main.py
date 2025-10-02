@@ -217,7 +217,6 @@ async def lifespan(app: FastAPI):
             if connection and name != "comments_admin":
                 close_tasks.append(connection.close_connection())
 
-        # Закрываем PostgreSQL соединение
         if "comments_admin" in connections and connections["comments_admin"]:
             close_tasks.append(
                 connections["comments_admin"].close_connection()
@@ -275,6 +274,18 @@ app.add_middleware(
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    """Middleware to log HTTP requests and responses.
+
+    Args:
+        request: Incoming HTTP request.
+        call_next: Next middleware or route handler.
+
+    Returns:
+        Response: HTTP response from the next handler.
+
+    Raises:
+        Exception: Re-raises any exceptions from the request processing.
+    """
     logger.info(f"Request: {request.method} {request.url}")
     try:
         response = await call_next(request)
@@ -292,12 +303,22 @@ async def log_requests(request: Request, call_next):
 
 @app.get("/", tags=["Admin Service Maintenance"])
 async def root():
+    """Root endpoint for service health check.
+
+    Returns:
+        dict: Service status message.
+    """
     logger.info("Root endpoint accessed")
     return {"message": "Content Service is running"}
 
 
 @app.get("/health", tags=["Admin Service Maintenance"])
 async def health_check():
+    """Health check endpoint for service monitoring.
+
+    Returns:
+        dict: Service health status and database connection state.
+    """
     logger.debug("Health check endpoint accessed")
     try:
         logger.info("Health check: MongoDB connection OK")
@@ -314,7 +335,19 @@ async def health_check():
 async def ensure_mongo_database(
     connection_manager: MongoConnectionManager, db_name: str, manager_name: str
 ):
-    """Универсальная функция для создания/проверки MongoDB базы"""
+    """Ensure MongoDB database exists and return client and database instances.
+
+    Args:
+        connection_manager (MongoConnectionManager): MongoDB connection manager.
+        db_name (str): Name of the database to ensure.
+        manager_name (str): Descriptive name for the database manager.
+
+    Returns:
+        tuple: MongoDB client and database instances.
+
+    Raises:
+        Exception: If database creation or connection fails.
+    """
     client = None
     try:
         client = await connection_manager.open_connection()

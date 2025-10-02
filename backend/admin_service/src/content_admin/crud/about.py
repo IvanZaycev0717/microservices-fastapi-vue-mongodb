@@ -16,16 +16,39 @@ logger = get_logger(settings.CONTENT_ADMIN_ABOUT_NAME)
 
 
 class AboutCRUD:
+    """Handles about section database operations.
+
+    Attributes:
+        collection: MongoDB collection instance for about data.
+    """
+
     def __init__(self, db: AsyncDatabase):
         self.collection: AsyncCollection = db.about
 
     # CREATE
     async def create(self, data: dict[str, Any]) -> str:
+        """Create a new document in the collection.
+
+        Args:
+            data (dict[str, Any]): Document data to insert.
+
+        Returns:
+            str: String representation of the inserted document's ID.
+        """
         result = await self.collection.insert_one(data)
         return str(result.inserted_id)
 
     # READ
     async def read_all(self, lang: str | None = None) -> list[dict[str, Any]]:
+        """Retrieve all documents from the collection.
+
+        Args:
+            lang (str | None): Language code for translation ('en' or 'ru').
+                              If None or invalid, returns full response.
+
+        Returns:
+            list[dict[str, Any]]: List of documents as dictionaries.
+        """
         if not lang or (lang not in ("en", "ru")):
             cursor = self.collection.find()
             results = await cursor.to_list(length=None)
@@ -51,19 +74,15 @@ class AboutCRUD:
     async def read_one(
         self, document_id: str, lang: str | None = None
     ) -> dict[str, Any] | None:
-        """Get a single document by ID with optional language filtering.
+        """Retrieve a specific document by ID.
 
         Args:
-            document_id: String representation of the document's ObjectId.
-            lang: Optional language code ('en' or 'ru') for translated response.
+            document_id (str): ID of the document to retrieve.
+            lang (str | None): Language code for translation ('en' or 'ru').
+                              If None, returns full response.
 
         Returns:
-            Dict representation of AboutFullResponse or AboutTranslatedResponse if found,
-            None otherwise.
-
-        Raises:
-            ValueError: If the provided document_id is not a valid ObjectId.
-            Exception: For any other database errors during fetch operation.
+            dict[str, Any] | None: Document data as dictionary if found, None otherwise.
         """
         try:
             if not lang:
@@ -102,18 +121,14 @@ class AboutCRUD:
     async def update(
         self, document_id: str, update_data: dict[str, Any]
     ) -> bool:
-        """Update a document by its ID with provided data.
+        """Update a specific document by ID.
 
         Args:
-            document_id: The string representation of the document's ObjectId.
-            update_data: Dictionary with fields to update.
+            document_id (str): ID of the document to update.
+            update_data (dict[str, Any]): Dictionary containing fields to update.
 
         Returns:
-            bool: True if document was successfully updated, False if document not found.
-
-        Raises:
-            ValueError: If the provided document_id is not a valid ObjectId.
-            Exception: For any other database errors during update.
+            bool: True if document was successfully updated, False otherwise.
         """
         result = await self.collection.update_one(
             {"_id": ObjectId(document_id)}, {"$set": update_data}
@@ -130,17 +145,13 @@ class AboutCRUD:
 
     # DELETE
     async def delete(self, document_id: str) -> bool:
-        """Delete a document by its ID from the collection.
+        """Delete a specific document by ID.
 
         Args:
-            document_id: The string representation of the document's ObjectId.
+            document_id (str): ID of the document to delete.
 
         Returns:
-            bool: True if document was successfully deleted, False if document not found.
-
-        Raises:
-            ValueError: If the provided document_id is not a valid ObjectId.
-            Exception: For any other database errors during deletion.
+            bool: True if document was successfully deleted, False otherwise.
         """
         result = await self.collection.delete_one(
             {"_id": ObjectId(document_id)}
