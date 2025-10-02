@@ -1,11 +1,11 @@
 <template>
   <q-card class="notification-card q-mb-md">
     <div class="card-actions">
-      <q-btn 
-        icon="delete" 
-        color="negative" 
-        size="sm" 
-        round 
+      <q-btn
+        icon="delete"
+        color="negative"
+        size="sm"
+        round
         flat
         class="action-btn"
         @click="handleDelete"
@@ -26,13 +26,9 @@
           </div>
         </div>
 
-        <!-- Мета-информация -->
         <div class="col-12 col-md-4">
           <div class="row items-center q-gutter-xs q-mb-sm">
-            <q-badge 
-              :color="getStatusColor(notification.status)" 
-              class="q-px-sm q-py-xs"
-            >
+            <q-badge :color="getStatusColor(notification.status)" class="q-px-sm q-py-xs">
               {{ notification.status }}
             </q-badge>
           </div>
@@ -44,9 +40,7 @@
             <q-icon name="send" class="q-mr-xs" size="14px" />
             Sent: {{ formatDate(notification.sent_at) }}
           </div>
-          <div class="text-caption text-grey q-mt-xs">
-            ID: {{ notification._id }}
-          </div>
+          <div class="text-caption text-grey q-mt-xs">ID: {{ notification._id }}</div>
         </div>
       </div>
     </q-card-section>
@@ -69,9 +63,9 @@ const props = defineProps({
       message: '',
       status: '',
       created_at: '',
-      sent_at: ''
-    })
-  }
+      sent_at: '',
+    }),
+  },
 })
 
 const emit = defineEmits(['delete'])
@@ -84,15 +78,15 @@ const formatDate = (dateString) => {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
 const getStatusColor = (status) => {
   const statusColors = {
-    'sent': 'positive',
-    'failed': 'negative',
-    'pending': 'warning'
+    sent: 'positive',
+    failed: 'negative',
+    pending: 'warning',
   }
   return statusColors[status] || 'grey'
 }
@@ -102,7 +96,7 @@ const handleDelete = () => {
     title: 'Confirm Delete',
     message: `Are you sure you want to delete this notification for "${props.notification.to_email}"?`,
     cancel: true,
-    persistent: true
+    persistent: true,
   }).onOk(async () => {
     try {
       deleteLoading.value = true
@@ -111,7 +105,7 @@ const handleDelete = () => {
       $q.notify({
         type: 'negative',
         message: error,
-        position: 'top'
+        position: 'top',
       })
     } finally {
       deleteLoading.value = false
@@ -136,7 +130,7 @@ const handleDelete = () => {
 .action-btn {
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(4px);
-  
+
   &:hover {
     background-color: rgba(255, 255, 255, 1);
   }

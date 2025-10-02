@@ -1,13 +1,12 @@
 <template>
   <q-dialog v-model="showModal">
-    <q-card style="width: 700px; max-width: 90vw;">
+    <q-card style="width: 700px; max-width: 90vw">
       <q-card-section>
         <div class="text-h6">Edit Project</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
         <q-form @submit="handleUpdate" class="q-gutter-md">
-          <!-- Загрузка изображения -->
           <div class="row items-center q-gutter-md">
             <q-file
               v-model="imageFile"
@@ -23,13 +22,12 @@
               </template>
             </q-file>
 
-            <!-- Preview изображения -->
             <div class="image-preview">
               <q-img
                 :src="imagePreview || currentProject.thumbnail"
                 height="100px"
                 width="100px"
-                style="border-radius: 4px;"
+                style="border-radius: 4px"
               />
               <div v-if="imageFile" class="text-caption text-center q-mt-xs">
                 {{ getFileSize(imageFile) }}
@@ -37,47 +35,44 @@
             </div>
           </div>
 
-          <!-- Русская версия -->
           <div class="text-h6">Russian Version</div>
           <q-input
             v-model="formData.title_ru"
             label="Title RU"
-            :rules="[val => !!val || 'Title is required']"
+            :rules="[(val) => !!val || 'Title is required']"
             outlined
           />
           <q-input
             v-model="formData.description_ru"
             label="Description RU"
             type="textarea"
-            :rules="[val => !!val || 'Description is required']"
+            :rules="[(val) => !!val || 'Description is required']"
             outlined
             rows="3"
           />
 
-          <!-- Английская версия -->
           <div class="text-h6">English Version</div>
           <q-input
             v-model="formData.title_en"
             label="Title EN"
-            :rules="[val => !!val || 'Title is required']"
+            :rules="[(val) => !!val || 'Title is required']"
             outlined
           />
           <q-input
             v-model="formData.description_en"
             label="Description EN"
             type="textarea"
-            :rules="[val => !!val || 'Description is required']"
+            :rules="[(val) => !!val || 'Description is required']"
             outlined
             rows="3"
           />
 
-          <!-- Ссылка и популярность -->
           <div class="row q-col-gutter-md">
             <div class="col-8">
               <q-input
                 v-model="formData.link"
                 label="Project Link"
-                :rules="[val => !!val || 'Link is required', isValidUrl]"
+                :rules="[(val) => !!val || 'Link is required', isValidUrl]"
                 outlined
               />
             </div>
@@ -119,7 +114,7 @@ const currentProject = reactive({
   description: { en: '', ru: '' },
   thumbnail: '',
   link: '',
-  popularity: 0
+  popularity: 0,
 })
 
 const formData = reactive({
@@ -128,17 +123,18 @@ const formData = reactive({
   title_en: '',
   description_en: '',
   link: '',
-  popularity: 0
+  popularity: 0,
 })
 
-// Отслеживаем изменения
 const hasTextChanges = computed(() => {
-  return formData.title_ru !== currentProject.title.ru ||
-         formData.description_ru !== currentProject.description.ru ||
-         formData.title_en !== currentProject.title.en ||
-         formData.description_en !== currentProject.description.en ||
-         formData.link !== currentProject.link ||
-         formData.popularity !== currentProject.popularity
+  return (
+    formData.title_ru !== currentProject.title.ru ||
+    formData.description_ru !== currentProject.description.ru ||
+    formData.title_en !== currentProject.title.en ||
+    formData.description_en !== currentProject.description.en ||
+    formData.link !== currentProject.link ||
+    formData.popularity !== currentProject.popularity
+  )
 })
 
 const hasImageChanges = computed(() => {
@@ -175,7 +171,7 @@ const onFileSelected = (file) => {
 const onFileRejected = (rejectedEntries) => {
   $q.notify({
     type: 'negative',
-    message: rejectedEntries
+    message: rejectedEntries,
   })
 }
 
@@ -187,19 +183,17 @@ const open = async (projectId) => {
   try {
     const response = await getProjectById(projectId)
     Object.assign(currentProject, response.data)
-    
-    // Предзаполняем форму
+
     formData.title_ru = currentProject.title.ru
     formData.description_ru = currentProject.description.ru
     formData.title_en = currentProject.title.en
     formData.description_en = currentProject.description.en
     formData.link = currentProject.link
     formData.popularity = currentProject.popularity
-    
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: error
+      message: error,
     })
     showModal.value = false
   } finally {
@@ -211,29 +205,26 @@ const handleUpdate = async () => {
   loading.value = true
 
   try {
-    // Обновляем текст если есть изменения
     if (hasTextChanges.value) {
       await updateProjectText(currentProjectId.value, formData)
     }
 
-    // Обновляем изображение если есть изменения
     if (hasImageChanges.value) {
       await updateProjectImage(currentProjectId.value, imageFile.value)
     }
 
     $q.notify({
       type: 'positive',
-      message: 'Project updated successfully!'
+      message: 'Project updated successfully!',
     })
-    
+
     showModal.value = false
     resetForm()
     emit('updated')
-    
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: error.response?.data?.detail || 'Failed to update project'
+      message: error.response?.data?.detail || 'Failed to update project',
     })
   } finally {
     loading.value = false
@@ -249,7 +240,7 @@ const resetForm = () => {
 
 const emit = defineEmits(['updated'])
 defineExpose({
-  open
+  open,
 })
 </script>
 
@@ -258,7 +249,7 @@ defineExpose({
   border: 2px dashed #ccc;
   border-radius: 4px;
   padding: 4px;
-  
+
   .text-caption {
     color: #666;
   }

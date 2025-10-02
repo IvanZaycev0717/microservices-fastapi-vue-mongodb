@@ -63,8 +63,8 @@ export default boot(({ app, router }) => {
 export function createAboutCard(formData) {
   return api.post('/about', formData, {
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
   })
 }
 
@@ -90,7 +90,6 @@ export function logoutUser() {
   )
 }
 
-
 // ABOUT
 export function getAboutCardById(document_id) {
   return api.get(`/about/${document_id}`)
@@ -102,29 +101,31 @@ export function updateAboutText(document_id, textData) {
   formData.append('description_en', textData.description_en)
   formData.append('title_ru', textData.title_ru)
   formData.append('description_ru', textData.description_ru)
-  
+
   return api.patch(`/about/${document_id}`, formData, {
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   })
 }
 
 export function updateAboutImage(document_id, imageFile) {
   const formData = new FormData()
   formData.append('image', imageFile)
-  
+
   return api.patch(`/about/${document_id}/image`, formData, {
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
   })
 }
 
+// TECH
 export function updateTechSkills(kingdomName, skillsData) {
   return api.patch(`/technologies/${kingdomName}`, skillsData)
 }
 
+// PROJECTS
 export function getProjects() {
   return api.get('/projects')
 }
@@ -132,15 +133,14 @@ export function getProjects() {
 export function createProject(formData) {
   return api.post('/projects', formData, {
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
   })
 }
 
 export function deleteProject(documentId) {
   return api.delete(`/projects/${documentId}`)
 }
-
 
 export function getProjectById(documentId) {
   return api.get(`/projects/${documentId}`)
@@ -154,22 +154,22 @@ export function updateProjectText(documentId, textData) {
   formData.append('description_ru', textData.description_ru)
   formData.append('link', textData.link)
   formData.append('popularity', textData.popularity.toString())
-  
+
   return api.patch(`/projects/${documentId}`, formData, {
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   })
 }
 
 export function updateProjectImage(documentId, imageFile) {
   const formData = new FormData()
   formData.append('image', imageFile)
-  
+
   return api.patch(`/projects/${documentId}/image`, formData, {
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
   })
 }
 
@@ -185,27 +185,27 @@ export function getCertificateById(certificateId) {
 export function createCertificate(formData) {
   return api.post('/certificates', formData, {
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
   })
 }
 
 export function updateCertificateImage(certificateId, formData) {
   return api.patch(`/certificates/${certificateId}/image`, formData, {
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
   })
 }
 
 export function updateCertificatePopularity(certificateId, popularity) {
   const formData = new URLSearchParams()
   formData.append('popularity', popularity.toString())
-  
+
   return api.patch(`/certificates/${certificateId}`, formData, {
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   })
 }
 
@@ -233,8 +233,8 @@ export function createPublication(publicationData) {
 
   return api.post('/publications', formData, {
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   })
 }
 
@@ -248,8 +248,8 @@ export function updatePublication(documentId, publicationData) {
 
   return api.patch(`/publications/${documentId}`, formData, {
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   })
 }
 
@@ -257,7 +257,7 @@ export function deletePublication(documentId) {
   return api.delete(`/publications/${documentId}`)
 }
 
-// AUTH - User Management
+// AUTH
 export function getUsers() {
   return api.get('/auth')
 }
@@ -266,39 +266,37 @@ export function registerUser(userData) {
   const formData = new URLSearchParams()
   formData.append('email', userData.email)
   formData.append('password', userData.password)
-  
-  // roles должен быть массивом строк
+
   if (userData.roles && userData.roles.length > 0) {
-    userData.roles.forEach(role => {
+    userData.roles.forEach((role) => {
       formData.append('roles', role)
     })
   }
 
   return api.post('/auth/register', formData, {
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   })
 }
 
 export function updateUser(email, updateData) {
   const formData = new URLSearchParams()
-  
+
   if (updateData.is_banned !== undefined) {
     formData.append('is_banned', updateData.is_banned.toString())
   }
-  
+
   if (updateData.roles !== undefined) {
-    // roles должен быть массивом строк
-    updateData.roles.forEach(role => {
+    updateData.roles.forEach((role) => {
       formData.append('roles', role)
     })
   }
 
   return api.patch(`/auth/update/${email}`, formData, {
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   })
 }
 
@@ -306,13 +304,11 @@ export function deleteUser(email) {
   const formData = new URLSearchParams()
   formData.append('email', email)
 
-  console.log('Sending delete request for email:', email) // Лог для отладки
-
   return api.delete('/auth/delete', {
     data: formData,
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   })
 }
 
@@ -332,16 +328,16 @@ export function getCommentById(commentId) {
 export function createComment(commentData) {
   return api.post('/comments', commentData, {
     headers: {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   })
 }
 
 export function updateComment(commentId, updateData) {
   return api.patch(`/comments/${commentId}`, updateData, {
     headers: {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   })
 }
 
@@ -352,8 +348,6 @@ export function deleteComment(commentId) {
 export function banUserComments(authorId) {
   return api.patch(`/comments/ban_user/${authorId}`)
 }
-
-
 
 // NOTIFICATIONS
 export function getNotifications() {
@@ -371,11 +365,9 @@ export function deleteNotification(notificationId) {
 export function createNotification(notificationData) {
   return api.post('/notifications', notificationData, {
     headers: {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   })
 }
-
-
 
 export { axios, api }

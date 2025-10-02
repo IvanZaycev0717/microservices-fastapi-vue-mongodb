@@ -11,7 +11,6 @@
 
       <q-card-section class="q-pa-none">
         <div class="row full-height">
-          <!-- Список комментариев -->
           <div class="col-12 col-md-8 q-pa-md">
             <div v-if="loading" class="text-center q-pa-lg">
               <q-spinner size="50px" color="primary" />
@@ -37,7 +36,6 @@
             </div>
           </div>
 
-          <!-- Информация о проекте -->
           <div class="col-12 col-md-4 bg-grey-2 q-pa-md">
             <div class="text-h6 q-mb-md">Project Info</div>
             <q-img
@@ -48,14 +46,9 @@
             />
             <div class="text-weight-medium">{{ project?.title?.ru }}</div>
             <div class="text-caption text-grey">{{ project?.title?.en }}</div>
-            <div class="text-caption text-grey q-mt-sm">
-              Popularity: {{ project?.popularity }}
-            </div>
-            <div class="text-caption text-grey">
-              Date: {{ formatDate(project?.date) }}
-            </div>
-            
-            <!-- Статистика комментариев -->
+            <div class="text-caption text-grey q-mt-sm">Popularity: {{ project?.popularity }}</div>
+            <div class="text-caption text-grey">Date: {{ formatDate(project?.date) }}</div>
+
             <div class="q-mt-lg">
               <div class="text-weight-medium">Comments Statistics</div>
               <div class="text-caption">Total: {{ comments.length }}</div>
@@ -80,16 +73,12 @@ const project = ref(null)
 const comments = ref([])
 const loading = ref(false)
 
-// Сортируем комментарии по дате создания (от старых к новым)
 const sortedComments = computed(() => {
-  return [...comments.value].sort((a, b) => 
-    new Date(a.created_at) - new Date(b.created_at)
-  )
+  return [...comments.value].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
 })
 
-// Корневые комментарии (без parent_comment_id)
 const rootComments = computed(() => {
-  return sortedComments.value.filter(comment => comment.parent_comment_id === null)
+  return sortedComments.value.filter((comment) => comment.parent_comment_id === null)
 })
 
 const formatDate = (dateString) => {
@@ -97,33 +86,27 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('ru-RU')
 }
 
-// Обработчик удаления комментария
 const handleCommentDeleted = (deletedCommentId) => {
-  // Удаляем комментарий из локального списка
-  comments.value = comments.value.filter(comment => comment.id !== deletedCommentId)
-  
-  // Также нужно удалить все дочерние комментарии (из-за CASCADE в БД)
+  comments.value = comments.value.filter((comment) => comment.id !== deletedCommentId)
+
   const removeChildren = (parentId) => {
-    const children = comments.value.filter(comment => comment.parent_comment_id === parentId)
-    children.forEach(child => {
-      comments.value = comments.value.filter(c => c.id !== child.id)
-      removeChildren(child.id) // Рекурсивно удаляем детей
+    const children = comments.value.filter((comment) => comment.parent_comment_id === parentId)
+    children.forEach((child) => {
+      comments.value = comments.value.filter((c) => c.id !== child.id)
+      removeChildren(child.id)
     })
   }
-  
+
   removeChildren(deletedCommentId)
 }
 
-// Обработчик обновления комментария
 const handleCommentUpdated = (updatedComment) => {
-  // Обновляем комментарий в локальном списке
-  const index = comments.value.findIndex(comment => comment.id === updatedComment.id)
+  const index = comments.value.findIndex((comment) => comment.id === updatedComment.id)
   if (index !== -1) {
     comments.value[index].comment_text = updatedComment.new_text
   }
 }
 
-// Метод для открытия модального окна
 const open = async (selectedProject) => {
   showModal.value = true
   project.value = selectedProject
@@ -137,7 +120,7 @@ const open = async (selectedProject) => {
     $q.notify({
       type: 'negative',
       message: error,
-      position: 'top'
+      position: 'top',
     })
     comments.value = []
   } finally {
@@ -146,7 +129,7 @@ const open = async (selectedProject) => {
 }
 
 defineExpose({
-  open
+  open,
 })
 </script>
 

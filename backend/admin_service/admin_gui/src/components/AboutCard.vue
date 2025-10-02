@@ -1,11 +1,9 @@
 <template>
   <div class="about-cards">
-    <!-- Загрузка -->
     <div v-if="loading" class="text-center q-pa-lg">
       <q-spinner size="50px" color="primary" />
     </div>
 
-    <!-- Данные -->
     <q-card
       v-for="card in cards"
       :key="card._id"
@@ -13,20 +11,20 @@
       v-else-if="cards.length"
     >
       <div class="card-actions">
-        <q-btn 
-          icon="edit" 
-          color="primary" 
-          size="sm" 
-          round 
+        <q-btn
+          icon="edit"
+          color="primary"
+          size="sm"
+          round
           flat
           @click="handleEdit(card)"
           class="action-btn q-mr-xs"
         />
-        <q-btn 
-          icon="delete" 
-          color="negative" 
-          size="sm" 
-          round 
+        <q-btn
+          icon="delete"
+          color="negative"
+          size="sm"
+          round
           flat
           @click="confirmDelete(card)"
           class="action-btn"
@@ -35,11 +33,7 @@
 
       <div class="row no-wrap">
         <div class="col-auto">
-          <q-img
-            :src="card.image_url"
-            height="200px"
-            width="200px"
-          />
+          <q-img :src="card.image_url" height="200px" width="200px" />
         </div>
 
         <div class="col q-pa-md">
@@ -56,7 +50,6 @@
       </div>
     </q-card>
 
-    <!-- Пустое состояние -->
     <div v-else class="text-center q-pa-lg">
       <p>No data available</p>
     </div>
@@ -68,7 +61,6 @@ import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { api } from 'boot/axios'
 
-// defineEmits больше не нужно импортировать
 const emit = defineEmits(['edit-card'])
 const $q = useQuasar()
 const cards = ref([])
@@ -96,7 +88,7 @@ const confirmDelete = (card) => {
     title: 'Confirm Delete',
     message: `Are you sure you want to delete "${card.translations.en.title}"?`,
     cancel: true,
-    persistent: true
+    persistent: true,
   }).onOk(() => {
     deleteCard(card)
   })
@@ -105,19 +97,18 @@ const confirmDelete = (card) => {
 const deleteCard = async (card) => {
   try {
     await api.delete(`/about/${card._id}`)
-    
+
     $q.notify({
       type: 'positive',
-      message: 'Card deleted successfully!'
+      message: 'Card deleted successfully!',
     })
-    
-    cards.value = cards.value.filter(c => c._id !== card._id)
-    
+
+    cards.value = cards.value.filter((c) => c._id !== card._id)
   } catch (error) {
     console.error('Error deleting card:', error)
     $q.notify({
       type: 'negative',
-      message: error.response?.data?.detail || 'Failed to delete card'
+      message: error.response?.data?.detail || 'Failed to delete card',
     })
   }
 }
@@ -127,7 +118,7 @@ onMounted(() => {
 })
 
 defineExpose({
-  fetchAboutData
+  fetchAboutData,
 })
 </script>
 
@@ -152,7 +143,7 @@ defineExpose({
 .action-btn {
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(4px);
-  
+
   &:hover {
     background-color: rgba(255, 255, 255, 1);
   }

@@ -1,13 +1,12 @@
 <template>
   <q-dialog v-model="showModal">
-    <q-card style="width: 700px; max-width: 90vw;">
+    <q-card style="width: 700px; max-width: 90vw">
       <q-card-section>
         <div class="text-h6">Create Project</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
         <q-form @submit="handleCreate" class="q-gutter-md">
-          <!-- Загрузка изображения -->
           <div class="row items-center q-gutter-md">
             <q-file
               v-model="imageFile"
@@ -17,82 +16,67 @@
               @rejected="onFileRejected"
               @update:model-value="onFileSelected"
               style="width: 200px"
-              :rules="[val => !!val || 'Image is required']"
+              :rules="[(val) => !!val || 'Image is required']"
             >
               <template v-slot:prepend>
                 <q-icon name="attach_file" />
               </template>
             </q-file>
 
-            <!-- Preview изображения -->
             <div v-if="imagePreview" class="image-preview">
-              <q-img
-                :src="imagePreview"
-                height="100px"
-                width="100px"
-                style="border-radius: 4px;"
-              />
+              <q-img :src="imagePreview" height="100px" width="100px" style="border-radius: 4px" />
               <div class="text-caption text-center q-mt-xs">
                 {{ getFileSize(imageFile) }}
               </div>
             </div>
           </div>
 
-          <!-- Русская версия -->
           <div class="text-h6">Russian Version</div>
           <q-input
             v-model="formData.title_ru"
             label="Title RU"
-            :rules="[val => !!val || 'Title is required']"
+            :rules="[(val) => !!val || 'Title is required']"
             outlined
           />
           <q-input
             v-model="formData.description_ru"
             label="Description RU"
             type="textarea"
-            :rules="[val => !!val || 'Description is required']"
+            :rules="[(val) => !!val || 'Description is required']"
             outlined
             rows="3"
           />
 
-          <!-- Английская версия -->
           <div class="text-h6">English Version</div>
           <q-input
             v-model="formData.title_en"
             label="Title EN"
-            :rules="[val => !!val || 'Title is required']"
+            :rules="[(val) => !!val || 'Title is required']"
             outlined
           />
           <q-input
             v-model="formData.description_en"
             label="Description EN"
             type="textarea"
-            :rules="[val => !!val || 'Description is required']"
+            :rules="[(val) => !!val || 'Description is required']"
             outlined
             rows="3"
           />
 
-          <!-- Ссылка и дата -->
           <div class="row q-col-gutter-md">
             <div class="col-8">
               <q-input
                 v-model="formData.link"
                 label="Project Link"
-                :rules="[val => !!val || 'Link is required', isValidUrl]"
+                :rules="[(val) => !!val || 'Link is required', isValidUrl]"
                 outlined
               />
             </div>
             <div class="col-4">
-              <q-input
-                v-model="formData.date"
-                label="Date"
-                type="date"
-                outlined
-              />
+              <q-input v-model="formData.date" label="Date" type="date" outlined />
             </div>
           </div>
 
-          <!-- Popularity -->
           <q-input
             v-model="formData.popularity"
             label="Popularity"
@@ -128,8 +112,8 @@ const formData = reactive({
   title_en: '',
   description_en: '',
   link: '',
-  date: new Date().toISOString().split('T')[0], // текущая дата
-  popularity: 0
+  date: new Date().toISOString().split('T')[0],
+  popularity: 0,
 })
 
 const isValidUrl = (val) => {
@@ -142,13 +126,15 @@ const isValidUrl = (val) => {
 }
 
 const isFormValid = computed(() => {
-  return imageFile.value &&
+  return (
+    imageFile.value &&
     formData.title_ru.trim() &&
     formData.description_ru.trim() &&
     formData.title_en.trim() &&
     formData.description_en.trim() &&
     formData.link.trim() &&
     isValidUrl(formData.link) === true
+  )
 })
 
 const getFileSize = (file) => {
@@ -172,14 +158,13 @@ const onFileSelected = (file) => {
 const onFileRejected = (rejectedEntries) => {
   $q.notify({
     type: 'negative',
-    message: `${rejectedEntries} File must be JPG, PNG, GIF or WebP and less than 5MB`
+    message: `${rejectedEntries} File must be JPG, PNG, GIF or WebP and less than 5MB`,
   })
 }
 
 const prepareFormData = () => {
   const formDataObj = new FormData()
-  
-  // Текстовые поля
+
   formDataObj.append('title_ru', formData.title_ru)
   formDataObj.append('description_ru', formData.description_ru)
   formDataObj.append('title_en', formData.title_en)
@@ -187,12 +172,11 @@ const prepareFormData = () => {
   formDataObj.append('link', formData.link)
   formDataObj.append('date', formData.date)
   formDataObj.append('popularity', formData.popularity.toString())
-  
-  // Файл изображения
+
   if (imageFile.value) {
     formDataObj.append('image', imageFile.value)
   }
-  
+
   return formDataObj
 }
 
@@ -200,7 +184,7 @@ const handleCreate = async () => {
   if (!isFormValid.value) {
     $q.notify({
       type: 'warning',
-      message: 'Please fill all required fields correctly'
+      message: 'Please fill all required fields correctly',
     })
     return
   }
@@ -210,21 +194,20 @@ const handleCreate = async () => {
   try {
     const formDataObj = prepareFormData()
     await createProject(formDataObj)
-    
+
     $q.notify({
       type: 'positive',
-      message: 'Project created successfully!'
+      message: 'Project created successfully!',
     })
-    
+
     showModal.value = false
     resetForm()
     emit('created')
-    
   } catch (error) {
     console.error('Error creating project:', error)
     $q.notify({
       type: 'negative',
-      message: error.response?.data?.detail || 'Failed to create project'
+      message: error.response?.data?.detail || 'Failed to create project',
     })
   } finally {
     loading.value = false
@@ -250,7 +233,7 @@ const resetForm = () => {
 
 const emit = defineEmits(['created'])
 defineExpose({
-  open
+  open,
 })
 </script>
 
@@ -259,7 +242,7 @@ defineExpose({
   border: 2px dashed #ccc;
   border-radius: 4px;
   padding: 4px;
-  
+
   .text-caption {
     color: #666;
   }

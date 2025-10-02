@@ -7,14 +7,13 @@
       </div>
     </div>
 
-    <!-- Search Section -->
     <div class="row items-center q-gutter-md q-mb-lg">
       <q-input
         v-model="searchEmail"
         label="Search by email"
         type="email"
         outlined
-        style="min-width: 300px;"
+        style="min-width: 300px"
         @keyup.enter="handleSearch"
       />
       <q-btn
@@ -39,13 +38,11 @@
       />
     </div>
 
-    <!-- Loading State -->
     <div v-if="loading" class="text-center q-pa-lg">
       <q-spinner size="50px" color="primary" />
       <div class="q-mt-md">Loading notifications...</div>
     </div>
 
-    <!-- Notifications List -->
     <div v-else class="notifications-list">
       <NotificationCard
         v-for="notification in notifications"
@@ -55,7 +52,6 @@
       />
     </div>
 
-    <!-- Empty State -->
     <div
       v-if="!loading && notifications.length === 0"
       class="column items-center justify-center q-pa-xl text-center"
@@ -64,17 +60,14 @@
       <h3 class="text-h5 q-mb-sm">No notifications found</h3>
       <p class="text-grey-7">
         {{
-          searchEmail 
+          searchEmail
             ? `No notifications found for email: ${searchEmail}`
             : 'No notifications in the system'
         }}
       </p>
     </div>
 
-    <SendEmailModal 
-      ref="sendEmailModalRef" 
-      @sent="handleEmailSent"
-    />
+    <SendEmailModal ref="sendEmailModalRef" @sent="handleEmailSent" />
   </q-page>
 </template>
 
@@ -95,14 +88,14 @@ const sendEmailModalRef = ref(null)
 const fetchAllNotifications = async () => {
   try {
     loading.value = true
-    searchEmail.value = '' // Сбрасываем поиск
+    searchEmail.value = ''
     const response = await getNotifications()
     notifications.value = response.data
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: error.response?.data?.detail || 'Failed to load notifications',
-      position: 'top'
+      position: 'top',
     })
     notifications.value = []
   } finally {
@@ -126,13 +119,13 @@ const handleSearch = async () => {
       $q.notify({
         type: 'info',
         message: `No notifications found for email: ${searchEmail.value}`,
-        position: 'top'
+        position: 'top',
       })
     } else {
       $q.notify({
         type: 'negative',
         message: error.response?.data?.detail || 'Failed to search notifications',
-        position: 'top'
+        position: 'top',
       })
     }
   } finally {
@@ -143,26 +136,26 @@ const handleSearch = async () => {
 const handleDeleteNotification = async (notificationId) => {
   try {
     await deleteNotification(notificationId)
-    
+
     $q.notify({
       type: 'positive',
       message: 'Notification deleted successfully!',
-      position: 'top'
+      position: 'top',
     })
-    
-    notifications.value = notifications.value.filter(notification => notification._id !== notificationId)
-    
+
+    notifications.value = notifications.value.filter(
+      (notification) => notification._id !== notificationId,
+    )
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: error.response?.data?.detail || 'Failed to delete notification',
-      position: 'top'
+      position: 'top',
     })
   }
 }
 
 const handleEmailSent = () => {
-  // Обновляем список уведомлений после отправки email
   fetchAllNotifications()
 }
 

@@ -1,13 +1,12 @@
 <template>
   <q-dialog v-model="showModal">
-    <q-card style="width: 700px; max-width: 90vw;">
+    <q-card style="width: 700px; max-width: 90vw">
       <q-card-section>
         <div class="text-h6">Edit About Card</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
         <q-form @submit="handleUpdate" class="q-gutter-md">
-          <!-- Загрузка изображения -->
           <div class="row items-center q-gutter-md">
             <q-file
               v-model="imageFile"
@@ -23,13 +22,12 @@
               </template>
             </q-file>
 
-            <!-- Preview изображения -->
             <div class="image-preview">
               <q-img
                 :src="imagePreview || currentCard.image_url"
                 height="100px"
                 width="100px"
-                style="border-radius: 4px;"
+                style="border-radius: 4px"
               />
               <div v-if="imageFile" class="text-caption text-center q-mt-xs">
                 {{ getFileSize(imageFile) }}
@@ -37,14 +35,13 @@
             </div>
           </div>
 
-          <!-- Русская версия -->
           <div class="text-h6">Russian Version</div>
           <q-input
             v-model="formData.title_ru"
             label="Title RU"
             :rules="[
-              val => !!val || 'Title is required',
-              val => val.length <= 255 || 'Max 255 characters'
+              (val) => !!val || 'Title is required',
+              (val) => val.length <= 255 || 'Max 255 characters',
             ]"
             counter
             maxlength="255"
@@ -55,8 +52,8 @@
             label="Description RU"
             type="textarea"
             :rules="[
-              val => !!val || 'Description is required',
-              val => val.length <= 1000 || 'Max 1000 characters'
+              (val) => !!val || 'Description is required',
+              (val) => val.length <= 1000 || 'Max 1000 characters',
             ]"
             counter
             maxlength="1000"
@@ -64,14 +61,13 @@
             rows="3"
           />
 
-          <!-- Английская версия -->
           <div class="text-h6">English Version</div>
           <q-input
             v-model="formData.title_en"
             label="Title EN"
             :rules="[
-              val => !!val || 'Title is required',
-              val => val.length <= 255 || 'Max 255 characters'
+              (val) => !!val || 'Title is required',
+              (val) => val.length <= 255 || 'Max 255 characters',
             ]"
             counter
             maxlength="255"
@@ -82,8 +78,8 @@
             label="Description EN"
             type="textarea"
             :rules="[
-              val => !!val || 'Description is required',
-              val => val.length <= 1000 || 'Max 1000 characters'
+              (val) => !!val || 'Description is required',
+              (val) => val.length <= 1000 || 'Max 1000 characters',
             ]"
             counter
             maxlength="1000"
@@ -117,23 +113,24 @@ const currentCard = reactive({
   image_url: '',
   translations: {
     en: { title: '', description: '' },
-    ru: { title: '', description: '' }
-  }
+    ru: { title: '', description: '' },
+  },
 })
 
 const formData = reactive({
   title_ru: '',
   description_ru: '',
   title_en: '',
-  description_en: ''
+  description_en: '',
 })
 
-// Отслеживаем изменения
 const hasTextChanges = computed(() => {
-  return formData.title_ru !== currentCard.translations.ru.title ||
-         formData.description_ru !== currentCard.translations.ru.description ||
-         formData.title_en !== currentCard.translations.en.title ||
-         formData.description_en !== currentCard.translations.en.description
+  return (
+    formData.title_ru !== currentCard.translations.ru.title ||
+    formData.description_ru !== currentCard.translations.ru.description ||
+    formData.title_en !== currentCard.translations.en.title ||
+    formData.description_en !== currentCard.translations.en.description
+  )
 })
 
 const hasImageChanges = computed(() => {
@@ -148,18 +145,16 @@ const open = async (cardId) => {
   try {
     const response = await getAboutCardById(cardId)
     Object.assign(currentCard, response.data)
-    
-    // Предзаполняем форму
+
     formData.title_ru = currentCard.translations.ru.title
     formData.description_ru = currentCard.translations.ru.description
     formData.title_en = currentCard.translations.en.title
     formData.description_en = currentCard.translations.en.description
-    
   } catch (error) {
     console.error('Error loading card data:', error)
     $q.notify({
       type: 'negative',
-      message: 'Failed to load card data'
+      message: 'Failed to load card data',
     })
     showModal.value = false
   } finally {
@@ -167,36 +162,31 @@ const open = async (cardId) => {
   }
 }
 
-// ... остальные методы (onFileSelected, onFileRejected, getFileSize) такие же как в CreateModal
-
 const handleUpdate = async () => {
   loading.value = true
 
   try {
-    // Обновляем текст если есть изменения
     if (hasTextChanges.value) {
       await updateAboutText(currentCardId.value, formData)
     }
 
-    // Обновляем изображение если есть изменения
     if (hasImageChanges.value) {
       await updateAboutImage(currentCardId.value, imageFile.value)
     }
 
     $q.notify({
       type: 'positive',
-      message: 'Card updated successfully!'
+      message: 'Card updated successfully!',
     })
-    
+
     showModal.value = false
     resetForm()
     emit('updated')
-    
   } catch (error) {
     console.error('Error updating card:', error)
     $q.notify({
       type: 'negative',
-      message: error.response?.data?.detail || 'Failed to update card'
+      message: error.response?.data?.detail || 'Failed to update card',
     })
   } finally {
     loading.value = false
@@ -212,7 +202,7 @@ const resetForm = () => {
 
 const emit = defineEmits(['updated'])
 defineExpose({
-  open
+  open,
 })
 </script>
 
@@ -221,7 +211,7 @@ defineExpose({
   border: 2px dashed #ccc;
   border-radius: 4px;
   padding: 4px;
-  
+
   .text-caption {
     color: #666;
   }

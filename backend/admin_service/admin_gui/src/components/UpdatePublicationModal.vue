@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="showModal">
-    <q-card style="width: 600px; max-width: 90vw;">
+    <q-card style="width: 600px; max-width: 90vw">
       <q-card-section class="row items-center">
         <div class="text-h6">Update Publication</div>
         <q-space />
@@ -9,55 +9,44 @@
 
       <q-card-section class="q-pt-none">
         <q-form class="q-gutter-md" @submit.prevent="handleSubmit">
-          <!-- English Title -->
           <q-input
             v-model="formData.title_en"
             label="Title (English)"
             outlined
-            :rules="[val => !!val || 'English title is required']"
+            :rules="[(val) => !!val || 'English title is required']"
           />
-          
-          <!-- Russian Title -->
+
           <q-input
             v-model="formData.title_ru"
             label="Title (Russian)"
             outlined
-            :rules="[val => !!val || 'Russian title is required']"
+            :rules="[(val) => !!val || 'Russian title is required']"
           />
 
-          <!-- Page URL -->
           <q-input
             v-model="formData.page"
             label="Page URL"
             type="url"
             outlined
-            :rules="[
-              val => !!val || 'Page URL is required',
-              isValidUrl
-            ]"
+            :rules="[(val) => !!val || 'Page URL is required', isValidUrl]"
           />
 
-          <!-- Site URL -->
           <q-input
             v-model="formData.site"
             label="Site URL"
             type="url"
             outlined
-            :rules="[
-              val => !!val || 'Site URL is required',
-              isValidUrl
-            ]"
+            :rules="[(val) => !!val || 'Site URL is required', isValidUrl]"
           />
 
-          <!-- Rating -->
           <q-input
             v-model="formData.rating"
             label="Rating"
             type="number"
             outlined
             :rules="[
-              val => !!val || 'Rating is required',
-              val => val >= 0 || 'Rating must be positive'
+              (val) => !!val || 'Rating is required',
+              (val) => val >= 0 || 'Rating must be positive',
             ]"
           />
         </q-form>
@@ -65,12 +54,7 @@
 
       <q-card-actions align="right">
         <q-btn flat label="Cancel" color="primary" v-close-popup />
-        <q-btn 
-          label="Update" 
-          color="primary" 
-          @click="handleSubmit"
-          :loading="loading"
-        />
+        <q-btn label="Update" color="primary" @click="handleSubmit" :loading="loading" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -91,12 +75,11 @@ const formData = ref({
   title_ru: '',
   page: '',
   site: '',
-  rating: 0
+  rating: 0,
 })
 
 const emit = defineEmits(['updated'])
 
-// Валидация URL
 const isValidUrl = (val) => {
   try {
     new URL(val)
@@ -106,18 +89,16 @@ const isValidUrl = (val) => {
   }
 }
 
-// Метод для открытия модального окна с данными публикации
 const open = (publication) => {
   showModal.value = true
   currentPublication.value = publication
-  
-  // Заполняем форму текущими данными
+
   formData.value = {
     title_en: publication.title.en,
     title_ru: publication.title.ru,
     page: publication.page,
     site: publication.site,
-    rating: publication.rating
+    rating: publication.rating,
   }
 }
 
@@ -126,21 +107,20 @@ const handleSubmit = async () => {
     loading.value = true
 
     await updatePublication(currentPublication.value.id, formData.value)
-    
+
     $q.notify({
       type: 'positive',
       message: 'Publication updated successfully!',
-      position: 'top'
+      position: 'top',
     })
 
     showModal.value = false
     emit('updated')
-    
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: error.response?.data?.detail || 'Failed to update publication',
-      position: 'top'
+      position: 'top',
     })
   } finally {
     loading.value = false
@@ -148,6 +128,6 @@ const handleSubmit = async () => {
 }
 
 defineExpose({
-  open
+  open,
 })
 </script>

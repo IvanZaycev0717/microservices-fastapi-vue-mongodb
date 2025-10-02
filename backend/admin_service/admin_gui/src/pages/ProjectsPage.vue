@@ -2,12 +2,7 @@
   <q-page class="q-pa-md">
     <div class="row justify-between items-center q-mb-md">
       <div class="text-h4">Projects</div>
-      <q-btn 
-        label="Create Project" 
-        color="primary" 
-        icon="add" 
-        @click="openCreateModal" 
-      />
+      <q-btn label="Create Project" color="primary" icon="add" @click="openCreateModal" />
     </div>
     <ProjectCard ref="projectCardRef" @edit-project="openEditModal" />
     <ProjectCreateModal ref="createModalRef" @created="refreshProjects" />

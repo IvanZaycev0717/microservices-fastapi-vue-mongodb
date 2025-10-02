@@ -1,13 +1,12 @@
 <template>
   <q-dialog v-model="showModal">
-    <q-card style="width: 700px; max-width: 90vw;">
+    <q-card style="width: 700px; max-width: 90vw">
       <q-card-section>
         <div class="text-h6">Create About Card</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
         <q-form @submit="handleCreate" class="q-gutter-md">
-          <!-- Загрузка изображения -->
           <div class="row items-center q-gutter-md">
             <q-file
               v-model="imageFile"
@@ -17,35 +16,28 @@
               @rejected="onFileRejected"
               @update:model-value="onFileSelected"
               style="width: 200px"
-              :rules="[val => !!val || 'Image is required']"
+              :rules="[(val) => !!val || 'Image is required']"
             >
               <template v-slot:prepend>
                 <q-icon name="attach_file" />
               </template>
             </q-file>
 
-            <!-- Preview изображения -->
             <div v-if="imagePreview" class="image-preview">
-              <q-img
-                :src="imagePreview"
-                height="100px"
-                width="100px"
-                style="border-radius: 4px;"
-              />
+              <q-img :src="imagePreview" height="100px" width="100px" style="border-radius: 4px" />
               <div class="text-caption text-center q-mt-xs">
                 {{ getFileSize(imageFile) }}
               </div>
             </div>
           </div>
 
-          <!-- Русская версия -->
           <div class="text-h6">Russian Version</div>
           <q-input
             v-model="formData.title_ru"
             label="Title RU"
             :rules="[
-              val => !!val || 'Title is required',
-              val => val.length <= 255 || 'Max 255 characters'
+              (val) => !!val || 'Title is required',
+              (val) => val.length <= 255 || 'Max 255 characters',
             ]"
             counter
             maxlength="255"
@@ -56,8 +48,8 @@
             label="Description RU"
             type="textarea"
             :rules="[
-              val => !!val || 'Description is required',
-              val => val.length <= 1000 || 'Max 1000 characters'
+              (val) => !!val || 'Description is required',
+              (val) => val.length <= 1000 || 'Max 1000 characters',
             ]"
             counter
             maxlength="1000"
@@ -65,14 +57,13 @@
             rows="3"
           />
 
-          <!-- Английская версия -->
           <div class="text-h6">English Version</div>
           <q-input
             v-model="formData.title_en"
             label="Title EN"
             :rules="[
-              val => !!val || 'Title is required',
-              val => val.length <= 255 || 'Max 255 characters'
+              (val) => !!val || 'Title is required',
+              (val) => val.length <= 255 || 'Max 255 characters',
             ]"
             counter
             maxlength="255"
@@ -83,8 +74,8 @@
             label="Description EN"
             type="textarea"
             :rules="[
-              val => !!val || 'Description is required',
-              val => val.length <= 1000 || 'Max 1000 characters'
+              (val) => !!val || 'Description is required',
+              (val) => val.length <= 1000 || 'Max 1000 characters',
             ]"
             counter
             maxlength="1000"
@@ -94,11 +85,11 @@
 
           <q-card-actions align="right" class="q-pa-none q-mt-md">
             <q-btn flat label="Cancel" color="primary" v-close-popup />
-            <q-btn 
-              label="Create" 
-              type="submit" 
-              color="primary" 
-              :loading="loading" 
+            <q-btn
+              label="Create"
+              type="submit"
+              color="primary"
+              :loading="loading"
               :disable="!isFormValid"
             />
           </q-card-actions>
@@ -123,12 +114,12 @@ const formData = reactive({
   title_ru: '',
   description_ru: '',
   title_en: '',
-  description_en: ''
+  description_en: '',
 })
 
-// Валидация формы
 const isFormValid = computed(() => {
-  return imageFile.value &&
+  return (
+    imageFile.value &&
     formData.title_ru.trim() &&
     formData.description_ru.trim() &&
     formData.title_en.trim() &&
@@ -137,6 +128,7 @@ const isFormValid = computed(() => {
     formData.description_ru.length <= 1000 &&
     formData.title_en.length <= 255 &&
     formData.description_en.length <= 1000
+  )
 })
 
 const getFileSize = (file) => {
@@ -159,7 +151,7 @@ const onFileSelected = (file) => {
     if (!validateImageFormat(file)) {
       $q.notify({
         type: 'negative',
-        message: 'Invalid image format. Use JPG, PNG or WebP'
+        message: 'Invalid image format. Use JPG, PNG or WebP',
       })
       imageFile.value = null
       return
@@ -168,7 +160,7 @@ const onFileSelected = (file) => {
     if (!validateImageSize(file)) {
       $q.notify({
         type: 'negative',
-        message: 'Image size must be less than 500KB'
+        message: 'Image size must be less than 500KB',
       })
       imageFile.value = null
       return
@@ -185,32 +177,32 @@ const onFileSelected = (file) => {
 }
 
 const onFileRejected = (rejectedEntries) => {
-  const reasons = rejectedEntries.map(entry => entry.failedPropValidation)
+  const reasons = rejectedEntries.map((entry) => entry.failedPropValidation)
   if (reasons.includes('max-file-size')) {
     $q.notify({
       type: 'negative',
-      message: 'File size must be less than 500KB'
+      message: 'File size must be less than 500KB',
     })
   } else if (reasons.includes('accept')) {
     $q.notify({
       type: 'negative',
-      message: 'File must be JPG, PNG or WebP'
+      message: 'File must be JPG, PNG or WebP',
     })
   }
 }
 
 const prepareFormData = () => {
   const formDataObj = new FormData()
-  
+
   formDataObj.append('title_ru', formData.title_ru.trim())
   formDataObj.append('description_ru', formData.description_ru.trim())
   formDataObj.append('title_en', formData.title_en.trim())
   formDataObj.append('description_en', formData.description_en.trim())
-  
+
   if (imageFile.value) {
     formDataObj.append('image', imageFile.value)
   }
-  
+
   return formDataObj
 }
 
@@ -218,7 +210,7 @@ const handleCreate = async () => {
   if (!isFormValid.value) {
     $q.notify({
       type: 'warning',
-      message: 'Please fill all required fields correctly'
+      message: 'Please fill all required fields correctly',
     })
     return
   }
@@ -228,21 +220,20 @@ const handleCreate = async () => {
   try {
     const formDataObj = prepareFormData()
     await createAboutCard(formDataObj)
-    
+
     $q.notify({
       type: 'positive',
-      message: 'About card created successfully!'
+      message: 'About card created successfully!',
     })
-    
+
     showModal.value = false
     resetForm()
     emit('created')
-    
   } catch (error) {
     console.error('Error creating about card:', error)
     $q.notify({
       type: 'negative',
-      message: error.response?.data?.detail || 'Failed to create about card'
+      message: error.response?.data?.detail || 'Failed to create about card',
     })
   } finally {
     loading.value = false
@@ -265,7 +256,7 @@ const resetForm = () => {
 
 const emit = defineEmits(['created'])
 defineExpose({
-  open
+  open,
 })
 </script>
 
@@ -274,7 +265,7 @@ defineExpose({
   border: 2px dashed #ccc;
   border-radius: 4px;
   padding: 4px;
-  
+
   .text-caption {
     color: #666;
   }

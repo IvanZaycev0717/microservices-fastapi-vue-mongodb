@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { api } from 'boot/axios'
 
-
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(localStorage.getItem('access_token'))
   const isRefreshing = ref(false)
@@ -32,8 +31,8 @@ export const useAuthStore = defineStore('auth', () => {
       setToken(response.data.access_token)
       return true
     } catch (error) {
+      error
       clearToken()
-      console.log(error)
       return false
     } finally {
       isRefreshing.value = false

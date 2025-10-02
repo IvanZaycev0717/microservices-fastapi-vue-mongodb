@@ -2,12 +2,7 @@
   <q-page class="q-pa-md">
     <div class="row justify-between items-center q-mb-md">
       <div class="text-h4">About</div>
-      <q-btn 
-        label="Create" 
-        color="primary" 
-        icon="add" 
-        @click="openCreateModal" 
-      />
+      <q-btn label="Create" color="primary" icon="add" @click="openCreateModal" />
     </div>
     <AboutCard ref="aboutCardRef" @edit-card="openEditModal" />
     <AboutCreateModal ref="createModalRef" @created="refreshAboutCards" />

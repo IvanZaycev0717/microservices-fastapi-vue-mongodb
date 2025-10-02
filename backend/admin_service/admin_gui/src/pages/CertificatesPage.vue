@@ -24,15 +24,9 @@
       />
     </div>
 
-    <CreateCertificateModal 
-      ref="createModalRef" 
-      @created="handleCertificateCreated"
-    />
-    
-    <UpdateCertificateModal 
-      ref="updateModalRef" 
-      @updated="handleCertificateUpdated"
-    />
+    <CreateCertificateModal ref="createModalRef" @created="handleCertificateCreated" />
+
+    <UpdateCertificateModal ref="updateModalRef" @updated="handleCertificateUpdated" />
   </q-page>
 </template>
 
@@ -57,7 +51,7 @@ const fetchCertificates = async () => {
     $q.notify({
       type: 'negative',
       message: error,
-      position: 'top'
+      position: 'top',
     })
   }
 }
@@ -73,20 +67,19 @@ const handleCertificateUpdated = () => {
 const handleDeleteCertificate = async (certificateId) => {
   try {
     await deleteCertificate(certificateId)
-    
+
     $q.notify({
       type: 'positive',
       message: 'Certificate deleted successfully!',
-      position: 'top'
+      position: 'top',
     })
-    
-    certificates.value = certificates.value.filter(cert => cert.id !== certificateId)
-    
+
+    certificates.value = certificates.value.filter((cert) => cert.id !== certificateId)
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: error.response?.data?.detail || 'Failed to delete certificate',
-      position: 'top'
+      position: 'top',
     })
   }
 }

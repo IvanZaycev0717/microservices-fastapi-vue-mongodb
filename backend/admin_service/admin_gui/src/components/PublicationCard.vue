@@ -1,20 +1,20 @@
 <template>
   <q-card class="publication-card q-mb-md">
     <div class="card-actions">
-      <q-btn 
-        icon="edit" 
-        color="primary" 
-        size="sm" 
-        round 
+      <q-btn
+        icon="edit"
+        color="primary"
+        size="sm"
+        round
         flat
         class="action-btn q-mr-xs"
         @click="handleEdit"
       />
-      <q-btn 
-        icon="delete" 
-        color="negative" 
-        size="sm" 
-        round 
+      <q-btn
+        icon="delete"
+        color="negative"
+        size="sm"
+        round
         flat
         class="action-btn"
         @click="handleDelete"
@@ -24,13 +24,11 @@
 
     <q-card-section class="q-pa-md">
       <div class="row items-start q-col-gutter-md">
-        <!-- Английская версия -->
         <div class="col-12 col-md-6">
           <div class="text-subtitle2 text-grey-7 q-mb-xs">English</div>
           <div class="text-h6 q-mb-sm">{{ publication.title.en }}</div>
         </div>
 
-        <!-- Русская версия -->
         <div class="col-12 col-md-6">
           <div class="text-subtitle2 text-grey-7 q-mb-xs">Russian</div>
           <div class="text-h6 q-mb-sm">{{ publication.title.ru }}</div>
@@ -40,23 +38,17 @@
       <q-separator class="q-my-md" />
 
       <div class="row items-center q-col-gutter-md">
-        <!-- Ссылки -->
         <div class="col-12 col-sm-6">
           <div class="row items-center q-gutter-xs">
             <q-icon name="link" size="16px" color="primary" />
-            <a :href="publication.page" target="_blank" class="text-primary">
-              Page Link
-            </a>
+            <a :href="publication.page" target="_blank" class="text-primary"> Page Link </a>
           </div>
           <div class="row items-center q-gutter-xs q-mt-xs">
             <q-icon name="public" size="16px" color="secondary" />
-            <a :href="publication.site" target="_blank" class="text-secondary">
-              Site Link
-            </a>
+            <a :href="publication.site" target="_blank" class="text-secondary"> Site Link </a>
           </div>
         </div>
 
-        <!-- Рейтинг и дата -->
         <div class="col-12 col-sm-6">
           <div class="row items-center justify-end q-gutter-md">
             <q-badge color="orange" class="q-px-sm q-py-xs">
@@ -86,14 +78,14 @@ const props = defineProps({
       id: '',
       title: {
         en: '',
-        ru: ''
+        ru: '',
       },
       page: '',
       site: '',
       rating: 0,
-      date: ''
-    })
-  }
+      date: '',
+    }),
+  },
 })
 
 const emit = defineEmits(['delete', 'edit'])
@@ -103,7 +95,7 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 
@@ -116,7 +108,7 @@ const handleDelete = () => {
     title: 'Confirm Delete',
     message: `Are you sure you want to delete "${props.publication.title.en}"?`,
     cancel: true,
-    persistent: true
+    persistent: true,
   }).onOk(async () => {
     try {
       deleteLoading.value = true
@@ -125,7 +117,7 @@ const handleDelete = () => {
       $q.notify({
         type: 'negative',
         message: error,
-        position: 'top'
+        position: 'top',
       })
     } finally {
       deleteLoading.value = false
@@ -150,7 +142,7 @@ const handleDelete = () => {
 .action-btn {
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(4px);
-  
+
   &:hover {
     background-color: rgba(255, 255, 255, 1);
   }
@@ -158,7 +150,7 @@ const handleDelete = () => {
 
 a {
   text-decoration: none;
-  
+
   &:hover {
     text-decoration: underline;
   }

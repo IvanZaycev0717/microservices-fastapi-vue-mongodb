@@ -63,12 +63,12 @@ const handleLogout = async () => {
   try {
     await logoutUser()
   } catch (error) {
-     $q.notify({
+    $q.notify({
       type: 'negative',
       message: `Logout warning: ${error.response?.data?.detail || 'Proceeding with local logout'}`,
     })
   }
-  
+
   authStore.clearToken()
   window.location.href = '/login'
 }

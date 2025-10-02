@@ -1,76 +1,60 @@
 <template>
   <div class="project-cards">
-    <!-- Загрузка -->
     <div v-if="loading" class="text-center q-pa-lg">
       <q-spinner size="50px" color="primary" />
     </div>
 
-    <!-- Данные -->
     <div v-else-if="projects.length" class="row q-col-gutter-md">
-      <div 
-        v-for="project in projects" 
-        :key="project.id"
-        class="col-12 col-sm-6 col-lg-4"
-      >
+      <div v-for="project in projects" :key="project.id" class="col-12 col-sm-6 col-lg-4">
         <q-card class="project-card">
-          <!-- Кнопки действий -->
           <div class="card-actions">
-            <q-btn 
-              icon="edit" 
-              color="primary" 
-              size="sm" 
-              round 
+            <q-btn
+              icon="edit"
+              color="primary"
+              size="sm"
+              round
               flat
               @click="handleEdit(project)"
               class="action-btn q-mr-xs"
             />
-            <q-btn 
-              icon="delete" 
-              color="negative" 
-              size="sm" 
-              round 
+            <q-btn
+              icon="delete"
+              color="negative"
+              size="sm"
+              round
               flat
               @click="confirmDelete(project)"
               class="action-btn"
             />
           </div>
 
-          <!-- Изображение проекта -->
-          <q-img
-            :src="project.thumbnail"
-            height="200px"
-            class="project-thumbnail"
-          />
+          <q-img :src="project.thumbnail" height="200px" class="project-thumbnail" />
 
           <q-card-section>
-            <!-- Заголовок -->
             <div class="text-h6">{{ project.title.ru }}</div>
             <div class="text-subtitle2 text-grey">{{ project.title.en }}</div>
 
-            <!-- Описание -->
             <div class="q-mt-sm">
               <div class="text-body2">{{ project.description.ru }}</div>
               <div class="text-caption text-grey">{{ project.description.en }}</div>
             </div>
 
-            <!-- Мета-информация -->
             <div class="row items-center justify-between q-mt-md">
               <div class="text-caption text-grey">
                 {{ formatDate(project.date) }}
               </div>
-              <q-badge 
+              <q-badge
                 :color="getPopularityColor(project.popularity)"
                 :label="`Popularity: ${project.popularity}`"
               />
             </div>
           </q-card-section>
 
-          <!-- Ссылка на проект -->
           <q-card-actions vertical>
-            <q-btn 
-              :href="project.link" 
-              target="_blank" 
-              color="primary" 
+            <q-btn
+              :href="project.link"
+              target="_blank"
+              color="primary"
               icon="open_in_new"
               label="View Project"
               no-caps
@@ -81,7 +65,6 @@
       </div>
     </div>
 
-    <!-- Пустое состояние -->
     <div v-else class="text-center q-pa-lg">
       <p>No projects available</p>
     </div>
@@ -103,14 +86,13 @@ const fetchProjectsData = async () => {
     loading.value = true
     const response = await getProjects()
     projects.value = response.data
-    // Минимальная отладка для production
     if (projects.value.length > 0 && !projects.value[0].id) {
       console.warn('Project structure warning: id not found')
     }
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: 'Failed to load projects: ' + (error.response?.data?.detail || 'Network error')
+      message: 'Failed to load projects: ' + (error.response?.data?.detail || 'Network error'),
     })
     projects.value = []
   } finally {
@@ -133,15 +115,13 @@ const handleEdit = (project) => {
 }
 
 const confirmDelete = (project) => {
-  // Проверить все возможные варианты ID
   const projectId = project.id
-  
+
   if (!projectId) {
-    // Минимальная отладка для разработки
     console.warn('Project ID not found in:', Object.keys(project))
     $q.notify({
       type: 'negative',
-      message: 'Invalid project data - ID not found'
+      message: 'Invalid project data - ID not found',
     })
     return
   }
@@ -150,7 +130,7 @@ const confirmDelete = (project) => {
     title: 'Confirm Delete',
     message: `Are you sure you want to delete "${project.title?.en || 'Unknown Project'}"?`,
     cancel: true,
-    persistent: true
+    persistent: true,
   }).onOk(() => {
     deleteProjectHandler(project, projectId)
   })
@@ -159,18 +139,17 @@ const confirmDelete = (project) => {
 const deleteProjectHandler = async (project, projectId) => {
   try {
     await deleteProject(projectId)
-    
+
     $q.notify({
       type: 'positive',
-      message: 'Project deleted successfully!'
+      message: 'Project deleted successfully!',
     })
-    
-    projects.value = projects.value.filter(p => p.id !== projectId)
-    
+
+    projects.value = projects.value.filter((p) => p.id !== projectId)
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: error.response?.data?.detail || 'Failed to delete project'
+      message: error.response?.data?.detail || 'Failed to delete project',
     })
   }
 }
@@ -180,7 +159,7 @@ onMounted(() => {
 })
 
 defineExpose({
-  fetchProjectsData
+  fetchProjectsData,
 })
 </script>
 
@@ -210,7 +189,7 @@ defineExpose({
 .action-btn {
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(4px);
-  
+
   &:hover {
     background-color: rgba(255, 255, 255, 1);
   }

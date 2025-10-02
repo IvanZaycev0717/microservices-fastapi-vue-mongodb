@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="showModal">
-    <q-card style="width: 500px; max-width: 90vw;">
+    <q-card style="width: 500px; max-width: 90vw">
       <q-card-section class="row items-center">
         <div class="text-h6">Update Certificate</div>
         <q-space />
@@ -14,17 +14,17 @@
             label="Date"
             type="date"
             outlined
-            :rules="[val => !!val || 'Date is required']"
+            :rules="[(val) => !!val || 'Date is required']"
           />
-          
+
           <q-input
             v-model="formData.popularity"
             label="Popularity"
             type="number"
             outlined
             :rules="[
-              val => !!val || 'Popularity is required',
-              val => val >= 0 && val <= 1000 || 'Popularity must be between 0 and 1000'
+              (val) => !!val || 'Popularity is required',
+              (val) => (val >= 0 && val <= 1000) || 'Popularity must be between 0 and 1000',
             ]"
           />
 
@@ -42,12 +42,7 @@
 
       <q-card-actions align="right">
         <q-btn flat label="Cancel" color="primary" v-close-popup />
-        <q-btn 
-          label="Update" 
-          color="primary" 
-          @click="handleSubmit"
-          :loading="loading"
-        />
+        <q-btn label="Update" color="primary" @click="handleSubmit" :loading="loading" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -66,7 +61,7 @@ const loading = ref(false)
 const formData = ref({
   date: '',
   popularity: 10,
-  file: null
+  file: null,
 })
 
 const emit = defineEmits(['updated'])
@@ -74,11 +69,11 @@ const emit = defineEmits(['updated'])
 const open = (certificate) => {
   showModal.value = true
   currentCertificate.value = certificate
-  
+
   formData.value = {
     date: certificate.date.split('T')[0],
     popularity: certificate.popularity,
-    file: null
+    file: null,
   }
 }
 
@@ -86,49 +81,32 @@ const handleSubmit = async () => {
   try {
     loading.value = true
 
-    console.log('Updating certificate:', {
-      id: currentCertificate.value.id,
-      popularity: formData.value.popularity,
-      hasFile: !!formData.value.file
-    })
+    await updateCertificatePopularity(currentCertificate.value.id, formData.value.popularity)
 
-    // Обновляем популярность
-    await updateCertificatePopularity(
-      currentCertificate.value.id, 
-      formData.value.popularity
-    )
-
-    // Если выбран новый файл - обновляем изображение
     if (formData.value.file) {
-      console.log('Updating image with file:', formData.value.file)
-      
-      // Создаем FormData для файла
+
       const fileFormData = new FormData()
       fileFormData.append('file', formData.value.file)
-      
-      await updateCertificateImage(
-        currentCertificate.value.id, 
-        fileFormData
-      )
+
+      await updateCertificateImage(currentCertificate.value.id, fileFormData)
     }
 
     $q.notify({
       type: 'positive',
       message: 'Certificate updated successfully!',
-      position: 'top'
+      position: 'top',
     })
 
     showModal.value = false
     emit('updated')
-    
   } catch (error) {
     console.error('Update error:', error)
     console.error('Error response:', error.response)
-    
+
     $q.notify({
       type: 'negative',
       message: error.response?.data?.detail || `Failed to update certificate: ${error.message}`,
-      position: 'top'
+      position: 'top',
     })
   } finally {
     loading.value = false
@@ -136,6 +114,6 @@ const handleSubmit = async () => {
 }
 
 defineExpose({
-  open
+  open,
 })
 </script>

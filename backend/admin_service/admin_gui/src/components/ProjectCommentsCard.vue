@@ -1,46 +1,32 @@
 <template>
   <div class="project-comments-cards">
-    <!-- Загрузка -->
     <div v-if="loading" class="text-center q-pa-lg">
       <q-spinner size="50px" color="primary" />
     </div>
 
-    <!-- Данные -->
     <div v-else-if="projects.length" class="row q-col-gutter-md">
-      <div 
-        v-for="project in projects" 
-        :key="project.id"
-        class="col-12 col-sm-6 col-lg-4"
-      >
+      <div v-for="project in projects" :key="project.id" class="col-12 col-sm-6 col-lg-4">
         <q-card class="project-comments-card">
-          <!-- Изображение проекта -->
-          <q-img
-            :src="project.thumbnail"
-            height="200px"
-            class="project-thumbnail"
-          />
+          <q-img :src="project.thumbnail" height="200px" class="project-thumbnail" />
 
           <q-card-section>
-            <!-- Заголовки -->
             <div class="text-h6">{{ project.title.ru }}</div>
             <div class="text-subtitle2 text-grey">{{ project.title.en }}</div>
 
-            <!-- Мета-информация -->
             <div class="row items-center justify-between q-mt-md">
               <div class="text-caption text-grey">
                 {{ formatDate(project.date) }}
               </div>
-              <q-badge 
+              <q-badge
                 :color="getPopularityColor(project.popularity)"
                 :label="`Popularity: ${project.popularity}`"
               />
             </div>
           </q-card-section>
 
-          <!-- Кнопка Show Comments -->
           <q-card-actions vertical>
-            <q-btn 
-              color="primary" 
+            <q-btn
+              color="primary"
               icon="chat"
               :label="`Show Comments (${getCommentCount(project.id)})`"
               no-caps
@@ -53,7 +39,6 @@
       </div>
     </div>
 
-    <!-- Пустое состояние -->
     <div v-else class="text-center q-pa-lg">
       <p>No projects available</p>
     </div>
@@ -77,13 +62,12 @@ const fetchProjectsData = async () => {
     loading.value = true
     const response = await getProjects()
     projects.value = response.data
-    
-    // Загружаем количество комментариев для каждого проекта
+
     await loadCommentCounts()
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: 'Failed to load projects: ' + (error.response?.data?.detail || 'Network error')
+      message: 'Failed to load projects: ' + (error.response?.data?.detail || 'Network error'),
     })
     projects.value = []
   } finally {
@@ -98,7 +82,6 @@ const loadCommentCounts = async () => {
       const response = await getCommentsByProjectId(project.id)
       commentCounts.value[project.id] = response.data.length
     } catch (error) {
-      // Если комментариев нет или ошибка - показываем 0
       error
       commentCounts.value[project.id] = 0
     } finally {
@@ -130,7 +113,7 @@ onMounted(() => {
 })
 
 defineExpose({
-  fetchProjectsData
+  fetchProjectsData,
 })
 </script>
 

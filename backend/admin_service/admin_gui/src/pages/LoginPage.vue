@@ -1,38 +1,38 @@
 <template>
-    <q-layout>
+  <q-layout>
     <q-page-container>
-  <q-page class="row justify-center items-center">
-    <q-card style="width: 400px">
-      <q-card-section>
-        <q-form class="q-gutter-md" @submit.prevent="onSubmit">
-          <q-input
-            v-model="email"
-            label="Email"
-            type="email"
-            outlined
-            :rules="[val => !!val || 'Email is required', isValidEmail]"
-          />
-          <q-input
-            v-model="password"
-            label="Password"
-            :type="isPwd ? 'password' : 'text'"
-            outlined
-            :rules="[val => !!val || 'Password is required', isValidPassword]"
-          >
-            <template v-slot:append>
-              <q-icon
-                :name="isPwd ? 'visibility_off' : 'visibility'"
-                class="cursor-pointer"
-                @click="isPwd = !isPwd"
+      <q-page class="row justify-center items-center">
+        <q-card style="width: 400px">
+          <q-card-section>
+            <q-form class="q-gutter-md" @submit.prevent="onSubmit">
+              <q-input
+                v-model="email"
+                label="Email"
+                type="email"
+                outlined
+                :rules="[(val) => !!val || 'Email is required', isValidEmail]"
               />
-            </template>
-          </q-input>
-          <q-btn label="Login" color="primary" type="submit"/>
-        </q-form>
-      </q-card-section>
-    </q-card>
-  </q-page>
-  </q-page-container>
+              <q-input
+                v-model="password"
+                label="Password"
+                :type="isPwd ? 'password' : 'text'"
+                outlined
+                :rules="[(val) => !!val || 'Password is required', isValidPassword]"
+              >
+                <template v-slot:append>
+                  <q-icon
+                    :name="isPwd ? 'visibility_off' : 'visibility'"
+                    class="cursor-pointer"
+                    @click="isPwd = !isPwd"
+                  />
+                </template>
+              </q-input>
+              <q-btn label="Login" color="primary" type="submit" />
+            </q-form>
+          </q-card-section>
+        </q-card>
+      </q-page>
+    </q-page-container>
   </q-layout>
 </template>
 
@@ -64,25 +64,24 @@ const onSubmit = async () => {
   try {
     const response = await loginUser({
       email: email.value,
-      password: password.value
-    });
+      password: password.value,
+    })
 
     const authStore = useAuthStore()
     authStore.setToken(response.data.access_token)
-    
 
     $q.notify({
       type: 'positive',
       message: response.data?.data || 'Login Successful',
-      position: 'top'
-    });
+      position: 'top',
+    })
     router.push('/')
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: error.response?.data?.data || 'Login failed',
-      position: 'top'
-    });
+      position: 'top',
+    })
   }
-};
+}
 </script>

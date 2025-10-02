@@ -51,7 +51,7 @@ const routes = [
         path: '/comments',
         component: () => import('pages/CommentsPage.vue'),
         meta: { requiresAuth: true },
-      }
+      },
     ],
   },
 

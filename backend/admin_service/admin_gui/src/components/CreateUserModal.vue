@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="showModal">
-    <q-card style="width: 500px; max-width: 90vw;">
+    <q-card style="width: 500px; max-width: 90vw">
       <q-card-section class="row items-center">
         <div class="text-h6">Create New User</div>
         <q-space />
@@ -9,27 +9,22 @@
 
       <q-card-section class="q-pt-none">
         <q-form class="q-gutter-md" @submit.prevent="handleSubmit">
-          <!-- Email -->
           <q-input
             v-model="formData.email"
             label="Email"
             type="email"
             outlined
-            :rules="[
-              val => !!val || 'Email is required',
-              isValidEmail
-            ]"
+            :rules="[(val) => !!val || 'Email is required', isValidEmail]"
           />
-          
-          <!-- Password -->
+
           <q-input
             v-model="formData.password"
             label="Password"
             :type="isPwd ? 'password' : 'text'"
             outlined
             :rules="[
-              val => !!val || 'Password is required',
-              val => val.length >= 5 || 'Password must be at least 5 characters'
+              (val) => !!val || 'Password is required',
+              (val) => val.length >= 5 || 'Password must be at least 5 characters',
             ]"
           >
             <template v-slot:append>
@@ -41,7 +36,6 @@
             </template>
           </q-input>
 
-          <!-- Roles -->
           <q-select
             v-model="formData.roles"
             label="Roles"
@@ -55,12 +49,7 @@
 
       <q-card-actions align="right">
         <q-btn flat label="Cancel" color="primary" v-close-popup />
-        <q-btn 
-          label="Create" 
-          color="primary" 
-          @click="handleSubmit"
-          :loading="loading"
-        />
+        <q-btn label="Create" color="primary" @click="handleSubmit" :loading="loading" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -79,29 +68,24 @@ const loading = ref(false)
 const formData = ref({
   email: '',
   password: '',
-  roles: []
+  roles: [],
 })
 
-const roleOptions = [
-  'user',
-  'admin'
-]
+const roleOptions = ['user', 'admin']
 
 const emit = defineEmits(['created'])
 
-// Валидация email
 const isValidEmail = (val) => {
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return pattern.test(val) || 'Invalid email format'
 }
 
-// Метод для открытия модального окна
 const open = () => {
   showModal.value = true
   formData.value = {
     email: '',
     password: '',
-    roles: []
+    roles: [],
   }
   isPwd.value = true
 }
@@ -111,21 +95,20 @@ const handleSubmit = async () => {
     loading.value = true
 
     await registerUser(formData.value)
-    
+
     $q.notify({
       type: 'positive',
       message: 'User created successfully!',
-      position: 'top'
+      position: 'top',
     })
 
     showModal.value = false
     emit('created')
-    
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: error.response?.data?.detail || 'Failed to create user',
-      position: 'top'
+      position: 'top',
     })
   } finally {
     loading.value = false
@@ -133,6 +116,6 @@ const handleSubmit = async () => {
 }
 
 defineExpose({
-  open
+  open,
 })
 </script>

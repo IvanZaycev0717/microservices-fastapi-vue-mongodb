@@ -1,20 +1,20 @@
 <template>
   <q-card class="certificate-card q-mb-md">
     <div class="card-actions">
-      <q-btn 
-        icon="edit" 
-        color="primary" 
-        size="sm" 
-        round 
+      <q-btn
+        icon="edit"
+        color="primary"
+        size="sm"
+        round
         flat
         class="action-btn q-mr-xs"
         @click="handleEdit"
       />
-      <q-btn 
-        icon="delete" 
-        color="negative" 
-        size="sm" 
-        round 
+      <q-btn
+        icon="delete"
+        color="negative"
+        size="sm"
+        round
         flat
         class="action-btn"
         @click="handleDelete"
@@ -24,12 +24,7 @@
 
     <div class="row no-wrap">
       <div class="col-auto">
-        <q-img
-          :src="certificate.thumb"
-          :alt="certificate.alt"
-          height="200px"
-          width="200px"
-        />
+        <q-img :src="certificate.thumb" :alt="certificate.alt" height="200px" width="200px" />
       </div>
 
       <div class="col q-pa-md">
@@ -53,8 +48,8 @@ const $q = useQuasar()
 const props = defineProps({
   certificate: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const emit = defineEmits(['deleted', 'edit'])
@@ -73,7 +68,7 @@ const handleDelete = () => {
     title: 'Confirm Delete',
     message: 'Are you sure you want to delete this certificate?',
     cancel: true,
-    persistent: true
+    persistent: true,
   }).onOk(async () => {
     try {
       deleteLoading.value = true
@@ -82,7 +77,7 @@ const handleDelete = () => {
       $q.notify({
         type: 'negative',
         message: error,
-        position: 'top'
+        position: 'top',
       })
     } finally {
       deleteLoading.value = false
@@ -107,7 +102,7 @@ const handleDelete = () => {
 .action-btn {
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(4px);
-  
+
   &:hover {
     background-color: rgba(255, 255, 255, 1);
   }

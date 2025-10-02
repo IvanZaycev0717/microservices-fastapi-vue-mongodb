@@ -24,15 +24,9 @@
       />
     </div>
 
-    <CreatePublicationModal 
-      ref="createModalRef" 
-      @created="handlePublicationCreated"
-    />
-    
-    <UpdatePublicationModal 
-      ref="updateModalRef" 
-      @updated="handlePublicationUpdated"
-    />
+    <CreatePublicationModal ref="createModalRef" @created="handlePublicationCreated" />
+
+    <UpdatePublicationModal ref="updateModalRef" @updated="handlePublicationUpdated" />
   </q-page>
 </template>
 
@@ -57,7 +51,7 @@ const fetchPublications = async () => {
     $q.notify({
       type: 'negative',
       message: error.response?.data?.detail || 'Failed to load publications',
-      position: 'top'
+      position: 'top',
     })
   }
 }
@@ -73,20 +67,19 @@ const handlePublicationUpdated = () => {
 const handleDeletePublication = async (publicationId) => {
   try {
     await deletePublication(publicationId)
-    
+
     $q.notify({
       type: 'positive',
       message: 'Publication deleted successfully!',
-      position: 'top'
+      position: 'top',
     })
-    
-    publications.value = publications.value.filter(pub => pub.id !== publicationId)
-    
+
+    publications.value = publications.value.filter((pub) => pub.id !== publicationId)
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: error.response?.data?.detail || 'Failed to delete publication',
-      position: 'top'
+      position: 'top',
     })
   }
 }

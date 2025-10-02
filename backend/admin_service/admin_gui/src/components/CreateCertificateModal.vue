@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="showModal">
-    <q-card style="width: 500px; max-width: 90vw;">
+    <q-card style="width: 500px; max-width: 90vw">
       <q-card-section class="row items-center">
         <div class="text-h6">Create New Certificate</div>
         <q-space />
@@ -14,17 +14,17 @@
             label="Date"
             type="date"
             outlined
-            :rules="[val => !!val || 'Date is required']"
+            :rules="[(val) => !!val || 'Date is required']"
           />
-          
+
           <q-input
             v-model="formData.popularity"
             label="Popularity"
             type="number"
             outlined
             :rules="[
-              val => !!val || 'Popularity is required',
-              val => val >= 0 && val <= 1000 || 'Popularity must be between 0 and 1000'
+              (val) => !!val || 'Popularity is required',
+              (val) => (val >= 0 && val <= 1000) || 'Popularity must be between 0 and 1000',
             ]"
           />
 
@@ -32,7 +32,7 @@
             v-model="formData.file"
             label="Certificate File (PDF or Image)"
             outlined
-            :rules="[val => !!val || 'File is required']"
+            :rules="[(val) => !!val || 'File is required']"
           >
             <template v-slot:prepend>
               <q-icon name="attach_file" />
@@ -43,12 +43,7 @@
 
       <q-card-actions align="right">
         <q-btn flat label="Cancel" color="primary" v-close-popup />
-        <q-btn 
-          label="Create" 
-          color="primary" 
-          @click="handleSubmit"
-          :loading="loading"
-        />
+        <q-btn label="Create" color="primary" @click="handleSubmit" :loading="loading" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -66,18 +61,17 @@ const loading = ref(false)
 const formData = ref({
   date: '',
   popularity: 10,
-  file: null
+  file: null,
 })
 
 const emit = defineEmits(['created'])
 
 const open = () => {
   showModal.value = true
-  // Сбрасываем форму при открытии
   formData.value = {
     date: '',
     popularity: 10,
-    file: null
+    file: null,
   }
 }
 
@@ -91,21 +85,20 @@ const handleSubmit = async () => {
     formDataToSend.append('file', formData.value.file)
 
     await createCertificate(formDataToSend)
-    
+
     $q.notify({
       type: 'positive',
       message: 'Certificate created successfully!',
-      position: 'top'
+      position: 'top',
     })
 
     showModal.value = false
     emit('created')
-    
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: error.response?.data?.detail || 'Failed to create certificate',
-      position: 'top'
+      position: 'top',
     })
   } finally {
     loading.value = false
@@ -113,6 +106,6 @@ const handleSubmit = async () => {
 }
 
 defineExpose({
-  open
+  open,
 })
 </script>

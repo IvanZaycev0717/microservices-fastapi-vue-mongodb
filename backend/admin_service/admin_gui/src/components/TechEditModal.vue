@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="showModal">
-    <q-card style="width: 600px; max-width: 90vw;">
+    <q-card style="width: 600px; max-width: 90vw">
       <q-card-section>
         <div class="text-h6">Edit {{ kingdomData.kingdom }} Skills</div>
       </q-card-section>
@@ -11,7 +11,7 @@
             v-model="skillsString"
             type="textarea"
             label="Skills (comma separated)"
-            :rules="[val => !!val || 'Skills are required']"
+            :rules="[(val) => !!val || 'Skills are required']"
             outlined
             rows="6"
             hint="Enter skills separated by commas"
@@ -53,23 +53,22 @@ const handleUpdate = async () => {
 
   try {
     await api.patch(`/technologies/${kingdomData.value.key}`, {
-      skills: skillsString.value
+      skills: skillsString.value,
     })
-    
+
     $q.notify({
       type: 'positive',
-      message: `${kingdomData.value.kingdom} skills updated successfully!`
+      message: `${kingdomData.value.kingdom} skills updated successfully!`,
     })
-    
+
     showModal.value = false
     resetForm()
     emit('updated')
-    
   } catch (error) {
     console.error('Error updating skills:', error)
     $q.notify({
       type: 'negative',
-      message: error.response?.data?.detail || 'Failed to update skills'
+      message: error.response?.data?.detail || 'Failed to update skills',
     })
   } finally {
     loading.value = false
@@ -84,6 +83,6 @@ const resetForm = () => {
 
 const emit = defineEmits(['updated'])
 defineExpose({
-  open
+  open,
 })
 </script>

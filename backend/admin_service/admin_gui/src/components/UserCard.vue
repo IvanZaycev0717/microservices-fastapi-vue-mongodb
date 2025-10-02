@@ -1,20 +1,20 @@
 <template>
   <q-card class="user-card q-mb-md">
     <div class="card-actions">
-      <q-btn 
-        icon="edit" 
-        color="primary" 
-        size="sm" 
-        round 
+      <q-btn
+        icon="edit"
+        color="primary"
+        size="sm"
+        round
         flat
         class="action-btn q-mr-xs"
         @click="handleEdit"
       />
-      <q-btn 
-        icon="delete" 
-        color="negative" 
-        size="sm" 
-        round 
+      <q-btn
+        icon="delete"
+        color="negative"
+        size="sm"
+        round
         flat
         class="action-btn"
         @click="handleDelete"
@@ -24,28 +24,21 @@
 
     <q-card-section class="q-pa-md">
       <div class="row items-start q-col-gutter-md">
-        <!-- Основная информация -->
         <div class="col-12 col-md-6">
           <div class="text-h6 q-mb-xs">{{ user.email }}</div>
-          <div class="text-caption text-grey">
-            ID: {{ user.id }}
-          </div>
+          <div class="text-caption text-grey">ID: {{ user.id }}</div>
         </div>
 
-        <!-- Статус и роли -->
         <div class="col-12 col-md-6">
           <div class="row items-center q-gutter-sm q-mb-xs">
-            <q-badge 
-              :color="user.is_banned ? 'negative' : 'positive'" 
-              class="q-px-sm q-py-xs"
-            >
+            <q-badge :color="user.is_banned ? 'negative' : 'positive'" class="q-px-sm q-py-xs">
               {{ user.is_banned ? 'Banned' : 'Active' }}
             </q-badge>
-            
-            <q-badge 
-              v-for="role in user.roles" 
+
+            <q-badge
+              v-for="role in user.roles"
               :key="role"
-              color="secondary" 
+              color="secondary"
               class="q-px-sm q-py-xs"
             >
               {{ role }}
@@ -57,7 +50,6 @@
       <q-separator class="q-my-md" />
 
       <div class="row items-center q-col-gutter-md">
-        <!-- Даты -->
         <div class="col-12 col-sm-6">
           <div class="text-caption text-grey">
             <q-icon name="event" class="q-mr-xs" size="14px" />
@@ -88,9 +80,9 @@ const props = defineProps({
       is_banned: false,
       roles: [],
       created_at: '',
-      last_login_at: ''
-    })
-  }
+      last_login_at: '',
+    }),
+  },
 })
 
 const emit = defineEmits(['delete', 'edit'])
@@ -103,7 +95,7 @@ const formatDate = (dateString) => {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
@@ -116,7 +108,7 @@ const handleDelete = () => {
     title: 'Confirm Delete',
     message: `Are you sure you want to delete user "${props.user.email}"? This action cannot be undone.`,
     cancel: true,
-    persistent: true
+    persistent: true,
   }).onOk(() => {
     deleteLoading.value = true
     emit('delete', props.user.email)
@@ -141,7 +133,7 @@ const handleDelete = () => {
 .action-btn {
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(4px);
-  
+
   &:hover {
     background-color: rgba(255, 255, 255, 1);
   }
