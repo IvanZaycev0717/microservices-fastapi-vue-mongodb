@@ -1,1 +1,53 @@
-Сервис контента
+# Admin Service
+
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![MinIO](https://img.shields.io/badge/MinIO-FF0000?style=for-the-badge&logo=minio&logoColor=white)
+
+## Overview
+
+Admin Service is a unified administration panel designed to manage multiple microservices for a personal website. It provides a centralized interface for content management, user administration, and system monitoring across various services.
+
+## Key Features
+
+- **Unified Administration**: Single panel to manage all website microservices
+- **User Management**: Complete user registration, authentication, and role-based access control
+- **Content Management**: Handle projects, publications, certificates, and comments
+- **File Storage**: Integrated MinIO for efficient file and image management
+- **Email Notifications**: Automated email system for user communications
+- **Multi-language Support**: English and Russian content management
+- **Security**: JWT-based authentication with bcrypt password hashing
+
+## Technology Stack
+
+### Backend Framework
+- **FastAPI** - Modern, fast web framework for building APIs
+- **Uvicorn** - ASGI server for running FastAPI applications
+
+### Databases
+- **MongoDB** (PyMongo) - Primary database for content and user data
+- **PostgreSQL** (asyncpg, SQLAlchemy, Alembic) - Relational database for structured data
+
+### File Storage
+- **MinIO** - S3-compatible object storage for files and images
+- **Pillow** - Image processing and manipulation
+- **PDF2Image** - PDF to image conversion
+- **AIOFiles** - Async file operations
+
+### Security & Authentication
+- **Bcrypt** - Password hashing
+- **JWT** - JSON Web Tokens for authentication
+- **Pydantic Settings** - Configuration management
+
+### Email & Communication
+- **FastAPI-Mail** - Email sending capabilities with HTTpx
+- **AIOHTTP** - Async HTTP client for webhooks
+
+### Testing & Development
+- **Pytest** - Testing framework
+- **Pytest-asyncio** - Async test support
+- **Mongomock-motor** - MongoDB mocking for tests
+- **Mimesis** - Fake data generation for testing
+
+
