@@ -1,4 +1,18 @@
 services:
+
+  admin_gui:
+    build:
+      context: ./admin_gui
+      dockerfile: Dockerfile
+    container_name: admin_gui
+    ports:
+      - "9500:80"
+    depends_on:
+      - content_db
+      - auth_db
+      - comments_db
+      - notification_db
+      - minio
   content_db:
     image: mongo:8.0
     container_name: content_db
