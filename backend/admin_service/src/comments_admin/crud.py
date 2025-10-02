@@ -55,7 +55,12 @@ class CommentsCRUD:
                 .order_by(Comment.created_at.desc())
             )
             result = await self.db_session.execute(stmt)
-            return result.scalars().all()
+            comments = result.scalars().all()
+
+            if not comments:
+                raise ValueError(f"No comments found for project {project_id}")
+
+            return comments
         except SQLAlchemyError as e:
             raise ValueError(
                 f"Database error reading comments for project {project_id}: {str(e)}"

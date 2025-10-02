@@ -4043,6 +4043,57 @@
 							"response": []
 						},
 						{
+							"name": "/comments/projects/pro_id - 200",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function() {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/comments/project/:project_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"comments",
+										"project",
+										":project_id"
+									],
+									"variable": [
+										{
+											"key": "project_id",
+											"value": "{{project_id_1}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "/comments/com_id - 200 (Update Text Comment)",
 							"event": [
 								{
