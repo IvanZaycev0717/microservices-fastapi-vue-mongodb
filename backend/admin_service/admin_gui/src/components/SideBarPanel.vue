@@ -8,7 +8,7 @@
   >
     <q-list padding>
       <q-item-label header class="text-white">
-        Navigation
+        Admin Panel Menu
       </q-item-label>
 
       <q-item 

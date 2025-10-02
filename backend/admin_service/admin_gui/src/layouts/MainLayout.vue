@@ -10,7 +10,9 @@
           aria-label="Menu"
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
-        <q-toolbar-title>IvanZaycev0717 | Personal Site Microservices | Admin GUI</q-toolbar-title>
+        <q-toolbar-title class="cursor-pointer" @click="$router.push('/')">
+          IvanZaycev0717 | Personal Site Microservices | Admin GUI
+        </q-toolbar-title>
 
         <q-btn href="https://github.com/IvanZaycev0717/" target="_blank" flat>
           <GitHubIcon />

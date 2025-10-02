@@ -31,6 +31,8 @@
                 :comment="comment"
                 :all-comments="sortedComments"
                 level="0"
+                @comment-deleted="handleCommentDeleted"
+                @comment-updated="handleCommentUpdated"
               />
             </div>
           </div>
@@ -51,6 +53,13 @@
             </div>
             <div class="text-caption text-grey">
               Date: {{ formatDate(project?.date) }}
+            </div>
+            
+            <!-- Статистика комментариев -->
+            <div class="q-mt-lg">
+              <div class="text-weight-medium">Comments Statistics</div>
+              <div class="text-caption">Total: {{ comments.length }}</div>
+              <div class="text-caption">Root: {{ rootComments.length }}</div>
             </div>
           </div>
         </div>
@@ -88,6 +97,32 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('ru-RU')
 }
 
+// Обработчик удаления комментария
+const handleCommentDeleted = (deletedCommentId) => {
+  // Удаляем комментарий из локального списка
+  comments.value = comments.value.filter(comment => comment.id !== deletedCommentId)
+  
+  // Также нужно удалить все дочерние комментарии (из-за CASCADE в БД)
+  const removeChildren = (parentId) => {
+    const children = comments.value.filter(comment => comment.parent_comment_id === parentId)
+    children.forEach(child => {
+      comments.value = comments.value.filter(c => c.id !== child.id)
+      removeChildren(child.id) // Рекурсивно удаляем детей
+    })
+  }
+  
+  removeChildren(deletedCommentId)
+}
+
+// Обработчик обновления комментария
+const handleCommentUpdated = (updatedComment) => {
+  // Обновляем комментарий в локальном списке
+  const index = comments.value.findIndex(comment => comment.id === updatedComment.id)
+  if (index !== -1) {
+    comments.value[index].comment_text = updatedComment.new_text
+  }
+}
+
 // Метод для открытия модального окна
 const open = async (selectedProject) => {
   showModal.value = true
@@ -98,8 +133,6 @@ const open = async (selectedProject) => {
   try {
     const response = await getCommentsByProjectId(selectedProject.id)
     comments.value = response.data
-    console.log('Loaded comments:', comments.value) // Для отладки
-    console.log('Sorted comments:', sortedComments.value) // Для отладки
   } catch (error) {
     $q.notify({
       type: 'negative',
