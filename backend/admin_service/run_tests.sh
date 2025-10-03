@@ -1,13 +1,16 @@
 #!/bin/bash
 
 echo "Run Pytest"
-python -m pytest -v
+cd src
+poetry run python -m pytest -v
+cd ..
 
 echo "Run FastAPI Backend"
 cd src
-python main.py &
+poetry run python main.py &
 BACKEND_PID=$!
 cd ..
+
 sleep 5
 
 echo "Running Postman Tests"
@@ -20,9 +23,7 @@ npx newman run "Content_Admin_API.postman_collection.json" \
   --reporter-cli-no-console
 NEWMAN_EXIT=$?
 
-
 kill $BACKEND_PID
-
 
 if [ $NEWMAN_EXIT -eq 0 ]; then
     echo "✅ All tests passed!"

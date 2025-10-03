@@ -42,6 +42,9 @@ build-backend = "poetry.core.masonry.api"
 flake8-isort = "^6.1.2"
 ruff = "^0.12.11"
 
+[tool.poetry]
+package-mode = false
+
 [tool.ruff]
 line-length = 79
 

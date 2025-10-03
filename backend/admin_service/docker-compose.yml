@@ -1,4 +1,18 @@
 services:
+  admin_service:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - content_db
+      - auth_db
+      - comments_db
+      - notification_db
+      - minio
 
   admin_gui:
     build:
@@ -13,6 +27,7 @@ services:
       - comments_db
       - notification_db
       - minio
+      - admin_service
   content_db:
     image: mongo:8.0
     container_name: content_db
