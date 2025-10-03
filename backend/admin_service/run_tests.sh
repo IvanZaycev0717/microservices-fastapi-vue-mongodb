@@ -1,17 +1,29 @@
 #!/bin/bash
 
-echo "Run Pytest"
-cd src
-poetry run python -m pytest -v
-cd ..
+
+echo "Stop all containers before testing"
+docker-compose down
+
+echo "Starting databases for tests..."
+docker-compose up -d content_db auth_db comments_db notification_db minio
+sleep 15
 
 echo "Run FastAPI Backend"
 cd src
-poetry run python main.py &
+export $(grep -v '^#' ../.env.test | xargs) && poetry run python main.py &
 BACKEND_PID=$!
 cd ..
 
-sleep 5
+echo "Waiting for backend to start..."
+for i in {1..30}; do
+    curl -f http://localhost:8000/health >/dev/null 2>&1 && break
+    sleep 1
+done
+
+echo "Run Pytest"
+cd src
+export $(grep -v '^#' ../.env.test | xargs) && poetry run python -m pytest -v
+cd ..
 
 echo "Running Postman Tests"
 npx newman run "Content_Admin_API.postman_collection.json" \
@@ -24,6 +36,7 @@ npx newman run "Content_Admin_API.postman_collection.json" \
 NEWMAN_EXIT=$?
 
 kill $BACKEND_PID
+docker-compose down
 
 if [ $NEWMAN_EXIT -eq 0 ]; then
     echo "✅ All tests passed!"

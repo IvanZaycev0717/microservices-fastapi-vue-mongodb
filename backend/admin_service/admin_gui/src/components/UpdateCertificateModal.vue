@@ -84,7 +84,6 @@ const handleSubmit = async () => {
     await updateCertificatePopularity(currentCertificate.value.id, formData.value.popularity)
 
     if (formData.value.file) {
-
       const fileFormData = new FormData()
       fileFormData.append('file', formData.value.file)
 
