@@ -15,9 +15,9 @@ logger = get_logger("postgres_db_connection")
 
 
 class PostgresConnectionManager:
-    """
-    Manages PostgreSQL connection operations
-    including opening and closing connections.
+    """Manages PostgreSQL connection operations.
+
+    Includes opening and closing connections.
     """
 
     def __init__(
@@ -26,11 +26,11 @@ class PostgresConnectionManager:
         """Initializes the PostgreSQL connection manager.
 
         Args:
-            host (str): PostgreSQL host
-            port (int): PostgreSQL port
-            user (str): PostgreSQL username
-            password (str): PostgreSQL password
-            database (str): Database name
+            host: PostgreSQL host.
+            port: PostgreSQL port.
+            user: PostgreSQL username.
+            password: PostgreSQL password.
+            database: Database name.
         """
         self.host = host
         self.port = port
@@ -41,16 +41,15 @@ class PostgresConnectionManager:
         self.connection: Optional[Connection] = None
 
     async def open_connection(self) -> Connection:
-        """
-        Establishes a connection to PostgreSQL server.
+        """Establishes a connection to PostgreSQL server.
 
         Returns:
             Connection: Connected PostgreSQL connection instance.
 
         Raises:
-            InvalidPasswordError: If authentication fails
-            ConnectionDoesNotExistError: If connection to server fails
-            PostgresError: For other PostgreSQL errors
+            InvalidPasswordError: If authentication fails.
+            ConnectionDoesNotExistError: If connection to server fails.
+            PostgresError: For other PostgreSQL errors.
         """
         try:
             self.connection = await asyncpg.connect(
@@ -63,7 +62,6 @@ class PostgresConnectionManager:
                 command_timeout=settings.POSTGRES_COMMAND_TIMEOUT,
             )
 
-            # Verify connection
             await self.connection.execute("SELECT 1")
             logger.info("PostgreSQL connection successful")
             return self.connection
@@ -81,14 +79,13 @@ class PostgresConnectionManager:
             raise
 
     async def create_pool(self) -> Pool:
-        """
-        Creates a connection pool for PostgreSQL.
+        """Creates a connection pool for PostgreSQL.
 
         Returns:
             Pool: PostgreSQL connection pool instance.
 
         Raises:
-            PostgresError: If pool creation fails
+            PostgresError: If pool creation fails.
         """
         try:
             self.pool = await asyncpg.create_pool(
@@ -103,7 +100,6 @@ class PostgresConnectionManager:
                 command_timeout=settings.POSTGRES_COMMAND_TIMEOUT,
             )
 
-            # Test pool connection
             async with self.pool.acquire() as conn:
                 await conn.execute("SELECT 1")
 
@@ -115,9 +111,7 @@ class PostgresConnectionManager:
             raise
 
     async def close_connection(self):
-        """
-        Closes the PostgreSQL connection if it exists.
-        """
+        """Closes the PostgreSQL connection if it exists."""
         if self.connection and not self.connection.is_closed():
             await self.connection.close()
             self.connection = None
@@ -126,9 +120,7 @@ class PostgresConnectionManager:
             logger.info("PostgreSQL was closed before")
 
     async def close_pool(self):
-        """
-        Closes the PostgreSQL connection pool if it exists.
-        """
+        """Closes the PostgreSQL connection pool if it exists."""
         if self.pool:
             await self.pool.close()
             self.pool = None
@@ -136,16 +128,16 @@ class PostgresConnectionManager:
 
 
 class PostgresDatabaseManager:
-    """
-    Manages PostgreSQL database operations
-    including existence checks and creation.
+    """Manages PostgreSQL database operations.
+
+    Includes existence checks and creation.
     """
 
     def __init__(self, connection: Connection) -> None:
         """Initializes the PostgreSQL database manager.
 
         Args:
-            connection (Connection): Connected PostgreSQL connection instance.
+            connection: Connected PostgreSQL connection instance.
         """
         self.connection = connection
 
@@ -153,17 +145,14 @@ class PostgresDatabaseManager:
         """Checks if a database exists in the PostgreSQL instance.
 
         Args:
-            db_name (str): Name of the database to check.
+            db_name: Name of the database to check.
 
         Returns:
             bool: True if database exists, False otherwise.
         """
         try:
             result = await self.connection.fetchval(
-                """
-                SELECT 1 FROM pg_database WHERE datname = $1
-            """,
-                db_name,
+                "SELECT 1 FROM pg_database WHERE datname = $1", db_name
             )
 
             exists = result is not None
@@ -178,37 +167,57 @@ class PostgresDatabaseManager:
             logger.exception(f"Database check failed: {e}")
             return False
 
-    async def create_database(self, db_name: str) -> bool:
+    async def create_database(self, db_name: str, host: str, port: int, user: str, password: str) -> bool:
         """Creates a new database if it doesn't exist.
 
         Args:
-            db_name (str): Name of the database to create.
+            db_name: Name of the database to create.
+            host: PostgreSQL host.
+            port: PostgreSQL port.
+            user: PostgreSQL username.
+            password: PostgreSQL password.
 
         Returns:
             bool: True if successful, False otherwise.
         """
         try:
-            # Cannot create database within a transaction block
-            await self.connection.execute(f"CREATE DATABASE {db_name}")
-            logger.info(f"Database '{db_name}' created successfully")
-            return True
+            sys_conn = await asyncpg.connect(
+                host=host,
+                port=port,
+                user=user,
+                password=password,
+                database="postgres",
+            )
 
-        except PostgresError as e:
-            logger.exception(f"Failed to create database: {e}")
+            try:
+                await sys_conn.execute(f"CREATE DATABASE {db_name}")
+                logger.info(f"Database '{db_name}' created successfully")
+                return True
+            except asyncpg.DuplicateDatabaseError:
+                logger.info(f"Database '{db_name}' already exists")
+                return True
+            except Exception as e:
+                logger.exception(f"Failed to create database '{db_name}': {e}")
+                return False
+            finally:
+                await sys_conn.close()
+
+        except Exception as e:
+            logger.exception(f"Failed to connect to system database: {e}")
             return False
 
 
 class PostgresTableManager:
-    """
-    Manages PostgreSQL table operations
-    including existence checks and schema initialization.
+    """Manages PostgreSQL table operations.
+
+    Includes existence checks and schema initialization.
     """
 
     def __init__(self, connection: Connection) -> None:
         """Initializes the PostgreSQL table manager.
 
         Args:
-            connection (Connection): Connected PostgreSQL connection instance.
+            connection: Connected PostgreSQL connection instance.
         """
         self.connection = connection
 
@@ -216,7 +225,7 @@ class PostgresTableManager:
         """Checks if a table exists in the current database.
 
         Args:
-            table_name (str): Name of the table to check.
+            table_name: Name of the table to check.
 
         Returns:
             bool: True if table exists, False otherwise.
@@ -226,7 +235,7 @@ class PostgresTableManager:
                 """
                 SELECT 1 FROM information_schema.tables 
                 WHERE table_name = $1
-            """,
+                """,
                 table_name,
             )
 
@@ -246,7 +255,7 @@ class PostgresTableManager:
         """Initializes tables using provided SQL schema.
 
         Args:
-            schema_sql (str): SQL schema definition.
+            schema_sql: SQL schema definition.
 
         Returns:
             bool: True if successful, False otherwise.
@@ -264,7 +273,7 @@ class PostgresTableManager:
         """Initializes default data using provided SQL.
 
         Args:
-            data_sql (str): SQL for inserting default data.
+            data_sql: SQL for inserting default data.
 
         Returns:
             bool: True if successful, False otherwise.

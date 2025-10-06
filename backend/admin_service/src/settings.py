@@ -208,7 +208,7 @@ class Settings(BaseSettings):
     LOGGING_LEVEL: int = Field(logging.INFO, description="Logging level")
 
     model_config = SettingsConfigDict(
-        env_file="../.env", env_file_encoding="utf-8", extra="ignore"
+        env_file="../.env.dev", env_file_encoding="utf-8", extra="ignore"
     )
 
     # Email Settings

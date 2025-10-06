@@ -49,6 +49,7 @@ async def lifespan(app: FastAPI):
     databases = {}
 
     try:
+        # MongoDB connections
         connections["content_admin"] = MongoConnectionManager(
             host=settings.CONTENT_ADMIN_MONGODB_URL
         )
@@ -58,14 +59,17 @@ async def lifespan(app: FastAPI):
         connections["notification_admin"] = MongoConnectionManager(
             host=settings.NOTIFICATION_ADMIN_MONGODB_URL
         )
+
+        # PostgreSQL connection - сначала подключаемся к системной БД
         connections["comments_admin"] = PostgresConnectionManager(
             host=settings.COMMENTS_ADMIN_POSTGRES_ROOT_NAME,
             port=settings.COMMENTS_ADMIN_POSTGRES_PORT,
             user=settings.POSTGRES_USER,
             password=settings.POSTGRES_PASSWORD,
-            database=settings.COMMENTS_ADMIN_POSTGRES_DB_NAME,
+            database="postgres",  # ← подключаемся к системной БД сначала
         )
 
+        # MongoDB initialization
         (
             clients["content_admin"],
             databases["content_admin"],
@@ -93,6 +97,7 @@ async def lifespan(app: FastAPI):
             "notification admin",
         )
 
+        # PostgreSQL database creation
         comments_admin_client = await connections[
             "comments_admin"
         ].open_connection()
@@ -104,7 +109,11 @@ async def lifespan(app: FastAPI):
             settings.COMMENTS_ADMIN_POSTGRES_DB_NAME
         ):
             success = await comments_admin_db_manager.create_database(
-                settings.COMMENTS_ADMIN_POSTGRES_DB_NAME
+                settings.COMMENTS_ADMIN_POSTGRES_DB_NAME,
+                settings.COMMENTS_ADMIN_POSTGRES_ROOT_NAME,
+                settings.COMMENTS_ADMIN_POSTGRES_PORT,
+                settings.POSTGRES_USER,
+                settings.POSTGRES_PASSWORD
             )
             if success:
                 logger.info(
@@ -122,10 +131,25 @@ async def lifespan(app: FastAPI):
 
         await connections["comments_admin"].close_connection()
 
+        # Переподключаемся к созданной БД
+        connections["comments_admin"] = PostgresConnectionManager(
+            host=settings.COMMENTS_ADMIN_POSTGRES_ROOT_NAME,
+            port=settings.COMMENTS_ADMIN_POSTGRES_PORT,
+            user=settings.POSTGRES_USER,
+            password=settings.POSTGRES_PASSWORD,
+            database=settings.COMMENTS_ADMIN_POSTGRES_DB_NAME,  # ← теперь к нашей БД
+        )
+        
+        comments_admin_client = await connections[
+            "comments_admin"
+        ].open_connection()
+
+        # Создаем таблицы в целевой БД
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Comments database tables created successfully")
 
+        # Остальная логика инициализации...
         minio_crud = MinioCRUD()
         data_loader = DataLoader(
             settings.CONTENT_ADMIN_PATH, settings.INITIAL_DATA_LOADING_FILES
@@ -195,6 +219,7 @@ async def lifespan(app: FastAPI):
 
         # Comments states
         app.state.postgres_engine = engine
+        app.state.comments_admin_client = comments_admin_client  # ← добавляем
 
         # Notifications states
         app.state.notification_admin_client = clients["notification_admin"]
@@ -214,13 +239,8 @@ async def lifespan(app: FastAPI):
         close_tasks = []
 
         for name, connection in connections.items():
-            if connection and name != "comments_admin":
+            if connection:
                 close_tasks.append(connection.close_connection())
-
-        if "comments_admin" in connections and connections["comments_admin"]:
-            close_tasks.append(
-                connections["comments_admin"].close_connection()
-            )
 
         if "engine" in locals():
             await engine.dispose()
