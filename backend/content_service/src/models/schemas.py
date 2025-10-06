@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from bson import ObjectId
+from pydantic import BaseModel, Field, field_validator
 
 from settings import settings
 
@@ -24,17 +25,16 @@ class Translation(BaseModel):
 
 
 class AboutDocument(BaseModel):
-    """About documents from MongoDB.
-
-    Attributes:
-        id: Document identifier.
-        image_url: URL of the associated image.
-        translations: Dictionary of translations keyed by language code.
-    """
-
     id: str = Field(alias="_id")
     image_url: str
     translations: dict[str, Translation]
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def convert_objectid_to_str(cls, v):
+        if isinstance(v, ObjectId):
+            return str(v)
+        return v
 
 
 class TechKingdom(BaseModel):

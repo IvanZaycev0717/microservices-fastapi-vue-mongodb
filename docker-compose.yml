@@ -19,18 +19,18 @@ services:
       - notification_db
       - minio
 
-  # content_service:
-  #   build:
-  #     context: ./backend/content_service
-  #     dockerfile: Dockerfile
-  #   container_name: content_service
-  #   ports:
-  #     - "50051:50051"
-  #   env_file:
-  #     - ./.env
-  #   depends_on:
-  #     - content_db
-  #   restart: unless-stopped
+  content_service:
+    build:
+      context: ./backend/content_service
+      dockerfile: Dockerfile
+    container_name: content_service
+    ports:
+      - "50051:50051"
+    env_file:
+      - .env.example
+    depends_on:
+      - content_db
+    restart: unless-stopped
 
   admin_gui:
     build:

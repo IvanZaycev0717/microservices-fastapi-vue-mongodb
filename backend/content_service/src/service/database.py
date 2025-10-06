@@ -1,4 +1,7 @@
-from pymongo import AsyncMongoClient, DESCENDING, ASCENDING
+from typing import List
+
+from bson import ObjectId
+from pymongo import ASCENDING, DESCENDING, AsyncMongoClient
 from pymongo.asynchronous.database import AsyncDatabase
 
 from logger import get_logger
@@ -11,7 +14,7 @@ from models.schemas import (
 )
 from settings import settings
 
-logger = get_logger(f"{settings.CONTENT_SERVICE_NAME} - Database")
+logger = get_logger("database")
 
 
 class DatabaseManager:
@@ -39,20 +42,20 @@ class DatabaseManager:
             await self.db.command("ping")
             logger.info("Successfully connected to MongoDB")
         except Exception as e:
-            logger.exception(f"Failed to connect to MongoDB: {e}")
+            logger.error(f"Failed to connect to MongoDB: {e}")
             raise
 
     async def disconnect(self) -> None:
         """Closes the MongoDB connection."""
-        if self.client:
+        if self.client is not None:
             await self.client.close()
             logger.info("MongoDB connection closed")
 
-    async def get_about(self, lang: str | None = None) -> list[AboutDocument]:
+    async def get_about(self, lang: str | None = None) -> List[AboutDocument]:
         """Retrieves about documents with optional language filtering.
 
         Args:
-            lang: Language code for filtering translations ('en' or 'ru').
+            lang: Language code for filtering translations.
 
         Returns:
             List of about documents.
@@ -60,7 +63,7 @@ class DatabaseManager:
         Raises:
             Exception: If database operation fails.
         """
-        if not self.db:
+        if self.db is None:
             raise RuntimeError("Database not connected")
 
         if not lang or lang not in ("en", "ru"):
@@ -77,11 +80,11 @@ class DatabaseManager:
                     }
                 }
             ]
-            cursor = self.db.about.aggregate(pipeline)
+            cursor = await self.db.about.aggregate(pipeline)
             documents = await cursor.to_list(length=None)
             return [AboutDocument(**doc) for doc in documents]
 
-    async def get_tech(self) -> list[TechDocument]:
+    async def get_tech(self) -> List[TechDocument]:
         """Retrieves all technology documents.
 
         Returns:
@@ -90,7 +93,7 @@ class DatabaseManager:
         Raises:
             Exception: If database operation fails.
         """
-        if not self.db:
+        if self.db is None:
             raise RuntimeError("Database not connected")
 
         cursor = self.db.tech.find()
@@ -99,7 +102,7 @@ class DatabaseManager:
 
     async def get_projects(
         self, lang: str, sort: str = "date_desc"
-    ) -> list[ProjectDocument]:
+    ) -> List[ProjectDocument]:
         """Retrieves projects with language and sorting options.
 
         Args:
@@ -112,7 +115,7 @@ class DatabaseManager:
         Raises:
             Exception: If database operation fails.
         """
-        if not self.db:
+        if self.db is None:
             raise RuntimeError("Database not connected")
 
         if sort.startswith("date"):
@@ -147,7 +150,7 @@ class DatabaseManager:
 
     async def get_certificates(
         self, sort: str = "date_desc"
-    ) -> list[CertificateDocument]:
+    ) -> List[CertificateDocument]:
         """Retrieves certificates with sorting options.
 
         Args:
@@ -159,7 +162,7 @@ class DatabaseManager:
         Raises:
             Exception: If database operation fails.
         """
-        if not self.db:
+        if self.db is None:
             raise RuntimeError("Database not connected")
 
         if sort.startswith("date"):
@@ -175,7 +178,7 @@ class DatabaseManager:
 
     async def get_publications(
         self, lang: str, sort: str = "date_desc"
-    ) -> list[PublicationDocument]:
+    ) -> List[PublicationDocument]:
         """Retrieves publications with language and sorting options.
 
         Args:
@@ -188,7 +191,7 @@ class DatabaseManager:
         Raises:
             Exception: If database operation fails.
         """
-        if not self.db:
+        if self.db is None:
             raise RuntimeError("Database not connected")
 
         if sort.startswith("date"):
@@ -218,4 +221,5 @@ class DatabaseManager:
         return publication_docs
 
 
+# Global database instance
 db_manager = DatabaseManager()

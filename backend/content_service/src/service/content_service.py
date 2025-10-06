@@ -12,27 +12,26 @@ logger = get_logger(f"{settings.CONTENT_SERVICE_NAME} - Server")
 
 class ContentService(ContentServiceServicer):
     """gRPC service for content operations."""
-
     async def GetAbout(
         self, request: content_pb2.AboutRequest, context: ServicerContext
     ) -> content_pb2.AboutResponse:
-        """Retrieves about content with language filtering.
-
-        Args:
-            request: About request with language parameter.
-            context: gRPC servicer context.
-
-        Returns:
-            About response with list of about items.
-        """
         try:
             logger.info(f"GetAbout called with lang: {request.lang}")
             about_docs = await db_manager.get_about(request.lang or None)
-
             about_items = []
             for doc in about_docs:
-                for _, translation in doc.translations.items():
-                    if translation.title and translation.description:
+                if request.lang and request.lang in doc.translations:
+                    translation = doc.translations[request.lang]
+                    about_items.append(
+                        content_pb2.AboutItem(
+                            id=doc.id,
+                            image_url=doc.image_url,
+                            title=translation.title,
+                            description=translation.description,
+                        )
+                    )
+                else:
+                    for translation in doc.translations.values():
                         about_items.append(
                             content_pb2.AboutItem(
                                 id=doc.id,
@@ -41,7 +40,7 @@ class ContentService(ContentServiceServicer):
                                 description=translation.description,
                             )
                         )
-
+            
             return content_pb2.AboutResponse(about=about_items)
 
         except Exception as e:
