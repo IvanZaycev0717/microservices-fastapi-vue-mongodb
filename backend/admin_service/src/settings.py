@@ -3,7 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from pydantic import Field, SecretStr
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -206,10 +206,6 @@ class Settings(BaseSettings):
 
     # Logging configuration
     LOGGING_LEVEL: int = Field(logging.INFO, description="Logging level")
-
-    model_config = SettingsConfigDict(
-        env_file="../.env.dev", env_file_encoding="utf-8", extra="ignore"
-    )
 
     # Email Settings
     IS_SEND_EMAIL_ENABLED: bool = True

@@ -8,7 +8,7 @@ services:
       context: ./backend/admin_service/src
       dockerfile: Dockerfile
     env_file:
-      - .env
+      - .env.example
     ports:
       - "8000:8000"
     restart: always
@@ -40,7 +40,7 @@ services:
     ports:
       - "9500:80"
     env_file:
-      - .env
+      - .env.example
     depends_on:
       - content_db
       - auth_db
@@ -58,10 +58,12 @@ services:
   content_db:
       image: mongo:8.0
       container_name: content_db
+      env_file:
+        - .env.example
       restart: unless-stopped
       environment:
-        MONGO_INITDB_ROOT_USERNAME: admin
-        MONGO_INITDB_ROOT_PASSWORD: securepassword123
+        MONGO_INITDB_ROOT_USERNAME: ${CONTENT_ADMIN_MONGO_ROOT_USERNAME}
+        MONGO_INITDB_ROOT_PASSWORD: ${CONTENT_ADMIN_MONGO_ROOT_PASSWORD}
       expose:
         - "27017"
       volumes:
@@ -70,10 +72,12 @@ services:
   auth_db:
     image: mongo:8.0
     container_name: auth_db
+    env_file:
+      - .env.example
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: securepassword123
+      MONGO_INITDB_ROOT_USERNAME: ${AUTH_ADMIN_MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${AUTH_ADMIN_MONGO_ROOT_PASSWORD}
     expose:
       - "27017"
     volumes:
@@ -82,10 +86,12 @@ services:
   notification_db:
     image: mongo:8.0
     container_name: notification_db
+    env_file:
+      - .env.example
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: securepassword123
+      MONGO_INITDB_ROOT_USERNAME: ${NOTIFICATION_ADMIN_MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${NOTIFICATION_ADMIN_MONGO_ROOT_PASSWORD}
     expose:
       - "27017"
     volumes:
@@ -95,12 +101,14 @@ services:
     image: postgres:17.6
     container_name: comments_db
     restart: unless-stopped
+    env_file:
+      - .env.example
     environment:
-      COMMENTS_ADMIN_POSTGRES_DB_NAME: comments_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    expose:
-      - "5432"
+      COMMENTS_ADMIN_POSTGRES_DB_NAME: ${COMMENTS_ADMIN_POSTGRES_ROOT_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -111,6 +119,8 @@ services:
   mongo-express-content:
     image: mongo-express:1.0.2-20-alpine3.19
     container_name: mongo_express_content
+    env_file:
+      - .env.example
     restart: always
     ports:
       - "8081:8081"
@@ -123,6 +133,8 @@ services:
   mongo-express-auth:
     image: mongo-express:1.0.2-20-alpine3.19
     container_name: mongo_express_auth
+    env_file:
+      - .env.example
     restart: always
     ports:
       - "8082:8081"
@@ -135,6 +147,8 @@ services:
   mongo-express-notification:
     image: mongo-express:1.0.2-20-alpine3.19
     container_name: mongo_express_notification
+    env_file:
+      - .env.example
     restart: always
     ports:
       - "8083:8081"
@@ -151,11 +165,11 @@ services:
   minio:
     image: minio/minio:RELEASE.2025-07-23T15-54-02Z-cpuv1
     container_name: minio
+    env_file:
+      - .env.example
     ports:
       - "${MINIO_PORT}:9000"
       - "9001:9001"
-    env_file:
-      - .env
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
