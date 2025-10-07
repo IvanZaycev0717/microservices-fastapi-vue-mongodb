@@ -21,7 +21,7 @@ class Comment(Base):
         String(settings.COMMENTS_PROJECT_ID_LENGTH), nullable=False
     )
     author_email: Mapped[str] = mapped_column(
-        String(settings.MAX_EMAIL_LENGHT), nullable=False
+        String(settings.MAX_EMAIL_LENGTH), nullable=False
     )
     comment_text: Mapped[str] = mapped_column(
         String(settings.MAX_COMMENT_LENGTH), nullable=False

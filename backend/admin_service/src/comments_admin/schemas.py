@@ -18,7 +18,7 @@ class CreateCommentForm(BaseModel):
         json_schema_extra={"example": "68d13f82ea73fb8fa3a60314"},
     )
     author_email: EmailStr = Field(
-        max_length=settings.MAX_EMAIL_LENGHT,
+        max_length=settings.MAX_EMAIL_LENGTH,
         description="Email автора комментария",
         json_schema_extra={"example": "user@example.com"},
     )

@@ -50,7 +50,7 @@ class UserResponse(BaseModel):
 class CreateUserForm(BaseModel):
     email: EmailStr = Field(
         min_length=settings.MIN_EMAIL_LENGTH,
-        max_length=settings.MAX_EMAIL_LENGHT,
+        max_length=settings.MAX_EMAIL_LENGTH,
     )
     password: SecretStr = Field(
         min_length=settings.MIN_PASSWORD_LENGTH,
@@ -88,7 +88,7 @@ class UserUpdateForm(BaseModel):
 class LoginForm(BaseModel):
     email: EmailStr = Field(
         min_length=settings.MIN_EMAIL_LENGTH,
-        max_length=settings.MAX_EMAIL_LENGHT,
+        max_length=settings.MAX_EMAIL_LENGTH,
     )
     password: SecretStr = Field(
         min_length=settings.MIN_PASSWORD_LENGTH,

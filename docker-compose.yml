@@ -32,6 +32,21 @@ services:
       - content_db
     restart: unless-stopped
 
+  auth_service:
+    build:
+      context: ./backend/auth_service
+      dockerfile: Dockerfile
+    container_name: auth_service
+    ports:
+      - "50052:50052"
+    env_file:
+      - .env.example
+    depends_on:
+      - auth_db
+    restart: unless-stopped
+    volumes:
+      - ./backend/auth_service/src:/app/src
+
   admin_gui:
     build:
       context: ./backend/admin_service/admin_gui
@@ -48,7 +63,6 @@ services:
       - notification_db
       - minio
       - admin_service
-      # - content_service
     restart: unless-stopped
 
   # =====================
@@ -108,7 +122,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5432:5432" # Порт открыт на время разработки
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

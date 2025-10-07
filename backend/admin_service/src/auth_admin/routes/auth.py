@@ -377,7 +377,7 @@ async def update_user(
         EmailStr,
         Path(
             min_length=settings.MIN_EMAIL_LENGTH,
-            max_length=settings.MAX_EMAIL_LENGHT,
+            max_length=settings.MAX_EMAIL_LENGTH,
             description="Valid email address",
         ),
     ],
@@ -455,7 +455,7 @@ async def delete_user_by_email(
         EmailStr,
         Form(
             min_length=settings.MIN_EMAIL_LENGTH,
-            max_length=settings.MAX_EMAIL_LENGHT,
+            max_length=settings.MAX_EMAIL_LENGTH,
             description="Email пользователя для удаления",
         ),
     ],

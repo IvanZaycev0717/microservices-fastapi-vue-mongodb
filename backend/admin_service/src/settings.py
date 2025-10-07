@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     MIN_PASSWORD_LENGTH: int = 5
     MAX_PASSWORD_LENGTH: int = 31
     MIN_EMAIL_LENGTH: int = 3
-    MAX_EMAIL_LENGHT: int = 255
+    MAX_EMAIL_LENGTH: int = 255
 
     # Cookie Settings
     COOKIE_KEY: str = "refresh_token"
