@@ -14,7 +14,11 @@ dependencies = [
     "pymongo (>=4.15.2,<5.0.0)",
     "pydantic-settings (>=2.11.0,<3.0.0)",
     "colorlog (>=6.9.0,<7.0.0)",
-    "grpcio-reflection (>=1.75.1,<2.0.0)"
+    "grpcio-reflection (>=1.75.1,<2.0.0)",
+    "watchdog (>=6.0.0,<7.0.0)",
+    "pytest-env (>=1.1.5,<2.0.0)",
+    "mongomock (>=4.3.0,<5.0.0)",
+    "grpcio-health-checking (>=1.75.1,<2.0.0)"
 ]
 
 
@@ -32,7 +36,18 @@ generate-proto = "src.generate_proto:main"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<4.0"
+watchdog = ">=6.0.0,<7.0.0"
 
 [tool.taskipy.tasks]
 generate-proto = "python scripts/generate_proto.py"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+addopts = [
+    "--import-mode=importlib",
+]
+pythonpath = ["src"]
 

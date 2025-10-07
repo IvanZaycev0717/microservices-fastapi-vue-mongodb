@@ -14,7 +14,7 @@ from models.schemas import (
 )
 from settings import settings
 
-logger = get_logger("database")
+logger = get_logger(f"{settings.CONTENT_SERVICE_NAME} - Database")
 
 
 class DatabaseManager:
@@ -23,6 +23,7 @@ class DatabaseManager:
     Attributes:
         client: Async MongoDB client instance.
         db: Async MongoDB database instance.
+
     """
 
     def __init__(self) -> None:
@@ -62,6 +63,7 @@ class DatabaseManager:
 
         Raises:
             Exception: If database operation fails.
+
         """
         if self.db is None:
             raise RuntimeError("Database not connected")
@@ -92,6 +94,7 @@ class DatabaseManager:
 
         Raises:
             Exception: If database operation fails.
+
         """
         if self.db is None:
             raise RuntimeError("Database not connected")
@@ -101,23 +104,8 @@ class DatabaseManager:
         return [TechDocument(**doc) for doc in documents]
 
     async def get_projects(
-        self, lang: str, sort: str = "date_desc"
-    ) -> List[ProjectDocument]:
-        """Retrieves projects with language and sorting options.
-
-        Args:
-            lang: Language code for project data.
-            sort: Sorting criteria.
-
-        Returns:
-            List of project documents.
-
-        Raises:
-            Exception: If database operation fails.
-        """
-        if self.db is None:
-            raise RuntimeError("Database not connected")
-
+        self, lang: str = "en", sort: str = "date_desc"
+    ) -> list[ProjectDocument]:
         if sort.startswith("date"):
             sort_field = "date"
             sort_direction = DESCENDING if sort.endswith("desc") else ASCENDING
@@ -126,27 +114,41 @@ class DatabaseManager:
             sort_direction = DESCENDING
 
         cursor = self.db.projects.find({}).sort(sort_field, sort_direction)
-        documents = await cursor.to_list(length=None)
+        results = await cursor.to_list(length=None)
 
-        project_docs = []
-        for doc in documents:
-            project_data = dict(doc)
-
-            if lang in ("en", "ru"):
-                if "title" in project_data and isinstance(
-                    project_data["title"], dict
-                ):
-                    project_data["title"] = project_data["title"].get(lang, "")
-                if "description" in project_data and isinstance(
-                    project_data["description"], dict
-                ):
-                    project_data["description"] = project_data[
-                        "description"
-                    ].get(lang, "")
-
-            project_docs.append(ProjectDocument(**project_data))
-
-        return project_docs
+        transformed_results = []
+        for item in results:
+            if lang not in ("en", "ru"):
+                transformed_results.append(
+                    {
+                        "id": str(item["_id"]),
+                        "title": item["title"],
+                        "thumbnail": item["thumbnail"],
+                        "image": item["image"],
+                        "description": item["description"],
+                        "link": item["link"],
+                        "date": item["date"].isoformat()
+                        if hasattr(item["date"], "isoformat")
+                        else item["date"],
+                        "popularity": item["popularity"],
+                    }
+                )
+            else:
+                transformed_results.append(
+                    {
+                        "id": str(item["_id"]),
+                        "title": item["title"].get(lang, ""),
+                        "thumbnail": item["thumbnail"],
+                        "image": item["image"],
+                        "description": item["description"].get(lang, ""),
+                        "link": item["link"],
+                        "date": item["date"].isoformat()
+                        if hasattr(item["date"], "isoformat")
+                        else item["date"],
+                        "popularity": item["popularity"],
+                    }
+                )
+        return transformed_results
 
     async def get_certificates(
         self, sort: str = "date_desc"
@@ -161,6 +163,7 @@ class DatabaseManager:
 
         Raises:
             Exception: If database operation fails.
+
         """
         if self.db is None:
             raise RuntimeError("Database not connected")
@@ -190,6 +193,7 @@ class DatabaseManager:
 
         Raises:
             Exception: If database operation fails.
+
         """
         if self.db is None:
             raise RuntimeError("Database not connected")
@@ -221,5 +225,4 @@ class DatabaseManager:
         return publication_docs
 
 
-# Global database instance
 db_manager = DatabaseManager()

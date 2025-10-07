@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from bson import ObjectId
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
+from service.decorators import convert_objectid_to_str
 from settings import settings
 
 
@@ -12,6 +12,7 @@ class Translation(BaseModel):
     Attributes:
         title: Translation title with length constraints.
         description: Translation description with length constraints.
+
     """
 
     title: str = Field(
@@ -24,17 +25,11 @@ class Translation(BaseModel):
     )
 
 
+@convert_objectid_to_str
 class AboutDocument(BaseModel):
     id: str = Field(alias="_id")
     image_url: str
     translations: dict[str, Translation]
-
-    @field_validator("id", mode="before")
-    @classmethod
-    def convert_objectid_to_str(cls, v):
-        if isinstance(v, ObjectId):
-            return str(v)
-        return v
 
 
 class TechKingdom(BaseModel):
@@ -43,12 +38,14 @@ class TechKingdom(BaseModel):
     Attributes:
         kingdom: Name of the technical skill category.
         items: List of technical skills belonging to this kingdom.
+
     """
 
     kingdom: str
     items: list[str]
 
 
+@convert_objectid_to_str
 class TechDocument(BaseModel):
     """Tech document from MongoDB.
 
@@ -64,6 +61,7 @@ class TechDocument(BaseModel):
         computerscience_kingdom: Computer science fundamentals kingdom.
         gamedev_kingdom: Game development skills kingdom.
         ai_kingdom: Artificial intelligence skills kingdom.
+
     """
 
     id: str = Field(alias="_id")
@@ -79,6 +77,7 @@ class TechDocument(BaseModel):
     ai_kingdom: TechKingdom
 
 
+@convert_objectid_to_str
 class ProjectDocument(BaseModel):
     """Project documents from MongoDB.
 
@@ -91,11 +90,12 @@ class ProjectDocument(BaseModel):
         link: Project external link.
         date: Project creation date.
         popularity: Project popularity score.
+
     """
 
     id: str = Field(alias="_id")
-    title: dict[str, str]
-    description: dict[str, str]
+    title: dict[str, str] | str
+    description: dict[str, str] | str
     thumbnail: str
     image: str
     link: str
@@ -106,6 +106,7 @@ class ProjectDocument(BaseModel):
     )
 
 
+@convert_objectid_to_str
 class CertificateDocument(BaseModel):
     """Certificate documents from MongoDB.
 
@@ -116,6 +117,7 @@ class CertificateDocument(BaseModel):
         alt: Alternative text for certificate image.
         date: Certificate issue date.
         popularity: Certificate popularity score.
+
     """
 
     id: str = Field(alias="_id")
@@ -129,6 +131,7 @@ class CertificateDocument(BaseModel):
     )
 
 
+@convert_objectid_to_str
 class PublicationDocument(BaseModel):
     """Publication documents from MongoDB.
 
@@ -139,10 +142,11 @@ class PublicationDocument(BaseModel):
         site: Publication site URL.
         rating: Publication rating score.
         date: Publication date.
+
     """
 
     id: str = Field(alias="_id")
-    title: dict[str, str]
+    title: dict[str, str] | str
     page: str
     site: str
     rating: int = Field(

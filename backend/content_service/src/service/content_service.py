@@ -12,6 +12,7 @@ logger = get_logger(f"{settings.CONTENT_SERVICE_NAME} - Server")
 
 class ContentService(ContentServiceServicer):
     """gRPC service for content operations."""
+
     async def GetAbout(
         self, request: content_pb2.AboutRequest, context: ServicerContext
     ) -> content_pb2.AboutResponse:
@@ -40,7 +41,7 @@ class ContentService(ContentServiceServicer):
                                 description=translation.description,
                             )
                         )
-            
+
             return content_pb2.AboutResponse(about=about_items)
 
         except Exception as e:
@@ -49,7 +50,9 @@ class ContentService(ContentServiceServicer):
             context.set_details(str(e))
             return content_pb2.AboutResponse()
 
-    async def GetTech(self, request: content_pb2.TechRequest, context: ServicerContext) -> content_pb2.TechResponse:
+    async def GetTech(
+        self, request: content_pb2.TechRequest, context: ServicerContext
+    ) -> content_pb2.TechResponse:
         """Retrieves all technology skills."""
         try:
             logger.info("GetTech called")
@@ -91,15 +94,6 @@ class ContentService(ContentServiceServicer):
     async def GetProjects(
         self, request: content_pb2.ProjectsRequest, context: ServicerContext
     ) -> content_pb2.ProjectsResponse:
-        """Retrieves projects with language and sorting.
-
-        Args:
-            request: Projects request with language and sort parameters.
-            context: gRPC servicer context.
-
-        Returns:
-            Projects response with list of project items.
-        """
         try:
             logger.info(
                 f"GetProjects called with lang: {request.lang}, sort: {request.sort}"
@@ -107,21 +101,19 @@ class ContentService(ContentServiceServicer):
             project_docs = await db_manager.get_projects(
                 lang=request.lang or "en", sort=request.sort or "date_desc"
             )
-
+            logger.warning(str(project_docs))
             project_items = []
             for doc in project_docs:
                 project_items.append(
                     content_pb2.ProjectItem(
-                        id=doc.id,
-                        title=doc.title if isinstance(doc.title, str) else "",
-                        thumbnail=doc.thumbnail,
-                        image=doc.image,
-                        description=doc.description
-                        if isinstance(doc.description, str)
-                        else "",
-                        link=doc.link,
-                        date=doc.date.isoformat(),
-                        popularity=doc.popularity,
+                        id=doc["id"],
+                        title=doc["title"],
+                        thumbnail=doc["thumbnail"],
+                        image=doc["image"],
+                        description=doc["description"],
+                        link=doc["link"],
+                        date=doc["date"],
+                        popularity=doc["popularity"],
                     )
                 )
 
@@ -146,6 +138,7 @@ class ContentService(ContentServiceServicer):
 
         Returns:
             Certificates response with list of certificate items.
+
         """
         try:
             logger.info(f"GetCertificates called with sort: {request.sort}")
@@ -189,6 +182,7 @@ class ContentService(ContentServiceServicer):
 
         Returns:
             Publications response with list of publication items.
+
         """
         try:
             logger.info(

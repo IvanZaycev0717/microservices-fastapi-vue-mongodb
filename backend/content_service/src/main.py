@@ -1,6 +1,7 @@
 import asyncio
 
 import grpc
+from grpc_health.v1 import health_pb2, health_pb2_grpc
 from grpc_reflection.v1alpha import reflection
 
 from logger import get_logger
@@ -13,6 +14,19 @@ from settings import settings
 logger = get_logger(f"{settings.CONTENT_SERVICE_NAME} - Main")
 
 
+class HealthServicer(health_pb2_grpc.HealthServicer):
+    async def Check(self, request, context):
+        try:
+            await db_manager.db.command("ping")
+            return health_pb2.HealthCheckResponse(
+                status=health_pb2.HealthCheckResponse.SERVING
+            )
+        except Exception:
+            return health_pb2.HealthCheckResponse(
+                status=health_pb2.HealthCheckResponse.NOT_SERVING
+            )
+
+
 async def serve() -> None:
     """Starts the gRPC server and manages database connection."""
     try:
@@ -21,6 +35,7 @@ async def serve() -> None:
 
         server = grpc.aio.server()
 
+        health_pb2_grpc.add_HealthServicer_to_server(HealthServicer(), server)
         add_ContentServiceServicer_to_server(ContentService(), server)
 
         service_names = (
