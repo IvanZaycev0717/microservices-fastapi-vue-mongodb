@@ -28,7 +28,7 @@ class MinioManager:
             ValueError: If required MinIO configuration settings are missing.
         """
         self.client = Minio(
-            f"{settings.MINIO_HOST}:{settings.MINIO_PORT}",
+            f"{settings.MINIO_HOST}:{settings.MINIO_API_PORT}",
             access_key=settings.MINIO_ROOT_USER,
             secret_key=settings.MINIO_ROOT_PASSWORD,
             secure=False,
@@ -83,8 +83,8 @@ class MinioCRUD(MinioManager):
         additional host/port information for URL generation.
         """
         super().__init__()
-        self.minio_host = settings.MINIO_HOST
-        self.minio_port = settings.MINIO_PORT
+        self.minio_host = settings.MINIO_PUBLIC_URL
+        self.minio_port = settings.MINIO_API_PORT
 
     async def upload_file(
         self, bucket_name: str, object_name: str, file_data: bytes
@@ -122,7 +122,7 @@ class MinioCRUD(MinioManager):
             len(file_data),
         )
 
-        return f"http://{self.minio_host}:{self.minio_port}/{bucket_name}/{object_name}"
+        return f"{settings.MINIO_PUBLIC_URL}/{bucket_name}/{object_name}"
 
     async def update_file(self, file_url: str, new_file_data: bytes) -> str:
         """Update existing file in MinIO storage with new data.

@@ -102,11 +102,11 @@ class Settings(BaseSettings):
         description="Mongo Express connection URL for notification database"
     )
 
-    # Object Storage
-    MINIO_ROOT_USER: str = Field(description="MinIO user name")
-    MINIO_ROOT_PASSWORD: str = Field(description="MinIO password")
-    MINIO_HOST: str = Field(description="MinIO host")
-    MINIO_PORT: str = Field(description="MinIO port")
+    MINIO_ROOT_USER: str
+    MINIO_ROOT_PASSWORD: str
+    MINIO_HOST: str = "minio"
+    MINIO_API_PORT: int = 9000
+    MINIO_PUBLIC_URL: str = "http://localhost:9000"
 
     # Service Names Configurations
     SERVICE_NAME: str = "ADMIN_SERVICE"
