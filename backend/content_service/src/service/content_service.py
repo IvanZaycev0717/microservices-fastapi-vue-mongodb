@@ -7,7 +7,7 @@ from proto.content_pb2_grpc import ContentServiceServicer
 from service.database import db_manager
 from settings import settings
 
-logger = get_logger(f"{settings.CONTENT_SERVICE_NAME} - Server")
+logger = get_logger(f"{settings.GRPC_CONTENT_MONGODB_DB_NAME} - Server")
 
 
 class ContentService(ContentServiceServicer):

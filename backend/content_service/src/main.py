@@ -11,7 +11,7 @@ from service.content_service import ContentService
 from service.database import db_manager
 from settings import settings
 
-logger = get_logger(f"{settings.CONTENT_SERVICE_NAME} - Main")
+logger = get_logger(f"{settings.GRPC_CONTENT_SERVICE_NAME} - Main")
 
 
 class HealthServicer(health_pb2_grpc.HealthServicer):
@@ -44,7 +44,7 @@ async def serve() -> None:
         )
         reflection.enable_server_reflection(service_names, server)
 
-        server_address = f"{settings.GRPC_HOST}:{settings.GRPC_PORT}"
+        server_address = f"{settings.GRPC_CONTENT_HOST}:{settings.GRPC_CONTENT_PORT}"
         server.add_insecure_port(server_address)
         await server.start()
 

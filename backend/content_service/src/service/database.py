@@ -14,7 +14,7 @@ from models.schemas import (
 )
 from settings import settings
 
-logger = get_logger(f"{settings.CONTENT_SERVICE_NAME} - Database")
+logger = get_logger(f"{settings.GRPC_CONTENT_SERVICE_NAME} - Database")
 
 
 class DatabaseManager:
@@ -35,11 +35,11 @@ class DatabaseManager:
         """Establishes connection to MongoDB database."""
         try:
             self.client = AsyncMongoClient(
-                settings.MONGODB_URL,
+                settings.GRPC_CONTENT_MONGODB_URL,
                 connectTimeoutMS=settings.MONGO_CONNECTION_TIMEOUT_MS,
                 serverSelectionTimeoutMS=settings.MONGO_SERVER_SELECTION_TIMEOUT_MS,
             )
-            self.db = self.client[settings.MONGODB_DB_NAME]
+            self.db = self.client[settings.GRPC_CONTENT_MONGODB_DB_NAME]
             await self.db.command("ping")
             logger.info("Successfully connected to MongoDB")
         except Exception as e:

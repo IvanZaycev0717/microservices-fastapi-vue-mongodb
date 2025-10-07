@@ -3,18 +3,18 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # MongoDB
-    MONGODB_URL: str
-    MONGODB_DB_NAME: str
+    GRPC_CONTENT_MONGODB_URL: str
+    GRPC_CONTENT_MONGODB_DB_NAME: str
 
-    CONTENT_SERVICE_NAME: str
+    GRPC_CONTENT_SERVICE_NAME: str
 
     # MongoDB connection settings
     MONGO_CONNECTION_TIMEOUT_MS: int
     MONGO_SERVER_SELECTION_TIMEOUT_MS: int
 
     # gRPC Server
-    GRPC_HOST: str
-    GRPC_PORT: int
+    GRPC_CONTENT_HOST: str
+    GRPC_CONTENT_PORT: int
 
     # Logging
     LOG_LEVEL: str
