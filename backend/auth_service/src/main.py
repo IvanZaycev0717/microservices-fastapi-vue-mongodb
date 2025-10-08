@@ -9,6 +9,8 @@ from proto.auth_pb2 import DESCRIPTOR
 from proto.auth_pb2_grpc import add_AuthServiceServicer_to_server
 from services.auth_service import AuthService
 from services.database import db_manager
+from services.kafka_producer import kafka_producer
+from services.kafka_topic_management import ensure_topics_exist
 from settings import settings
 
 logger = get_logger(f"{settings.GRPC_AUTH_NAME} - Main")
@@ -28,10 +30,14 @@ class HealthServicer(health_pb2_grpc.HealthServicer):
 
 
 async def serve() -> None:
-    """Starts the gRPC server and manages database connection."""
+    """Starts the gRPC server and manages dependencies."""
     try:
         await db_manager.connect()
         logger.info("Database connection established")
+
+        await ensure_topics_exist()
+        await kafka_producer.initialize()
+        logger.info("Kafka topics verified")
 
         server = grpc.aio.server()
 
@@ -58,6 +64,7 @@ async def serve() -> None:
         logger.exception(f"Failed to start server: {e}")
         raise
     finally:
+        kafka_producer.close()
         await db_manager.disconnect()
         logger.info("Server shutdown complete")
 

@@ -36,5 +36,9 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int
     RESET_PASSWORD_TOKEN_EXPIRE_MINUTES: int
 
+    # Kafka Configuration
+    KAFKA_BOOTSTRAP_SERVERS: str
+    KAFKA_PASSWORD_RESET_TOPIC: str = "password-reset-requests"
+
 
 settings = Settings()

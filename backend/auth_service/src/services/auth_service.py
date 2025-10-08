@@ -12,6 +12,7 @@ from models.schemas import (
     LoginRequest,
 )
 from proto import auth_pb2, auth_pb2_grpc
+from services.kafka_producer import PasswordResetMessage, kafka_producer
 from services.password_processor import get_password_hash, verify_password
 from services.token_processor import create_token_for_user, verify_jwt_token
 from settings import settings
@@ -406,7 +407,15 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
 
             logger.info(f"Password reset token generated for: {user.email}")
 
-            # In production, this token would be sent to Notification Service via message broker
+            password_reset_msg = PasswordResetMessage(
+                email=user.email, reset_token=reset_token, user_id=user.id
+            )
+
+            if not kafka_producer.send_password_reset(password_reset_msg):
+                logger.error(
+                    f"Failed to send password reset message for: {user.email}"
+                )
+
             return auth_pb2.ForgotPasswordResponse(
                 success=True,
                 reset_token=reset_token,
