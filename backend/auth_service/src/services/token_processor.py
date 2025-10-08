@@ -93,6 +93,7 @@ def create_token_for_user(
     email: str,
     expires_delta: timedelta,
     roles: list | None = None,
+    token_type: str = "access",
 ) -> str:
     """Create JWT token for user authentication.
 
@@ -113,6 +114,7 @@ def create_token_for_user(
         "email": email,
         "roles": roles,
         "user_id": user_id,
+        "type": token_type,
     }
     token = create_jwt_token(data=payload, expires_delta=expires_delta)
     logger.info(f"Token created for user: {user_id}")

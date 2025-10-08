@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import grpc
 from grpc import ServicerContext
 from jwt.exceptions import JWTException
+from pydantic import ValidationError
 
 from logger import get_logger
 from models.schemas import (
@@ -33,12 +34,10 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
         try:
             logger.info(f"Login attempt for email: {request.email}")
 
-            # Validate input using Pydantic
             login_data = LoginRequest(
                 email=request.email, password=request.password
             )
 
-            # Get user from database
             user = await self.auth_crud.get_user_by_email(login_data.email)
             if not user:
                 logger.warning(f"User not found: {login_data.email}")
@@ -46,7 +45,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     grpc.StatusCode.UNAUTHENTICATED, "Invalid credentials"
                 )
 
-            # Verify password
             if not verify_password(
                 login_data.password.get_secret_value(), user.password_hash
             ):
@@ -55,7 +53,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     grpc.StatusCode.UNAUTHENTICATED, "Invalid credentials"
                 )
 
-            # Check if user is banned
             if user.is_banned:
                 logger.warning(
                     f"Banned user login attempt: {login_data.email}"
@@ -64,10 +61,8 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     grpc.StatusCode.PERMISSION_DENIED, "User account is banned"
                 )
 
-            # Update last login
             await self.auth_crud.update_user_last_login(user.email)
 
-            # Generate tokens
             access_token = create_token_for_user(
                 user_id=user.id,
                 email=user.email,
@@ -84,9 +79,9 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     days=settings.REFRESH_TOKEN_EXPIRE_DAYS
                 ),
                 roles=user.roles,
+                token_type="refresh",
             )
 
-            # Store refresh token
             refresh_expires = datetime.now() + timedelta(
                 days=settings.REFRESH_TOKEN_EXPIRE_DAYS
             )
@@ -131,14 +126,12 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
         try:
             logger.info(f"Registration attempt for email: {request.email}")
 
-            # Validate input
             register_data = CreateUserRequest(
                 email=request.email,
                 password=request.password,
-                roles=request.roles or ["user"],
+                roles=["user"],
             )
 
-            # Check if user already exists
             existing_user = await self.auth_crud.get_user_by_email(
                 register_data.email
             )
@@ -149,7 +142,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     "User with this email already exists",
                 )
 
-            # Hash password
             hashed_password = get_password_hash(
                 register_data.password.get_secret_value()
             )
@@ -159,14 +151,12 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     grpc.StatusCode.INTERNAL, "Internal server error"
                 )
 
-            # Create user
             user = await self.auth_crud.create_user(
                 email=register_data.email,
                 password_hash=hashed_password,
                 roles=register_data.roles,
             )
 
-            # Generate tokens
             access_token = create_token_for_user(
                 user_id=user.id,
                 email=user.email,
@@ -183,9 +173,9 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     days=settings.REFRESH_TOKEN_EXPIRE_DAYS
                 ),
                 roles=user.roles,
+                token_type="refresh",
             )
 
-            # Store refresh token
             refresh_expires = datetime.now() + timedelta(
                 days=settings.REFRESH_TOKEN_EXPIRE_DAYS
             )
@@ -215,6 +205,10 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     if user.last_login_at
                     else "",
                 ),
+            )
+        except ValidationError as e:
+            await context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT, "Invalid email format"
             )
 
         except Exception as e:
@@ -266,7 +260,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     "Refresh token is required",
                 )
 
-            # Verify refresh token
             try:
                 payload = verify_jwt_token(request.refresh_token)
             except JWTException:
@@ -279,7 +272,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     grpc.StatusCode.UNAUTHENTICATED, "Invalid token type"
                 )
 
-            # Check if token exists in database and is not used
             stored_token = await self.token_crud.get_refresh_token(
                 request.refresh_token
             )
@@ -289,14 +281,12 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     "Refresh token not found or already used",
                 )
 
-            # Check expiration
             if datetime.fromtimestamp(payload["exp"]) < datetime.now():
                 await self.token_crud.mark_token_as_used(request.refresh_token)
                 await context.abort(
                     grpc.StatusCode.UNAUTHENTICATED, "Refresh token expired"
                 )
 
-            # Get user
             user = await self.auth_crud.get_user_by_email(payload["email"])
             if not user:
                 await context.abort(
@@ -309,7 +299,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     grpc.StatusCode.PERMISSION_DENIED, "User is banned"
                 )
 
-            # Generate new tokens
             access_token = create_token_for_user(
                 user_id=user.id,
                 email=user.email,
@@ -326,9 +315,9 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     days=settings.REFRESH_TOKEN_EXPIRE_DAYS
                 ),
                 roles=user.roles,
+                token_type="refresh",
             )
 
-            # Store new refresh token and mark old as used
             refresh_expires = datetime.now() + timedelta(
                 days=settings.REFRESH_TOKEN_EXPIRE_DAYS
             )
@@ -393,13 +382,10 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
     ) -> auth_pb2.ForgotPasswordResponse:
         """Generate reset token for password recovery."""
         try:
-            # Validate input
             forgot_data = ForgotPasswordRequest(email=request.email)
 
-            # Check if user exists
             user = await self.auth_crud.get_user_by_email(forgot_data.email)
             if not user:
-                # Return success even if user doesn't exist for security
                 logger.info(
                     f"Password reset requested for non-existent email: {forgot_data.email}"
                 )
@@ -409,11 +395,12 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     message="If the email exists, a reset link will be sent",
                 )
 
-            # Generate reset token (short-lived)
             reset_token = create_token_for_user(
                 user_id=user.id,
                 email=user.email,
-                expires_delta=timedelta(minutes=15),  # 15 minutes for reset
+                expires_delta=timedelta(
+                    minutes=settings.RESET_PASSWORD_TOKEN_EXPIRE_MINUTES
+                ),
                 roles=user.roles,
             )
 

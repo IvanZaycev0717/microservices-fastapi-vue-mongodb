@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     # Token Settings
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
+    RESET_PASSWORD_TOKEN_EXPIRE_MINUTES: int
 
 
 settings = Settings()
