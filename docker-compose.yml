@@ -2,23 +2,6 @@ services:
   # =====================
   # APPLICATION SERVICES
   # =====================
-
-  admin_service:
-    build:
-      context: ./backend/admin_service/src
-      dockerfile: Dockerfile
-    env_file:
-      - .env.example
-    ports:
-      - "8000:8000"
-    restart: always
-    depends_on:
-      - content_db
-      - auth_db
-      - comments_db
-      - notification_db
-      - minio
-
   content_service:
     build:
       context: ./backend/content_service
@@ -43,9 +26,52 @@ services:
       - .env.example
     depends_on:
       - auth_db
+      - broker-1
+      - broker-2
+      - broker-3
+      - controller-1
+      - controller-2
+      - controller-3
     restart: unless-stopped
     volumes:
       - ./backend/auth_service/src:/app/src
+  
+  notification_service:
+    build:
+      context: ./backend/notification_service
+      dockerfile: Dockerfile
+    container_name: notification_service
+    ports:
+      - "50053:50053"
+    env_file:
+      - .env.example
+    depends_on:
+      - notification_db
+      - broker-1
+      - broker-2
+      - broker-3
+      - controller-1
+      - controller-2
+      - controller-3
+    restart: unless-stopped
+    volumes:
+      - ./backend/notification_service/src:/app/src
+
+  admin_service:
+    build:
+      context: ./backend/admin_service/src
+      dockerfile: Dockerfile
+    env_file:
+      - .env.example
+    ports:
+      - "8000:8000"
+    restart: always
+    depends_on:
+      - content_db
+      - auth_db
+      - comments_db
+      - notification_db
+      - minio
 
   admin_gui:
     build:
@@ -193,9 +219,9 @@ services:
       start_period: 40s
     restart: unless-stopped
     depends_on:
-    - controller-1
-    - controller-2  
-    - controller-3
+      - controller-1
+      - controller-2  
+      - controller-3
 
   broker-2:
     image: apache/kafka:4.1.0

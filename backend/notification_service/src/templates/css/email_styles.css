@@ -1,0 +1,54 @@
+.email-container {
+    max-width: 600px;
+    margin: 0 auto;
+    font-family: 'Arial', sans-serif;
+    background: #fff;
+}
+
+.email-header {
+    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+    color: white;
+    padding: 40px 30px;
+    text-align: center;
+    border-radius: 10px 10px 0 0;
+}
+
+.email-content {
+    background: #fefaf5;
+    padding: 40px 30px;
+    border-radius: 0 0 10px 10px;
+}
+
+.token-box {
+    background: #FFF3E0;
+    border: 2px dashed #FF9800;
+    padding: 20px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 25px 0;
+    border-radius: 8px;
+    color: #E65100;
+}
+
+.orange-button {
+    background: #FF9800;
+    color: white;
+    padding: 14px 35px;
+    text-decoration: none;
+    border-radius: 6px;
+    display: inline-block;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.orange-button:hover {
+    background: #F57C00;
+}
+
+.email-footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 12px;
+    color: #666;
+}

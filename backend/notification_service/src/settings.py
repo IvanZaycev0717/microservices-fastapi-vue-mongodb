@@ -1,0 +1,33 @@
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    NOTIFICATION_SERVICE_MONGODB_URL: SecretStr
+    NOTIFICATION_SERVICE_MONGO_DATABASE_NAME: str
+    NOTIFICATION_SERVICE_NAME: str
+    NOTIFICATION_HOST: str
+    NOTIFICATION_PORT: int
+
+    LOG_LEVEL: str
+
+    MONGO_CONNECTION_TIMEOUT_MS: int
+    MONGO_SERVER_SELECTION_TIMEOUT_MS: int
+
+    KAFKA_BOOTSTRAP_SERVERS: str
+    KAFKA_PASSWORD_RESET_TOPIC: str
+    KAFKA_PASSWORD_RESET_SUCCESS_TOPIC: str
+
+    SMTP_USERNAME: SecretStr
+    SMTP_PASSWORD: SecretStr
+    SMTP_FROM: SecretStr
+    SMTP_SERVER: str
+    SMTP_PORT: int
+
+    MIN_EMAIL_SUBJECT_LENGTH: int
+    MAX_EMAIL_SUBJECT_LENGTH: int
+    MIN_EMAIL_MESSAGE_LENGTH: int
+    MAX_EMAIL_MESSAGE_LENGTH: int
+
+
+settings = Settings()

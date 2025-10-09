@@ -152,5 +152,4 @@ class KafkaProducer:
             logger.info("Kafka producer closed")
 
 
-# Global instance
 kafka_producer = KafkaProducer()
