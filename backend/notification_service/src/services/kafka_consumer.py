@@ -25,7 +25,7 @@ class KafkaConsumer:
         self.consumer: Consumer | None = None
         self.running = False
         self.consumer_thread: threading.Thread | None = None
-        self.main_loop = None  # Будет хранить основной event loop
+        self.main_loop = None
 
     async def initialize(self):
         """Initialize Kafka consumer"""

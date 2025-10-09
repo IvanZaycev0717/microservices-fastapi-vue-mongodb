@@ -116,3 +116,34 @@ class ForgotPasswordResponse(BaseModel):
     success: bool
     reset_token: str
     message: str
+
+
+class ResetPasswordRequest(BaseModel):
+    reset_token: str
+    new_password: SecretStr = Field(
+        min_length=settings.MIN_PASSWORD_LENGTH,
+        max_length=settings.MAX_PASSWORD_LENGTH,
+        description=f"Password must be between {settings.MIN_PASSWORD_LENGTH} and {settings.MAX_PASSWORD_LENGTH} characters",
+    )
+    email: EmailStr = Field(
+        min_length=settings.MIN_EMAIL_LENGTH,
+        max_length=settings.MAX_EMAIL_LENGTH,
+    )
+
+
+class ResetPasswordResponse(BaseModel):
+    success: bool
+    message: str
+    user_id: Optional[str] = None
+    email: Optional[str] = None
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "success": True,
+                "message": "Password successfully reset",
+                "user_id": "507f1f77bcf86cd799439011",
+                "email": "user@example.com",
+            }
+        }
+    )

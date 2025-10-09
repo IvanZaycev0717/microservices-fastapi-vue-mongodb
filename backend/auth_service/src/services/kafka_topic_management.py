@@ -54,7 +54,6 @@ async def create_kafka_topics():
     Creates topics with recommended partitioning and replication.
     Safe to run multiple times - topics won't be recreated if they exist.
     """
-    # Wait for cluster first
     await wait_for_kafka_ready()
 
     admin = AdminClient(
@@ -66,13 +65,18 @@ async def create_kafka_topics():
             settings.KAFKA_PASSWORD_RESET_TOPIC,
             num_partitions=3,
             replication_factor=1,
+        ),
+        NewTopic(
+            settings.KAFKA_PASSWORD_RESET_SUCCESS_TOPIC,
+            num_partitions=3,
+            replication_factor=1,
         )
     ]
 
     try:
         fs = admin.create_topics(topics)
         for topic, f in fs.items():
-            f.result()  # Wait for topic creation
+            f.result()
         logger.info("Kafka topics created successfully")
     except Exception as e:
         logger.warning(f"Kafka topics may already exist: {e}")

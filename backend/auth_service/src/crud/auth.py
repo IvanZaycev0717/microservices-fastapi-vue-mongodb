@@ -59,3 +59,22 @@ class AuthCRUD:
         if result.modified_count > 0:
             return await self.get_user_by_email(email)
         return None
+
+    async def update_user_password(self, user_id: str, new_password_hash: str) -> bool:
+        """Update user's password hash.
+        
+        Args:
+            user_id: User ID
+            new_password_hash: New hashed password
+            
+        Returns:
+            bool: True if password was updated successfully, False otherwise
+        """
+        try:
+            result = await self.collection.update_one(
+                {"_id": ObjectId(user_id)},
+                {"$set": {"password_hash": new_password_hash}}
+            )
+            return result.modified_count > 0
+        except Exception:
+            return False

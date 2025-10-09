@@ -12,7 +12,7 @@ from models.schemas import (
     LoginRequest,
 )
 from proto import auth_pb2, auth_pb2_grpc
-from services.kafka_producer import PasswordResetMessage, kafka_producer
+from services.kafka_producer import PasswordResetMessage, PasswordResetSuccessMessage, kafka_producer
 from services.password_processor import get_password_hash, verify_password
 from services.token_processor import create_token_for_user, verify_jwt_token
 from settings import settings
@@ -403,6 +403,7 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                     minutes=settings.RESET_PASSWORD_TOKEN_EXPIRE_MINUTES
                 ),
                 roles=user.roles,
+                token_type="reset"
             )
 
             logger.info(f"Password reset token generated for: {user.email}")
@@ -426,6 +427,76 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
             logger.exception(
                 f"Forgot password failed for {request.email}: {e}"
             )
+            await context.abort(
+                grpc.StatusCode.INTERNAL, "Internal server error"
+            )
+
+    async def ResetPassword(
+        self, request: auth_pb2.ResetPasswordRequest, context: ServicerContext
+    ) -> auth_pb2.ResetPasswordResponse:
+        """Reset password using reset token."""
+        try:
+            try:
+                payload = verify_jwt_token(request.reset_token)
+            except JWTException:
+                return auth_pb2.ResetPasswordResponse(
+                    success=False, message="Invalid or expired reset token"
+                )
+
+            if payload.get("type") != "reset":
+                return auth_pb2.ResetPasswordResponse(
+                    success=False, message="Invalid token type"
+                )
+
+            if payload.get("email") != request.email:
+                return auth_pb2.ResetPasswordResponse(
+                    success=False, message="Email does not match reset token"
+                )
+
+            if len(request.new_password) < settings.MIN_PASSWORD_LENGTH:
+                return auth_pb2.ResetPasswordResponse(
+                    success=False,
+                    message=f"Password must be at least {settings.MIN_PASSWORD_LENGTH} characters",
+                )
+
+            user_id = payload.get("user_id")
+            hashed_password = get_password_hash(request.new_password)
+
+            if not hashed_password:
+                return auth_pb2.ResetPasswordResponse(
+                    success=False, message="Password hashing failed"
+                )
+
+            success = await self.auth_crud.update_user_password(
+                user_id, hashed_password
+            )
+
+            if not success:
+                return auth_pb2.ResetPasswordResponse(
+                    success=False, message="Failed to update password"
+                )
+
+            password_reset_success_msg = PasswordResetSuccessMessage(
+                email=request.email, user_id=user_id
+            )
+
+            kafka_producer.send_password_reset_success(
+                password_reset_success_msg
+            )
+
+            logger.info(
+                f"Password successfully reset for user: {request.email}"
+            )
+
+            return auth_pb2.ResetPasswordResponse(
+                success=True,
+                message="Password successfully reset",
+                user_id=user_id,
+                email=request.email,
+            )
+
+        except Exception as e:
+            logger.exception(f"Password reset failed: {e}")
             await context.abort(
                 grpc.StatusCode.INTERNAL, "Internal server error"
             )

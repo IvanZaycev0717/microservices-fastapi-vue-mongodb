@@ -9,9 +9,6 @@ COPY pyproject.toml poetry.lock* ./
 RUN poetry install --no-interaction --no-ansi --no-root
 
 COPY src/ ./src/
-COPY scripts/ ./scripts/
-
-RUN poetry run python scripts/generate_proto.py
 
 EXPOSE 50052
 

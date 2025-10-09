@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     # Kafka Configuration
     KAFKA_BOOTSTRAP_SERVERS: str
     KAFKA_PASSWORD_RESET_TOPIC: str = "password-reset-requests"
+    KAFKA_PASSWORD_RESET_SUCCESS_TOPIC: str = "password-reset-success"
 
 
 settings = Settings()

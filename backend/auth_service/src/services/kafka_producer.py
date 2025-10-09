@@ -24,6 +24,18 @@ class PasswordResetMessage(BaseModel):
     user_id: str
 
 
+class PasswordResetSuccessMessage(BaseModel):
+    """Data model for password reset success messages.
+
+    Attributes:
+        email: User's email address.
+        user_id: Unique user identifier.
+    """
+
+    email: str
+    user_id: str
+
+
 class KafkaProducer:
     """Kafka producer for sending messages to notification service.
 
@@ -128,6 +140,36 @@ class KafkaProducer:
             return False
         except Exception as e:
             logger.exception(f"Failed to send password reset message: {e}")
+            return False
+
+    def send_password_reset_success(self, message: PasswordResetSuccessMessage) -> bool:
+        """Send password reset success message to Kafka topic.
+
+        Args:
+            message: PasswordResetSuccessMessage instance with success data.
+
+        Returns:
+            bool: True if message was queued successfully, False otherwise.
+        """
+        try:
+            message_dict = message.model_dump()
+            value = json.dumps(message_dict).encode("utf-8")
+
+            self.producer.produce(
+                topic=settings.KAFKA_PASSWORD_RESET_SUCCESS_TOPIC,
+                value=value,
+                callback=self._delivery_report,
+            )
+
+            self.producer.poll(1)
+            logger.info(f"Password reset success message sent for: {message.email}")
+            return True
+
+        except BufferError as e:
+            logger.error(f"Producer queue full: {e}")
+            return False
+        except Exception as e:
+            logger.exception(f"Failed to send password reset success message: {e}")
             return False
 
     def flush(self) -> None:
