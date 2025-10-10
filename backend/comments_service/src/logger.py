@@ -6,7 +6,7 @@ import colorlog
 from settings import settings
 
 COLOR_FORMAT = (
-    "Auth Service: [%(name)s] "
+    "Comments Service: [%(name)s] "
     "%(log_color)s%(asctime)s - %(levelname)s - %(message)s%(reset)s"
 )
 

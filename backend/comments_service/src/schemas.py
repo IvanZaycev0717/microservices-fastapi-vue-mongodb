@@ -1,0 +1,72 @@
+from datetime import datetime
+from html import escape
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+from settings import settings
+
+
+class CreateCommentForm(BaseModel):
+    project_id: str = Field(
+        pattern=settings.MONGO_ID_VALID_ID_REGEXP,
+        description="ID проекта, к которому относится комментарий",
+        examples=["68d0f79576dcb44be4b8315f"],
+    )
+    author_id: str = Field(
+        pattern=settings.MONGO_ID_VALID_ID_REGEXP,
+        description="ID автора комментария",
+        examples=["68d13f82ea73fb8fa3a60314"],
+    )
+    author_email: EmailStr = Field(
+        max_length=settings.MAX_EMAIL_LENGTH,
+        description="Email автора комментария",
+        examples=["user@example.com"],
+    )
+    comment_text: str = Field(
+        min_length=settings.MIN_COMMENT_LENGTH,
+        max_length=settings.MAX_COMMENT_LENGTH,
+        description="Текст комментария",
+        examples=["Отличный проект!"],
+    )
+    parent_comment_id: Optional[int] = Field(
+        None, ge=1, description="ID родительского комментария (если это ответ)"
+    )
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    @field_validator("parent_comment_id", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v):
+        return None if v == "" else v
+
+    @field_validator("comment_text")
+    @classmethod
+    def escape_html(cls, v: str) -> str:
+        return escape(v)
+
+
+class CommentResponse(BaseModel):
+    id: int
+    project_id: str
+    author_id: str
+    author_email: str
+    comment_text: str
+    created_at: datetime
+    parent_comment_id: Optional[int]
+    likes: int
+    dislikes: int
+
+
+class UpdateCommentRequest(BaseModel):
+    new_text: str = Field(
+        min_length=settings.MIN_COMMENT_LENGTH,
+        max_length=settings.MAX_COMMENT_LENGTH,
+    )
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    @field_validator("new_text")
+    @classmethod
+    def escape_html(cls, v: str) -> str:
+        return escape(v)

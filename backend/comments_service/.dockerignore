@@ -1,0 +1,47 @@
+# Poetry
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.env
+
+# Poetry files
+poetry.lock
+.poetry/
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Tests
+tests/
+test/
+.coverage
+htmlcov/
+
+# Temp files
+*.tmp
+*.temp
+
+# Local configs
+local.yml
+docker-compose.override.yml

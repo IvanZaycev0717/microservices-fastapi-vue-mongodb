@@ -33,8 +33,21 @@ services:
       - controller-2
       - controller-3
     restart: unless-stopped
+  
+  comments_service:
+    build:
+      context: ./backend/comments_service
+      dockerfile: Dockerfile
+    container_name: comments_service
+    ports:
+      - "50054:50054"
+    env_file:
+      - .env.example
+    depends_on:
+      - comments_db
+    restart: unless-stopped
     volumes:
-      - ./backend/auth_service/src:/app/src
+      - ./backend/comments_service/src:/app/src
   
   notification_service:
     build:
@@ -54,8 +67,6 @@ services:
       - controller-2
       - controller-3
     restart: unless-stopped
-    volumes:
-      - ./backend/notification_service/src:/app/src
 
   admin_service:
     build:
