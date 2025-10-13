@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response, Cookie, Depends
 from grpc import RpcError
+import grpc
 
 from grpc_clients.auth_client import AuthClient
 from logger import get_logger
@@ -58,12 +59,12 @@ async def login(response: Response, login_data: LoginRequest):
             },
         )
     except RpcError as e:
-        if e.code() == e.UNAUTHENTICATED:
+        if e.code() == grpc.StatusCode.UNAUTHENTICATED:
             logger.warning(
                 f"Login failed for {login_data.email}: Invalid credentials"
             )
             raise HTTPException(status_code=401, detail="Invalid credentials")
-        elif e.code() == e.PERMISSION_DENIED:
+        elif e.code() == grpc.StatusCode.PERMISSION_DENIED:
             logger.warning(f"Login failed for {login_data.email}: User banned")
             raise HTTPException(
                 status_code=403, detail="User account is banned"
@@ -110,14 +111,14 @@ async def register(response: Response, register_data: RegisterRequest):
             },
         )
     except RpcError as e:
-        if e.code() == e.ALREADY_EXISTS:
+        if e.code() == grpc.StatusCode.ALREADY_EXISTS:
             logger.warning(
                 f"Registration failed: User already exists - {register_data.email}"
             )
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
             )
-        elif e.code() == e.INVALID_ARGUMENT:
+        elif e.code() == grpc.StatusCode.INVALID_ARGUMENT:
             logger.warning(
                 f"Registration failed: Invalid email - {register_data.email}"
             )
@@ -176,7 +177,7 @@ async def refresh_token(
             expires_in=grpc_response.expires_in,
         )
     except RpcError as e:
-        if e.code() == e.UNAUTHENTICATED:
+        if e.code() == grpc.StatusCode.UNAUTHENTICATED:
             logger.warning(
                 f"Token refresh failed for {current_user['email']}: Invalid refresh token"
             )
@@ -198,7 +199,7 @@ async def refresh_token(
 @router.post("/logout", response_model=LogoutResponse)
 async def logout(
     response: Response,
-    current_user: dict = Depends(get_current_user),  # Добавляем защиту
+    current_user: dict = Depends(get_current_user),
     refresh_token: str = Cookie(None),
 ):
     try:

@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.v1.endpoints import content
+from api.v1.endpoints import content, auth
 from logger import get_logger
 from settings import settings
 
@@ -12,12 +12,10 @@ logger = get_logger("API Gateway")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
     logger.info(
         f"{settings.API_GATEWAY_NAME} starting on {settings.API_GATEWAY_HOST}:{settings.API_GATEWAY_PORT}"
     )
     yield
-    # Shutdown
     logger.info(f"{settings.API_GATEWAY_NAME} shutting down")
 
 
@@ -33,8 +31,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
+
 app.include_router(content.router, prefix="/api/v1", tags=["content"])
+app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
 
 
 @app.get("/health")
