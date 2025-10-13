@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import content_service_pb2 as content_service__pb2
+from . import content_service_pb2 as content__service__pb2
 
 GRPC_GENERATED_VERSION = '1.75.1'
 GRPC_VERSION = grpc.__version__

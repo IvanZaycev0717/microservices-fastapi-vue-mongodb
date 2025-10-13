@@ -7,22 +7,22 @@ class Settings(BaseSettings):
     API_GATEWAY_HOST: str
     API_GATEWAY_PORT: int
 
-    # Auth Service
-    GRPC_AUTH_HOST: str
-    GRPC_AUTH_PORT: int
+    # Service Hosts
+    API_GATEWAY_CONTENT_HOST: str
+    API_GATEWAY_AUTH_HOST: str
+    API_GATEWAY_COMMENTS_HOST: str
 
-    # Content Service
-    GRPC_CONTENT_HOST: str
+    # Service Ports
     GRPC_CONTENT_PORT: int
-
-    # Comments Service
-    GRPC_COMMENTS_HOST: str
+    GRPC_AUTH_PORT: int
     GRPC_COMMENTS_PORT: int
 
     # Security
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+
+    LOG_LEVEL: str
 
 
 settings = Settings()

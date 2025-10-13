@@ -16,7 +16,7 @@ logger = get_logger("ContentClient")
 class ContentClient:
     def __init__(self):
         self.channel = grpc.insecure_channel(
-            f"{settings.GRPC_CONTENT_HOST}:{settings.GRPC_CONTENT_PORT}"
+            f"{settings.API_GATEWAY_CONTENT_HOST}:{settings.GRPC_CONTENT_PORT}"
         )
         self.stub = ContentServiceStub(self.channel)
         logger.info("ContentClient initialized")
