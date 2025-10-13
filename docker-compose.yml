@@ -46,8 +46,6 @@ services:
     depends_on:
       - comments_db
     restart: unless-stopped
-    volumes:
-      - ./backend/comments_service/src:/app/src
   
   notification_service:
     build:
