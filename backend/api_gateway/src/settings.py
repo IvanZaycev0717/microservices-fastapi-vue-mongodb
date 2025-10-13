@@ -24,5 +24,12 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str
 
+    # Cookie Settings
+    COOKIE_KEY: str = "refresh_token"
+    COOKIE_HTTPONLY: bool = True
+    COOKIE_SECURE: bool = False
+    COOKIE_SAMESITE: str = "lax"
+    COOKIE_PATH: str = "/"
+
 
 settings = Settings()
