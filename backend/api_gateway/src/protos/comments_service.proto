@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package comments;
+
+service CommentsService {
+  rpc CreateComment (CreateCommentRequest) returns (CreateCommentResponse);
+  rpc GetAllComments (GetAllCommentsRequest) returns (GetAllCommentsResponse);
+  rpc GetComment (GetCommentRequest) returns (GetCommentResponse);
+  rpc GetCommentsByProjectId (GetCommentsByProjectIdRequest) returns (GetCommentsByProjectIdResponse);
+  rpc GetCommentsByAuthorId (GetCommentsByAuthorIdRequest) returns (GetCommentsByAuthorIdResponse);
+  rpc UpdateComment (UpdateCommentRequest) returns (UpdateCommentResponse);
+  rpc DeleteComment (DeleteCommentRequest) returns (DeleteCommentResponse);
+}
+
+message CreateCommentRequest {
+  string project_id = 1;
+  string author_id = 2;
+  string author_email = 3;
+  string comment_text = 4;
+  int32 parent_comment_id = 5;
+}
+
+message CreateCommentResponse {
+  int32 comment_id = 1;
+  string message = 2;
+}
+
+message GetAllCommentsRequest {}
+
+message GetAllCommentsResponse {
+  repeated Comment comments = 1;
+}
+
+message GetCommentRequest {
+  int32 comment_id = 1;
+}
+
+message GetCommentResponse {
+  Comment comment = 1;
+}
+
+message GetCommentsByProjectIdRequest {
+  string project_id = 1;
+}
+
+message GetCommentsByProjectIdResponse {
+  repeated Comment comments = 1;
+}
+
+message GetCommentsByAuthorIdRequest {
+  string author_id = 1;
+}
+
+message GetCommentsByAuthorIdResponse {
+  repeated Comment comments = 1;
+}
+
+message UpdateCommentRequest {
+  int32 comment_id = 1;
+  string new_text = 2;
+}
+
+message UpdateCommentResponse {
+  int32 comment_id = 1;
+  string message = 2;
+}
+
+message DeleteCommentRequest {
+  int32 comment_id = 1;
+}
+
+message DeleteCommentResponse {
+  int32 comment_id = 1;
+  string message = 2;
+}
+
+message Comment {
+  int32 id = 1;
+  string project_id = 2;
+  string author_id = 3;
+  string author_email = 4;
+  string comment_text = 5;
+  string created_at = 6;
+  int32 parent_comment_id = 7;
+  int32 likes = 8;
+  int32 dislikes = 9;
+}

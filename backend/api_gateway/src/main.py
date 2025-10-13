@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.v1.endpoints import content, auth
+from api.v1.endpoints import content, auth, comments
 from logger import get_logger
 from settings import settings
 
@@ -31,9 +31,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-app.include_router(content.router, prefix="/api/v1", tags=["content"])
-app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
+api_router = APIRouter(prefix="/api/v1")
+api_router.include_router(content.router, tags=["content"])
+api_router.include_router(auth.router, tags=["auth"])
+api_router.include_router(comments.router, tags=["comments"])
+app.include_router(api_router)
 
 
 @app.get("/health")
