@@ -9,7 +9,12 @@ license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pydantic-settings (>=2.11.0,<3.0.0)"
+    "pydantic-settings (>=2.11.0,<3.0.0)",
+    "fastapi (>=0.119.0,<0.120.0)",
+    "uvicorn (>=0.37.0,<0.38.0)",
+    "grpcio (>=1.75.1,<2.0.0)",
+    "grpcio-tools (>=1.75.1,<2.0.0)",
+    "colorlog (>=6.9.0,<7.0.0)"
 ]
 
 

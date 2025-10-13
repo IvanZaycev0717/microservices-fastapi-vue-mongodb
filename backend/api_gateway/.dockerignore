@@ -1,0 +1,19 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+.venv
+venv
+.idea
+.vscode
+*.swp
+*.swo
+
+# Poetry
+.pytest_cache
+.coverage
+htmlcov
+.tox
+.nox

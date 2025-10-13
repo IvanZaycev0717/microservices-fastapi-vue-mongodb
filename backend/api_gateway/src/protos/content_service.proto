@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package content;
+
+service ContentService {
+  rpc GetAbout(AboutRequest) returns (AboutResponse) {}
+  rpc GetTech(TechRequest) returns (TechResponse) {}
+  rpc GetProjects(ProjectsRequest) returns (ProjectsResponse) {}
+  rpc GetCertificates(CertificatesRequest) returns (CertificatesResponse) {}
+  rpc GetPublications(PublicationsRequest) returns (PublicationsResponse) {}
+}
+
+message Empty {}
+
+message AboutRequest {
+  string lang = 1;
+}
+
+message AboutResponse {
+  repeated AboutItem about = 1;
+}
+
+message AboutItem {
+  string id = 1;
+  string image_url = 2;
+  string title = 3;
+  string description = 4;
+}
+
+message TechRequest {}
+
+message TechResponse {
+  repeated TechKingdom kingdoms = 1;
+}
+
+message TechKingdom {
+  string kingdom = 1;
+  repeated string items = 2;
+}
+
+message ProjectsRequest {
+  string lang = 1;
+  string sort = 2;
+}
+
+message ProjectsResponse {
+  repeated ProjectItem projects = 1;
+}
+
+message ProjectItem {
+  string id = 1;
+  string title = 2;
+  string thumbnail = 3;
+  string image = 4;
+  string description = 5;
+  string link = 6;
+  string date = 7;
+  int32 popularity = 8;
+}
+
+message CertificatesRequest {
+  string sort = 1;
+}
+
+message CertificatesResponse {
+  repeated CertificateItem certificates = 1;
+}
+
+message CertificateItem {
+  string id = 1;
+  string thumb = 2;
+  string src = 3;
+  string date = 4;
+  int32 popularity = 5;
+  string alt = 6;
+}
+
+message PublicationsRequest {
+  string lang = 1;
+  string sort = 2;
+}
+
+message PublicationsResponse {
+  repeated PublicationItem publications = 1;
+}
+
+message PublicationItem {
+  string id = 1;
+  string title = 2;
+  string page = 3;
+  string site = 4;
+  int32 rating = 5;
+  string date = 6;
+}

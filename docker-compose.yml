@@ -2,6 +2,24 @@ services:
   # =====================
   # APPLICATION SERVICES
   # =====================
+
+  api_gateway:
+    build:
+      context: ./backend/api_gateway
+      dockerfile: Dockerfile
+    container_name: api_gateway
+    ports:
+      - "50055:50055"
+    env_file:
+      - .env.example
+    depends_on:
+      - content_service
+      - auth_service
+      - comments_service
+    restart: unless-stopped
+    volumes:
+      - ./backend/api_gateway/src:/app/src
+
   content_service:
     build:
       context: ./backend/content_service
