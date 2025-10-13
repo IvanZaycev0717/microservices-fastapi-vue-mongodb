@@ -1,0 +1,877 @@
+{
+	"info": {
+		"_postman_id": "f1ddf275-3de6-4c63-9ef3-8bc040f79b6d",
+		"name": "API Gateway",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24875435"
+	},
+	"item": [
+		{
+			"name": "/about - 200 (Lang EN)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/about?lang=en",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"about"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "en"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/about - 200 (Lang RU)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/about?lang=ru",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"about"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "ru"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/tech - 200",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/tech",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"tech"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/projects - 200 (Lang EN + Sort Date DESC) Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    \r",
+							"    if (jsonData.projects && jsonData.projects.length > 0) {\r",
+							"        // Берем первый проект из списка\r",
+							"        const firstProject = jsonData.projects[0];\r",
+							"        const projectId = firstProject.id;\r",
+							"        \r",
+							"        // Сохраняем project_id в environment\r",
+							"        pm.environment.set(\"project_id\", projectId);\r",
+							"        \r",
+							"        // Логируем\r",
+							"        console.log(\"=== PROJECT ID EXTRACTED ===\");\r",
+							"        console.log(\"✅ Project ID:\", projectId);\r",
+							"        console.log(\"✅ Project title:\", firstProject.title);\r",
+							"        console.log(\"✅ Total projects:\", jsonData.projects.length);\r",
+							"        \r",
+							"        // Можно также сохранить несколько ID для тестов\r",
+							"        if (jsonData.projects.length > 1) {\r",
+							"            const secondProjectId = jsonData.projects[1].id;\r",
+							"            pm.environment.set(\"project_id_2\", secondProjectId);\r",
+							"            console.log(\"✅ Second project ID:\", secondProjectId);\r",
+							"        }\r",
+							"        \r",
+							"    } else {\r",
+							"        console.log(\"❌ No projects found in response\");\r",
+							"    }\r",
+							"    \r",
+							"} else {\r",
+							"    console.log(\"❌ Projects request failed with status:\", pm.response.code);\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/projects?lang=en&sort=date_desc",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "en"
+						},
+						{
+							"key": "sort",
+							"value": "date_desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/projects - 200 (Lang EN + Sort Date ASC) Copy 2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/projects?lang=en&sort=date_asc",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "en"
+						},
+						{
+							"key": "sort",
+							"value": "date_asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/projects - 200 (Lang EN + Sort Popularity)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/projects?lang=en&sort=popularity",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "en"
+						},
+						{
+							"key": "sort",
+							"value": "popularity"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/projects - 200 (Lang RU + Sort Date DESC)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/projects?lang=ru&sort=date_desc",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "ru"
+						},
+						{
+							"key": "sort",
+							"value": "date_desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/projects - 200 (Lang RU + Sort Date ASC) Copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/projects?lang=ru&sort=date_asc",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "ru"
+						},
+						{
+							"key": "sort",
+							"value": "date_asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/projects - 200 (Lang RU + Sort Popularity) Copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/projects?lang=ru&sort=popularity",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "ru"
+						},
+						{
+							"key": "sort",
+							"value": "popularity"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/certificates - 200 (Date DESC)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/certificates?sort=date_desc",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"certificates"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "date_desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/certificates - 200 (Date ASC)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/certificates?sort=date_asc",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"certificates"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "date_asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/certificates - 200 (Popularity)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/certificates?sort=popularity",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"certificates"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "popularity"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/publications- 200 (Lang EN Date DESC)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/publications?lang=en&sort=date_desc",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"publications"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "en"
+						},
+						{
+							"key": "sort",
+							"value": "date_desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/publications- 200 (Lang EN Date ASC)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/publications?lang=en&sort=date_asc",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"publications"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "en"
+						},
+						{
+							"key": "sort",
+							"value": "date_asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/publications- 200 (Rating)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/publications?lang=en&sort=rating",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"publications"
+					],
+					"query": [
+						{
+							"key": "lang",
+							"value": "en"
+						},
+						{
+							"key": "sort",
+							"value": "rating"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/forgot-password",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    \r",
+							"    console.log(\"=== DEBUG FORGOT PASSWORD ===\");\r",
+							"    console.log(\"1. Full response:\", JSON.stringify(jsonData, null, 2));\r",
+							"    console.log(\"2. Reset token exists:\", !!jsonData.reset_token);\r",
+							"    console.log(\"3. Reset token value:\", jsonData.reset_token);\r",
+							"    \r",
+							"    // Сохраняем reset token\r",
+							"    if (jsonData.reset_token && jsonData.reset_token !== \"\") {\r",
+							"        pm.environment.set(\"reset_token\", jsonData.reset_token);\r",
+							"        console.log(\"✅ Reset token saved to environment\");\r",
+							"        \r",
+							"        // Проверяем что сохранилось\r",
+							"        const savedToken = pm.environment.get(\"reset_token\");\r",
+							"        console.log(\"4. Saved token check:\", savedToken);\r",
+							"    } else {\r",
+							"        console.log(\"❌ Reset token is empty or undefined\");\r",
+							"    }\r",
+							"    \r",
+							"    // Сохраняем остальные данные\r",
+							"    pm.environment.set(\"forgot_password_success\", jsonData.success);\r",
+							"    pm.environment.set(\"forgot_password_message\", jsonData.message);\r",
+							"    \r",
+							"    console.log(\"=== SUMMARY ===\");\r",
+							"    console.log(\"✅ Success:\", jsonData.success);\r",
+							"    console.log(\"✅ Message:\", jsonData.message);\r",
+							"    \r",
+							"} else {\r",
+							"    console.log(\"❌ Forgot password request failed with status:\", pm.response.code);\r",
+							"    console.log(\"Error:\", pm.response.text());\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"{{user_email}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/forgot-password",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"forgot-password"
+					]
+				},
+				"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+			},
+			"response": []
+		},
+		{
+			"name": "/reset-password",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"reset_token\": \"{{reset_token}}\",\r\n  \"new_password\": \"{{new_password}}\",\r\n  \"email\": \"{{user_email}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/reset-password",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"reset-password"
+					]
+				},
+				"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+			},
+			"response": []
+		},
+		{
+			"name": "/login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    \r",
+							"    // Сохраняем основные переменные\r",
+							"    pm.environment.set(\"access_token\", jsonData.access_token);\r",
+							"    pm.environment.set(\"user_id\", jsonData.user_id);\r",
+							"    \r",
+							"    // Извлекаем refresh_token из куки\r",
+							"    const allCookies = pm.cookies.toObject();\r",
+							"    const refreshToken = allCookies['refresh_token'];\r",
+							"    \r",
+							"    if (refreshToken) {\r",
+							"        pm.environment.set(\"refresh_token\", refreshToken);\r",
+							"        console.log(\"✅ Refresh token saved to environment\");\r",
+							"    }\r",
+							"    \r",
+							"    // Дополнительная информация о пользователе\r",
+							"    if (jsonData.user) {\r",
+							"        pm.environment.set(\"user_email\", jsonData.user.email);\r",
+							"        console.log(\"✅ User email saved:\", jsonData.user.email);\r",
+							"    }\r",
+							"    \r",
+							"    // Логируем для отладки\r",
+							"    console.log(\"=== ENVIRONMENT VARIABLES SET ===\");\r",
+							"    console.log(\"✅ access_token:\", jsonData.access_token);\r",
+							"    console.log(\"✅ user_id:\", jsonData.user_id);\r",
+							"    console.log(\"✅ refresh_token:\", refreshToken);\r",
+							"    console.log(\"✅ Total variables in environment:\", Object.keys(pm.environment.toObject()).length);\r",
+							"    \r",
+							"} else {\r",
+							"    console.log(\"❌ Request failed with status:\", pm.response.code);\r",
+							"    console.log(\"Error:\", pm.response.text());\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"{{user_email}}\",\r\n  \"password\": \"{{new_password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"login"
+					]
+				},
+				"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+			},
+			"response": []
+		},
+		{
+			"name": "/refresh",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    \r",
+							"    // Обновляем access_token\r",
+							"    pm.environment.set(\"access_token\", jsonData.access_token);\r",
+							"    \r",
+							"    // Извлекаем новый refresh_token из куки\r",
+							"    const allCookies = pm.cookies.toObject();\r",
+							"    const newRefreshToken = allCookies['refresh_token'];\r",
+							"    \r",
+							"    if (newRefreshToken) {\r",
+							"        pm.environment.set(\"refresh_token\", newRefreshToken);\r",
+							"        console.log(\"✅ New refresh token saved to environment\");\r",
+							"    }\r",
+							"    \r",
+							"    // Логируем обновление токенов\r",
+							"    console.log(\"=== TOKENS REFRESHED SUCCESSFULLY ===\");\r",
+							"    console.log(\"✅ New access_token:\", jsonData.access_token);\r",
+							"    console.log(\"✅ New refresh_token:\", newRefreshToken);\r",
+							"    console.log(\"✅ Token type:\", jsonData.token_type);\r",
+							"    console.log(\"✅ Expires in:\", jsonData.expires_in, \"seconds\");\r",
+							"    \r",
+							"    // Сохраняем timestamp обновления\r",
+							"    pm.environment.set(\"last_refresh\", new Date().toISOString());\r",
+							"    \r",
+							"} else {\r",
+							"    console.log(\"❌ Token refresh failed with status:\", pm.response.code);\r",
+							"    console.log(\"Error details:\", pm.response.text());\r",
+							"    \r",
+							"    // Если refresh failed, возможно нужно перелогиниться\r",
+							"    console.log(\"⚠️  You may need to login again\");\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/refresh",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"refresh"
+					]
+				},
+				"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+			},
+			"response": []
+		},
+		{
+			"name": "/comments - 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    \r",
+							"    if (jsonData.comments && jsonData.comments.length > 0) {\r",
+							"        // Берем первый комментарий\r",
+							"        const firstComment = jsonData.comments[0];\r",
+							"        const commentId = firstComment.id;\r",
+							"        \r",
+							"        // Сохраняем comment_id в environment\r",
+							"        pm.environment.set(\"comment_id\", commentId);\r",
+							"        pm.environment.set(\"comment_author_id\", firstComment.author_id);\r",
+							"        pm.environment.set(\"comment_project_id\", firstComment.project_id);\r",
+							"        \r",
+							"        // Логируем\r",
+							"        console.log(\"=== COMMENT ID EXTRACTED ===\");\r",
+							"        console.log(\"✅ Comment ID:\", commentId);\r",
+							"        console.log(\"✅ Author ID:\", firstComment.author_id);\r",
+							"        console.log(\"✅ Author email:\", firstComment.author_email);\r",
+							"        console.log(\"✅ Project ID:\", firstComment.project_id);\r",
+							"        console.log(\"✅ Comment text:\", firstComment.comment_text);\r",
+							"        console.log(\"✅ Total comments:\", jsonData.comments.length);\r",
+							"        \r",
+							"        // Сохраняем несколько ID если нужно\r",
+							"        if (jsonData.comments.length > 1) {\r",
+							"            const secondComment = jsonData.comments[1];\r",
+							"            pm.environment.set(\"comment_id_2\", secondComment.id);\r",
+							"            pm.environment.set(\"comment_author_id_2\", secondComment.author_id);\r",
+							"            console.log(\"✅ Second comment ID:\", secondComment.id);\r",
+							"        }\r",
+							"        \r",
+							"    } else {\r",
+							"        console.log(\"❌ No comments found in response\");\r",
+							"    }\r",
+							"    \r",
+							"} else {\r",
+							"    console.log(\"❌ Comments request failed with status:\", pm.response.code);\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/comments",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/logout",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"logout"
+					]
+				},
+				"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

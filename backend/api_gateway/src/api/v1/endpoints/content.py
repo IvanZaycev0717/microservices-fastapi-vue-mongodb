@@ -14,7 +14,6 @@ async def get_about(lang: str = Query(None)):
     try:
         response = content_client.get_about(lang)
         return {"about": [{
-            "id": item.id,
             "image_url": item.image_url,
             "title": item.title,
             "description": item.description
