@@ -142,6 +142,37 @@ class CommentsService(comments_pb2_grpc.CommentsServiceServicer):
             context.set_details(str(e))
             return comments_pb2.GetCommentsByProjectIdResponse()
 
+    async def GetCommentsByAuthorId(
+        self,
+        request: comments_pb2.GetCommentsByAuthorIdRequest,
+        context: ServicerContext,
+    ):
+        """Get comments by author ID."""
+        logger.info(f"Get comments for author {request.author_id}")
+
+        try:
+            async with get_db_session() as session:
+                crud = CommentsCRUD(session)
+                comments = await crud.get_comments_by_author_id(request.author_id)
+
+                comment_protos = [
+                    self._comment_to_proto(comment) for comment in comments
+                ]
+                return comments_pb2.GetCommentsByAuthorIdResponse(
+                    comments=comment_protos
+                )
+
+        except ValueError as e:
+            logger.error(f"Author comments not found: {e}")
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details(str(e))
+            return comments_pb2.GetCommentsByAuthorIdResponse()
+        except Exception as e:
+            logger.error(f"Get author comments error: {e}")
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return comments_pb2.GetCommentsByAuthorIdResponse()
+
     async def UpdateComment(
         self,
         request: comments_pb2.UpdateCommentRequest,

@@ -113,3 +113,15 @@ class Comment(_message.Message):
     likes: int
     dislikes: int
     def __init__(self, id: _Optional[int] = ..., project_id: _Optional[str] = ..., author_id: _Optional[str] = ..., author_email: _Optional[str] = ..., comment_text: _Optional[str] = ..., created_at: _Optional[str] = ..., parent_comment_id: _Optional[int] = ..., likes: _Optional[int] = ..., dislikes: _Optional[int] = ...) -> None: ...
+
+class GetCommentsByAuthorIdRequest(_message.Message):
+    __slots__ = ("author_id",)
+    AUTHOR_ID_FIELD_NUMBER: _ClassVar[int]
+    author_id: str
+    def __init__(self, author_id: _Optional[str] = ...) -> None: ...
+
+class GetCommentsByAuthorIdResponse(_message.Message):
+    __slots__ = ("comments",)
+    COMMENTS_FIELD_NUMBER: _ClassVar[int]
+    comments: _containers.RepeatedCompositeFieldContainer[Comment]
+    def __init__(self, comments: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...) -> None: ...

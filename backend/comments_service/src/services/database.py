@@ -32,9 +32,8 @@ async def init_db():
     """Initialize database connection and verify it works."""
     try:
         async with engine.connect() as conn:
-            # Используем text() для сырых SQL выражений в SQLAlchemy 2.0
             await conn.execute(text("SELECT 1"))
-            await conn.commit()  # Явный коммит для соединения
+            await conn.commit()
         logger.info("Database connection established successfully")
     except Exception as e:
         logger.error(f"Database connection failed: {e}")

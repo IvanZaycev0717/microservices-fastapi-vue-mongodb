@@ -7,6 +7,7 @@ service CommentsService {
   rpc GetAllComments (GetAllCommentsRequest) returns (GetAllCommentsResponse);
   rpc GetComment (GetCommentRequest) returns (GetCommentResponse);
   rpc GetCommentsByProjectId (GetCommentsByProjectIdRequest) returns (GetCommentsByProjectIdResponse);
+  rpc GetCommentsByAuthorId (GetCommentsByAuthorIdRequest) returns (GetCommentsByAuthorIdResponse);
   rpc UpdateComment (UpdateCommentRequest) returns (UpdateCommentResponse);
   rpc DeleteComment (DeleteCommentRequest) returns (DeleteCommentResponse);
 }
@@ -76,4 +77,12 @@ message Comment {
   int32 parent_comment_id = 7;
   int32 likes = 8;
   int32 dislikes = 9;
+}
+
+message GetCommentsByAuthorIdRequest {
+  string author_id = 1;
+}
+
+message GetCommentsByAuthorIdResponse {
+  repeated Comment comments = 1;
 }
