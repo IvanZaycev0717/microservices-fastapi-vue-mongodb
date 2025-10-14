@@ -1,8 +1,35 @@
 import { useI18n } from 'vue-i18n'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import axios from 'axios'
 
 export function useSkills() {
   const { t } = useI18n()
+
+  const apiClient = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+    timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+
+  const loading = ref(true)
+  const error = ref(null)
+
+  const fetchTechData = async () => {
+    try {
+      loading.value = true
+      error.value = null
+      const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_TECH)
+      return response
+    } catch (err) {
+      error.value = err
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   const BASE_SKILLS_DATA = {
     backend_kingdom: {
       kingdom: 'Backend',
@@ -90,5 +117,6 @@ export function useSkills() {
       return acc
     }, {})
   })
-  return skillsData
+
+  return [skillsData, fetchTechData, loading, error]
 }

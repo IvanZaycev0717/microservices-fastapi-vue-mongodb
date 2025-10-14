@@ -66,7 +66,16 @@ import SkillsModal from '@components/SkillsModal.vue'
 
 import { useSkills } from '@composables/useSkills.js'
 
-const skillsData = useSkills()
+const [skillsData, fetchTechData, loading, error] = useSkills()
+
+const loadTechData = async () => {
+  try {
+    const response = await fetchTechData()
+    console.log('Данные с бекенда:', response.data)
+  } catch (err) {
+    console.error('Ошибка при загрузке данных:', err)
+  }
+}
 
 const { t } = useI18n()
 const mapImage = mapImageUrl
@@ -81,6 +90,8 @@ const chosenSkill = ref(null)
 const showModal = ref(false)
 
 onMounted(() => {
+  loadTechData()
+  
   if (mapImageRef.value) {
     mapImageRef.value.onload = () => {}
   }
