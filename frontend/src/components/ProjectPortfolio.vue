@@ -15,97 +15,81 @@
     <div v-if="selectedProject" class="modal" @click.self="closeModal">
       <div class="modal-content">
         <button class="close-btn" @click="closeModal">×</button>
-        <h3>{{ selectedProject.title }}</h3>
-        <img v-lazy="selectedProject.image" :alt="selectedProject.title" class="modal-image" />
-        <p>{{ selectedProject.description }}</p>
-        <a
-          v-if="selectedProject.link"
-          :href="selectedProject.link"
-          target="_blank"
-          class="project-link"
-        >
-          {{ t('ProjectPortfolio.look') }}
-        </a>
+        
+        <div class="modal-layout">
+          <!-- Левая часть - проект -->
+          <div class="project-side">
+            <h3>{{ selectedProject.title }}</h3>
+            <img v-lazy="selectedProject.image" :alt="selectedProject.title" class="modal-image" />
+            <p>{{ selectedProject.description }}</p>
+            <a
+              v-if="selectedProject.link"
+              :href="selectedProject.link"
+              target="_blank"
+              class="project-link"
+            >
+              {{ t('ProjectPortfolio.look') }}
+            </a>
+          </div>
+          
+          <!-- Правая часть - комментарии -->
+          <div class="comments-side">
+            <ProjectComments :projectId="selectedProject.id" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-
+import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-
 import { useSortStore } from '@stores/sortStore.js'
-
-const sortStore = useSortStore()
+import { useLanguageStore } from '@stores/languageStore.js'
+import ProjectComments from '@components/ProjectComments.vue'
+import axios from 'axios'
 
 const { t } = useI18n()
+const sortStore = useSortStore()
+const languageStore = useLanguageStore()
 
-
-
-const projects = ref([
-  {
-    id: 1,
-    title: 'Project 1',
-    thumbnail: 'image1Thumb',
-    image: 'image1',
-    description: 'Project 1',
-    link: 'https://example.com',
-    date: new Date(2025, 2, 14),
-    popularity: 2,
-  },
-  {
-    id: 2,
-    title: 'Project 2',
-    thumbnail: 'image2Thumb',
-    image: 'image2',
-    description: 'Project 2',
-    link: 'https://example.com',
-    date: new Date(2024, 2, 14),
-    popularity: 2,
-  },
-  {
-    id: 3,
-    title: 'Project 3',
-    thumbnail: 'image3Thumb',
-    image: 'image3',
-    description: 'Project 3',
-    link: 'https://example.com',
-    date: new Date(2023, 2, 14),
-    popularity: 2,
-  },
-])
-
-const translatedData = computed(() => {
-  const sortOption = sortStore.selectedOption
-  const sortedProjects = sortProjects(sortOption)
-  return sortedProjects.map((obj) => ({
-    id: obj.id,
-    title: obj.title,
-    thumbnail: obj.thumbnail,
-    image: obj.image,
-    description: obj.description,
-    link: obj.link,
-    date: obj.date,
-    popularity: obj.popularity,
-  }))
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
 })
 
-function sortProjects(sortOption) {
-  switch (sortOption) {
-    case 'date_desc':
-      return [...projects.value].sort((a, b) => b.date - a.date)
-    case 'date_asc':
-      return [...projects.value].sort((a, b) => a.date - b.date)
-    case 'popular':
-      return [...projects.value].sort((a, b) => b.popularity - a.popularity)
-    default:
-      return [...projects.value]
+const projects = ref([])
+const loading = ref(false)
+const selectedProject = ref(null)
+
+const fetchProjects = async () => {
+  try {
+    loading.value = true
+    const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_PROJECTS, {
+      params: {
+        lang: languageStore.language,
+        sort: sortStore.selectedOption,
+      },
+    })
+    projects.value = response.data.projects || []
+  } catch (err) {
+    console.error('Ошибка загрузки проектов:', err)
+    projects.value = []
+  } finally {
+    loading.value = false
   }
 }
 
-const selectedProject = ref(null)
+const translatedData = computed(() => projects.value || [])
+
+onMounted(() => {
+  fetchProjects()
+})
+
+watch([() => sortStore.selectedOption, () => languageStore.language], () => {
+  fetchProjects()
+})
 
 const openModal = (project) => {
   selectedProject.value = project
@@ -258,5 +242,61 @@ img[lazy='loading'] {
 }
 img[lazy='error'] {
   background: inherit;
+}
+
+.modal-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  height: 100%;
+}
+
+.project-side {
+  display: flex;
+  flex-direction: column;
+}
+
+.comments-side {
+  border-left: none;
+  padding-left: 1rem;
+}
+
+@media (max-width: 768px) {
+  .modal-layout {
+    grid-template-columns: 1fr;
+  }
+  .comments-side {
+    padding-left: 0;
+    padding-top: 1rem;
+  }
+}
+
+.comments-section {
+  padding: 0.5rem;
+  height: 100%;
+}
+
+.comments-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.comment-form {
+  margin-bottom: 0.75rem;
+}
+
+.comment-form textarea {
+  font-size: 0.875rem;
+  padding: 0.375rem;
+}
+
+.comment-form button {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.comments-list {
+  max-height: 400px;
+  overflow-y: auto;
 }
 </style>

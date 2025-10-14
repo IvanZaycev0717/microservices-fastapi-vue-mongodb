@@ -98,5 +98,15 @@
   "ProjectPortfolio": {
     "look": "Check out the full code on GitHub"
   },
+  "ProjectComments": {
+    "title": "Comments",
+    "placeholder": "Add a comment...",
+    "add": "Post",
+    "reply": "Reply",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
   "removed": "This feature is excluded from the public release but available in the project's GitHub repo"
 }
