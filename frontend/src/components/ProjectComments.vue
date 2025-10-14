@@ -1,24 +1,29 @@
 <template>
   <div class="comments-section">
     <h4>{{ t('ProjectComments.title') }}</h4>
-    
+
     <!-- Форма добавления комментария -->
-    <div class="comment-form">
-      <textarea 
-        v-model="newComment" 
+    <div class="comment-form" v-if="authStore.isAuthenticated">
+      <textarea
+        v-model="newComment"
         :placeholder="t('ProjectComments.placeholder')"
         rows="3"
       ></textarea>
       <button @click="addComment">{{ t('ProjectComments.add') }}</button>
     </div>
+    <div v-else class="login-prompt">
+      <p>{{ t('ProjectComments.loginToComment') }}</p>
+    </div>
 
     <div class="comments-list">
-      <CommentItem 
-        v-for="comment in rootComments" 
+      <CommentItem
+        v-for="comment in rootComments"
         :key="comment.id"
         :comment="comment"
         :replies="getReplies(comment.id)"
         @reply="handleReply"
+        @update="handleUpdate"
+        @delete="handleDelete"
       />
     </div>
   </div>
@@ -29,8 +34,10 @@ import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CommentItem from '@components/CommentItem.vue'
 import axios from 'axios'
+import { useAuthStore } from '@stores/authStore.js'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -40,8 +47,8 @@ const apiClient = axios.create({
 const props = defineProps({
   projectId: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const comments = ref([])
@@ -51,7 +58,9 @@ const newComment = ref('')
 const fetchComments = async (projectId) => {
   try {
     loading.value = true
-    const response = await apiClient.get(`${import.meta.env.VITE_API_CONTENT_COMMENTS}/project/${projectId}`)
+    const response = await apiClient.get(
+      `${import.meta.env.VITE_API_CONTENT_COMMENTS}/project/${projectId}`,
+    )
     comments.value = response.data.comments || []
   } catch (err) {
     console.error('Ошибка загрузки комментариев:', err)
@@ -61,34 +70,75 @@ const fetchComments = async (projectId) => {
   }
 }
 
-const rootComments = computed(() => 
+const rootComments = computed(() =>
   [...comments.value]
-    .filter(comment => comment.parent_comment_id === null)
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .filter((comment) => comment.parent_comment_id === null)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
 )
 
-const getReplies = (parentId) => 
+const getReplies = (parentId) =>
   comments.value
-    .filter(comment => comment.parent_comment_id === parentId)
+    .filter((comment) => comment.parent_comment_id === parentId)
     .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
 
-const addComment = () => {
+const addComment = async () => {
   if (!newComment.value.trim()) return
-  // TODO: Реализовать POST запрос
-  console.log('Add comment:', newComment.value)
-  newComment.value = ''
-}
 
-const handleReply = (parentComment, replyText) => {
-  // TODO: Реализовать POST запрос с parent_comment_id
-  console.log('Reply to comment:', parentComment.id, replyText)
-}
+  try {
+    const response = await apiClient.post(import.meta.env.VITE_API_CONTENT_COMMENTS, {
+      project_id: props.projectId,
+      comment_text: newComment.value,
+    })
 
-watch(() => props.projectId, (newProjectId) => {
-  if (newProjectId) {
-    fetchComments(newProjectId)
+    await fetchComments(props.projectId)
+    newComment.value = ''
+  } catch (err) {
+    console.error('Ошибка добавления комментария:', err)
   }
-}, { immediate: true })
+}
+
+const handleReply = async (parentComment, replyText) => {
+  try {
+    const response = await apiClient.post(import.meta.env.VITE_API_CONTENT_COMMENTS, {
+      project_id: props.projectId,
+      comment_text: replyText,
+      parent_comment_id: parentComment.id,
+    })
+
+    await fetchComments(props.projectId)
+  } catch (err) {
+    console.error('Ошибка добавления ответа:', err)
+  }
+}
+
+const handleUpdate = async (commentId, newText) => {
+  try {
+    const comment = comments.value.find(c => c.id === commentId)
+    if (comment) {
+      comment.comment_text = newText
+    }
+  } catch (err) {
+    console.error('Ошибка обновления комментария:', err)
+  }
+}
+
+const handleDelete = async (commentId) => {
+  try {
+    comments.value = comments.value.filter(c => c.id !== commentId)
+  } catch (err) {
+    console.error('Ошибка удаления комментария:', err)
+  }
+}
+
+watch(
+  () => props.projectId,
+  (newProjectId) => {
+    if (newProjectId) {
+      fetchComments(newProjectId)
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>

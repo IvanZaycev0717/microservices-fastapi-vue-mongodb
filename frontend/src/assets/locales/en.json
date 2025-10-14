@@ -106,7 +106,12 @@
     "edit": "Edit",
     "delete": "Delete",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "loginToComment": "Please log in to leave a comment"
+  },
+  "AccountView": {
+    "title": "My Account",
+    "description": "Manage your comments"
   },
   "removed": "This feature is excluded from the public release but available in the project's GitHub repo"
 }

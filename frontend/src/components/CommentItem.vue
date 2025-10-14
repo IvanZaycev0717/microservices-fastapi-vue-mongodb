@@ -4,12 +4,12 @@
       <span class="author">{{ comment.author_email }}</span>
       <span class="date">{{ formatDate(comment.created_at) }}</span>
     </div>
-    
+
     <div class="comment-content">
       <p>{{ comment.comment_text }}</p>
     </div>
 
-    <div class="comment-actions">
+    <div class="comment-actions" v-if="authStore.isAuthenticated">
       <button @click="toggleReply" class="action-btn">
         {{ t('ProjectComments.reply') }}
       </button>
@@ -49,8 +49,8 @@
 
     <!-- Вложенные комментарии -->
     <div v-if="replies.length" class="replies">
-      <CommentItem 
-        v-for="reply in replies" 
+      <CommentItem
+        v-for="reply in replies"
         :key="reply.id"
         :comment="reply"
         :replies="getReplies(reply.id)"
@@ -64,19 +64,27 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAuthStore } from '@stores/authStore.js'
+import axios from 'axios'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
+
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+})
 
 const props = defineProps({
   comment: Object,
   replies: Array,
   depth: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 })
 
-const emit = defineEmits(['reply'])
+const emit = defineEmits(['reply', 'update', 'delete'])
 
 // Локальные состояния
 const showReplyForm = ref(false)
@@ -84,15 +92,19 @@ const showEditForm = ref(false)
 const replyText = ref('')
 const editText = ref(props.comment.comment_text)
 
-// Проверка авторства (заглушка)
-const isAuthor = computed(() => props.comment.author_id === 'current_user')
+// Проверка авторства
+const isAuthor = computed(() => props.comment.author_id === authStore.user?.id)
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  })
+  return (
+    date.toLocaleDateString() +
+    ' ' +
+    date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  )
 }
 
 const toggleReply = () => {
@@ -119,11 +131,20 @@ const cancelReply = () => {
   showReplyForm.value = false
 }
 
-const saveEdit = () => {
-  if (editText.value.trim()) {
-    // Логика сохранения редактирования
-    console.log('Save edited comment:', editText.value)
+const saveEdit = async () => {
+  if (!editText.value.trim()) return
+  
+  try {
+    await apiClient.put(
+      `${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`,
+      {
+        new_text: editText.value
+      }
+    )
     showEditForm.value = false
+    emit('update', props.comment.id, editText.value)
+  } catch (err) {
+    console.error('Ошибка редактирования комментария:', err)
   }
 }
 
@@ -132,15 +153,21 @@ const cancelEdit = () => {
   showEditForm.value = false
 }
 
-const deleteComment = () => {
-  if (confirm('Delete this comment?')) {
-    // Логика удаления
-    console.log('Delete comment:', props.comment.id)
+const deleteComment = async () => {
+  if (!confirm('Delete this comment?')) return
+  
+  try {
+    await apiClient.delete(
+      `${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`
+    )
+    emit('delete', props.comment.id)
+  } catch (err) {
+    console.error('Ошибка удаления комментария:', err)
   }
 }
 
 const getReplies = (parentId) => {
-  return props.replies.filter(reply => reply.parent_comment_id === parentId)
+  return props.replies.filter((reply) => reply.parent_comment_id === parentId)
 }
 </script>
 

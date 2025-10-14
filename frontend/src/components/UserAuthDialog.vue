@@ -175,13 +175,12 @@ import { useForm, useField } from 'vee-validate'
 import * as yup from 'yup'
 import { useRouter } from 'vue-router'
 import { StatusCodes } from 'http-status-codes'
-
 import { inject } from 'vue'
-
 import { emailValidation, passwordValidation } from '@utils/validationHelpers.js'
 import LoginIcon from '@icons/LoginIcon.vue'
 import LogoutIcon from '@icons/LogoutIcon.vue'
 import { useAuthStore } from '@stores/authStore.js'
+
 
 const { t, locale } = useI18n()
 const authError = ref('')
@@ -224,8 +223,6 @@ const switchToForgotPassword = () => {
 const switchToEmailSentModal = () => {
   showForgotPassModal.value = false
   showEmailSentModal.value = true
-  toast.warning(t('removed'))
-  closeModals()
 }
 
 /* Управление валидацией полей форм модальных окон */
@@ -316,36 +313,17 @@ watch(locale, () => {
 })
 
 const handleLogin = async (email, password) => {
-  toast.warning(t('removed'))
-  closeModals()
-  return
   try {
-    const response = await axios.post(
-      'http://localhost:3000/api/login',
-      { email, password },
-      {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    )
-
-    await authStore.checkAuth()
-
-    router.push('/account')
-    toast.success(t('auth.successful'))
-    closeModals()
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      if (err.status === StatusCodes.UNAUTHORIZED) {
-        toast.error(t('auth.invalid_credentials'))
-      } else if (err.message === 'Network Error') {
-        toast.error(t('auth.network_error'))
-      } else {
-        toast.error(t('auth.login_error'))
-      }
+    const result = await authStore.login({ email, password })
+    
+    if (result.success) {
+      toast.success(t('auth.successful'))
+      closeModals()
+    } else {
+      toast.error(result.error)
     }
+  } catch (err) {
+    toast.error(t('auth.login_error'))
   }
 }
 
@@ -353,36 +331,25 @@ const handleLogout = async () => {
   await authStore.logout()
   toast.warning(t('auth.logout'))
   router.push('/')
+  closeModals()
 }
 
 const handleRegister = async (email, password) => {
-  toast.warning(t('removed'))
-  closeModals()
-  return
   try {
-    const response = await axios.post(
-      'http://localhost:3000/api/register',
-      { email, password },
-      {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    )
-
-    await authStore.checkAuth()
-    router.push('/account')
-    toast.success(t('auth.successful'))
-    closeModals()
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      if (err.status === StatusCodes.CONFLICT) {
-        toast.error(t('auth.user_already_exists'))
-      } else if (err.status === StatusCodes.INTERNAL_SERVER_ERROR) {
-        toast.error(t('auth.network_error'))
-      }
+    const result = await authStore.register({ 
+      email, 
+      password,
+      roles: ["user"]
+    })
+    
+    if (result.success) {
+      toast.success(t('auth.successful'))
+      closeModals()
+    } else {
+      toast.error(result.error)
     }
+  } catch (err) {
+    toast.error(t('auth.network_error'))
   }
 }
 </script>

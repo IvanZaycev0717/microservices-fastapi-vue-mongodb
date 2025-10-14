@@ -17,6 +17,9 @@ import ru from '@/assets/locales/ru.json'
 import errorImage from '@assets/placeholders/error-image.webp'
 import cardPlaceholder from '@assets/placeholders/card-placeholder.webp'
 
+import '@utils/axiosInterceptor.js'
+
+
 const i18n = createI18n({
   legacy: false,
   objectNotation: true,
