@@ -1,17 +1,18 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import 'vue3-carousel/carousel.css'
 import axios from 'axios'
 import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 import AboutMeCard from '@components/AboutMeCard.vue'
-
+import { useLanguageStore } from '@stores/languageStore'
+const languageStore = useLanguageStore()
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
 })
 
 const cards = ref([])
@@ -23,11 +24,17 @@ const fetchAboutData = async () => {
   try {
     loading.value = true
     error.value = null
-    
-    const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_ABOUT)
 
-    cards.value = response.data
-    
+    const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_ABOUT, {
+      params: {
+        lang: languageStore.language || 'en'
+      }
+    })
+
+    cards.value = response.data.about.map((item) => ({
+      ...item,
+      image: item.image_url
+    }))
   } catch (err) {
     if (err.response) {
       error.value = `Ошибка сервера: ${err.response.status} - ${err.response.data?.message || err.response.statusText}`
@@ -44,6 +51,10 @@ const fetchAboutData = async () => {
 
 onMounted(() => {
   isMounted.value = true
+  fetchAboutData()
+})
+
+watch(() => languageStore.language, () => {
   fetchAboutData()
 })
 

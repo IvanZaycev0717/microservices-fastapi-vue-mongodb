@@ -11,8 +11,8 @@ import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 // https://vite.dev/config/
 export default defineConfig({
   server: {
-    host: true,
-    port: 8080,
+    host: '0.0.0.0',
+    port: 3000,
   },
   plugins: [
     vue(),
