@@ -52,14 +52,13 @@
     <div class="map-controls">
       <button @click="zoomIn">+</button>
       <button @click="zoomOut">-</button>
-      <button @click="resetZoom">{{ t('technologies.Reset') }}</button>
+      <button @click="resetZoom">Reset</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
 import mapImageUrl from '@assets/TechMap/map.webp'
 import MapMarkers from '@components/MapMarkers.vue'
 import SkillsModal from '@components/SkillsModal.vue'
@@ -77,7 +76,6 @@ const loadTechData = async () => {
   }
 }
 
-const { t } = useI18n()
 const mapImage = mapImageUrl
 const scale = ref(1)
 const position = ref({ x: 0, y: 0 })
@@ -90,8 +88,8 @@ const chosenSkill = ref(null)
 const showModal = ref(false)
 
 onMounted(() => {
-  loadTechData()
-  
+  fetchTechData()
+
   if (mapImageRef.value) {
     mapImageRef.value.onload = () => {}
   }
