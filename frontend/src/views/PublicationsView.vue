@@ -4,7 +4,7 @@
     <p>{{ t('PublicationsView.description') }}</p>
     <EasyDataTable
       :headers="translatedHeaders"
-      :items="sortedArticles"
+      :items="formattedArticles"
       table-class-name="customize-table"
       :rows-per-page="10"
       hide-footer
@@ -24,64 +24,72 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import axios from 'axios'
 import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
-
 import { useSortStore } from '@stores/sortStore.js'
+import { useLanguageStore } from '@stores/languageStore.js'
 
+const { t } = useI18n()
 const sortStore = useSortStore()
+const languageStore = useLanguageStore()
 
-const articles = ref([
-  {
-    id: 1,
-    title: 'Some random text',
-    page: 'https://example.com',
-    site: 'https://example.com',
-    rating: 18,
-    date: '08.08.2025',
-  },
-])
+const articles = ref([])
+const loading = ref(false)
 
-const translatedHeaders = computed(() => [
-  {
-    text: t('PublicationsView.title'),
-    value: 'title',
-  },
-  {
-    text: t('PublicationsView.site'),
-    value: 'site',
-  },
-  {
-    text: t('PublicationsView.rating'),
-    value: 'rating',
-  },
-  {
-    text: t('PublicationsView.pub_date'),
-    value: 'date',
-    width: 150,
-  },
-])
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+})
 
-const parseDate = (dateString) => {
-  const [day, month, year] = dateString.split('.')
-  return new Date(`${month}.${day}.${year}`)
+const fetchPublications = async () => {
+  try {
+    loading.value = true
+    const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_PUBLICATIONS, {
+      params: {
+        lang: languageStore.language,
+        sort: sortStore.selectedOption
+      }
+    })
+    articles.value = response.data.publications || []
+  } catch (err) {
+    console.error('Ошибка загрузки публикаций:', err)
+    articles.value = []
+  } finally {
+    loading.value = false
+  }
 }
 
-const sortedArticles = computed(() => {
-  const articlesBefore = [...articles.value]
+const translatedHeaders = computed(() => [
+  { text: t('PublicationsView.title'), value: 'title' },
+  { text: t('PublicationsView.site'), value: 'site' },
+  { text: t('PublicationsView.rating'), value: 'rating' },
+  { text: t('PublicationsView.pub_date'), value: 'date', width: 150 },
+])
 
-  switch (sortStore.selectedOption) {
-    case 'date_desc':
-      return articlesBefore.sort((a, b) => parseDate(b.date) - parseDate(a.date))
-    case 'date_asc':
-      return articlesBefore.sort((a, b) => parseDate(a.date) - parseDate(b.date))
-    case 'popular':
-      return articlesBefore.sort((a, b) => b.rating - a.rating)
-    default:
-      return articlesBefore
-  }
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  return `${day}.${month}.${year}`
+}
+
+const formattedArticles = computed(() => {
+  return (articles.value || []).map(article => ({
+    ...article,
+    date: formatDate(article.date)
+  }))
+})
+
+onMounted(() => {
+  fetchPublications()
+})
+
+watch([() => sortStore.selectedOption, () => languageStore.language], () => {
+  fetchPublications()
 })
 </script>
 

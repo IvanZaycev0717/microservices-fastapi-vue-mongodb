@@ -21,48 +21,39 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import VueEasyLightbox from 'vue-easy-lightbox'
 import { useSortStore } from '@stores/sortStore.js'
+import axios from 'axios'
 
 const sortStore = useSortStore()
 
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+})
+
 const visible = ref(false)
 const currentIndex = ref(0)
+const images = ref([])
+const loading = ref(false)
 
-const images = ref([
-  {
-    src: 'MinDigitalCom_ALGOR',
-    thumb: 'MinDigitalCom_ALGORThumb',
-    date: new Date(2025, 6, 13),
-    popularity: 85,
-    alt: 'MinDigitalCom_ALGOR',
-  },
-  {
-    src: 'MinDigitalCom_API',
-    thumb: 'MinDigitalCom_APIThumb',
-    date: new Date(2025, 5, 29),
-    popularity: 80,
-    alt: 'MinDigitalCom_API',
-  },
-  {
-    src: 'MinDigitalCom_CSS',
-    thumb: 'MinDigitalCom_CSSThumb',
-    date: new Date(2025, 5, 29),
-    popularity: 85,
-    alt: 'MinDigitalCom_CSS',
-  },
-  {
-    src: 'MinDigitalCom_Docker',
-    thumb: 'MinDigitalCom_DockerThumb',
-    date: new Date(2025, 6, 11),
-    popularity: 75,
-    alt: 'MinDigitalCom_Docker',
-  },
-])
+const fetchCertificates = async (sortOption) => {
+  try {
+    loading.value = true
+    const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_CERTIFICATES, {
+      params: { sort: sortOption }
+    })
+    images.value = response.data.certificates
+  } catch (err) {
+    console.error('Ошибка загрузки сертификатов:', err)
+  } finally {
+    loading.value = false
+  }
+}
 
 const showLightbox = (imgSrc) => {
-  currentIndex.value = sortedImages.value.findIndex((img) => img.src === imgSrc)
+  currentIndex.value = images.value.findIndex((img) => img.src === imgSrc)
   visible.value = true
 }
 
@@ -70,20 +61,16 @@ const handleHide = () => {
   visible.value = false
 }
 
-function sortImages(sortOption) {
-  switch (sortOption) {
-    case 'date_desc':
-      return [...images.value].sort((a, b) => b.date - a.date)
-    case 'date_asc':
-      return [...images.value].sort((a, b) => a.date - b.date)
-    case 'popular':
-      return [...images.value].sort((a, b) => b.popularity - a.popularity)
-    default:
-      return images.value
-  }
-}
+const sortedImages = computed(() => images.value)
 
-const sortedImages = computed(() => sortImages(sortStore.selectedOption))
+onMounted(() => {
+  fetchCertificates(sortStore.selectedOption)
+})
+
+
+watch(() => sortStore.selectedOption, (newSort) => {
+  fetchCertificates(newSort)
+})
 </script>
 
 <style scoped>
