@@ -25,10 +25,11 @@ import AccountCommentItem from '@components/AccountCommentItem.vue'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
+import { getConfig } from '@utils/config'
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+  baseURL: getConfig('VITE_API_BASE_URL'),
+  timeout: parseInt(getConfig('VITE_API_TIMEOUT')),
 })
 
 createAuthInterceptor(apiClient)
@@ -39,7 +40,7 @@ const loading = ref(false)
 const fetchUserComments = async () => {
   try {
     loading.value = true
-    const response = await apiClient.get(`${import.meta.env.VITE_API_CONTENT_COMMENTS}/my`)
+    const response = await apiClient.get(`${getConfig('VITE_API_CONTENT_COMMENTS')}/my`)
     userComments.value = response.data.comments || []
   } catch (err) {
     console.error('Ошибка загрузки комментариев:', err)

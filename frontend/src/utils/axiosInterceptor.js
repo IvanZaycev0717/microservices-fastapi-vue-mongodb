@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getConfig } from '@utils/config'
 
 let isRefreshing = false
 let failedQueue = []
@@ -56,7 +57,7 @@ const createAuthInterceptor = (axiosInstance) => {
 
         try {
           const refreshResponse = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_REFRESH}`,
+            `${getConfig('VITE_API_BASE_URL')}${getConfig('VITE_API_AUTH_REFRESH')}`,
             {},
             {
               withCredentials: true,

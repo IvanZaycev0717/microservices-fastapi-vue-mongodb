@@ -74,6 +74,7 @@ import * as yup from 'yup'
 import axios from 'axios'
 import { inject } from 'vue'
 import { emailValidation, passwordValidation } from '@utils/validationHelpers.js'
+import { getConfig } from '@utils/config'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -118,7 +119,7 @@ onMounted(() => {
 
 const handleSubmit = resetForm.handleSubmit(async (values) => {
   try {
-    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/reset-password`, {
+    const response = await axios.post(`${getConfig('VITE_API_BASE_URL')}/reset-password`, {
       reset_token: resetToken.value,
       new_password: values.newPassword,
       email: values.email,

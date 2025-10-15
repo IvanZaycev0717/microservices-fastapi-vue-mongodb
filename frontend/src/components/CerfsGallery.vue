@@ -27,10 +27,11 @@ import { useSortStore } from '@stores/sortStore.js'
 import axios from 'axios'
 
 const sortStore = useSortStore()
+import { getConfig } from '@utils/config'
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+  baseURL: getConfig('VITE_API_BASE_URL'),
+  timeout: parseInt(getConfig('VITE_API_TIMEOUT')),
 })
 
 const visible = ref(false)
@@ -41,7 +42,7 @@ const loading = ref(false)
 const fetchCertificates = async (sortOption) => {
   try {
     loading.value = true
-    const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_CERTIFICATES, {
+    const response = await apiClient.get(getConfig('VITE_API_CONTENT_CERTIFICATES'), {
       params: { sort: sortOption },
     })
     images.value = response.data.certificates

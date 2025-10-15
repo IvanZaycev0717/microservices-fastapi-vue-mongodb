@@ -1,13 +1,14 @@
 import { ref } from 'vue'
 import axios from 'axios'
+import { getConfig } from '@utils/config'
 
 export function useSkills() {
   const backendData = ref(null)
   const skillsData = ref({})
 
   const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-    timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+    baseURL: getConfig('VITE_API_BASE_URL'),
+    timeout: parseInt(getConfig('VITE_API_TIMEOUT')),
     headers: {
       'Content-Type': 'application/json',
     },
@@ -19,7 +20,7 @@ export function useSkills() {
   const fetchTechData = async () => {
     try {
       loading.value = true
-      const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_TECH)
+      const response = await apiClient.get(getConfig('VITE_API_CONTENT_TECH'))
       backendData.value = response.data.kingdoms
 
       skillsData.value = transformBackendData(backendData.value)

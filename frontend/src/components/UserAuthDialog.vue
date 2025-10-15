@@ -180,7 +180,7 @@ import { emailValidation, passwordValidation } from '@utils/validationHelpers.js
 import LoginIcon from '@icons/LoginIcon.vue'
 import LogoutIcon from '@icons/LogoutIcon.vue'
 import { useAuthStore } from '@stores/authStore.js'
-
+import { getConfig } from '@utils/config'
 const { t, locale } = useI18n()
 const authError = ref('')
 const authStore = useAuthStore()
@@ -302,7 +302,7 @@ const handleRegSubmit = regForm.handleSubmit((values) => {
 
 const handleResetSubmit = resetForm.handleSubmit(async (values) => {
   try {
-    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/forgot-password`, {
+    await axios.post(`${getConfig('VITE_API_BASE_URL')}/forgot-password`, {
       email: values.email,
     })
     switchToEmailSentModal()

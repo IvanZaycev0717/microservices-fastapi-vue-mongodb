@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
+import { getConfig } from '@utils/config'
 
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
@@ -39,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_VERIFY}`,
+        `${getConfig('VITE_API_BASE_URL')}${getConfig('VITE_API_AUTH_VERIFY')}`,
         { token: accessToken.value },
       )
 
@@ -63,7 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
       error.value = null
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_LOGIN}`,
+        `${getConfig('VITE_API_BASE_URL')}${getConfig('VITE_API_AUTH_LOGIN')}`,
         credentials,
         { withCredentials: true },
       )
@@ -84,7 +85,7 @@ export const useAuthStore = defineStore('auth', () => {
       error.value = null
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_REGISTER}`,
+        `${getConfig('VITE_API_BASE_URL')}${getConfig('VITE_API_AUTH_REGISTER')}`,
         userData,
         { withCredentials: true },
       )
@@ -104,7 +105,7 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = true
 
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_LOGOUT}`,
+        `${getConfig('VITE_API_BASE_URL')}${getConfig('VITE_API_AUTH_LOGOUT')}`,
         {},
         {
           withCredentials: true,
@@ -126,7 +127,7 @@ export const useAuthStore = defineStore('auth', () => {
       console.log('Attempting token refresh...')
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_REFRESH}`,
+        `${getConfig('VITE_API_BASE_URL')}${getConfig('VITE_API_AUTH_REFRESH')}`,
         {},
         {
           withCredentials: true,

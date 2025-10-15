@@ -48,14 +48,15 @@ import { useSortStore } from '@stores/sortStore.js'
 import { useLanguageStore } from '@stores/languageStore.js'
 import ProjectComments from '@components/ProjectComments.vue'
 import axios from 'axios'
+import { getConfig } from '@utils/config'
 
 const { t } = useI18n()
 const sortStore = useSortStore()
 const languageStore = useLanguageStore()
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+  baseURL: getConfig('VITE_API_BASE_URL'),
+  timeout: parseInt(getConfig('VITE_API_TIMEOUT')),
 })
 
 const projects = ref([])
@@ -65,7 +66,7 @@ const selectedProject = ref(null)
 const fetchProjects = async () => {
   try {
     loading.value = true
-    const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_PROJECTS, {
+    const response = await apiClient.get(getConfig('VITE_API_CONTENT_PROJECTS'), {
       params: {
         lang: languageStore.language,
         sort: sortStore.selectedOption,

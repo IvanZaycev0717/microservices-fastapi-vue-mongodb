@@ -6,10 +6,11 @@ import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 import AboutMeCard from '@components/AboutMeCard.vue'
 import { useLanguageStore } from '@stores/languageStore'
 const languageStore = useLanguageStore()
+import { getConfig } from '@utils/config'
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+  baseURL: getConfig('VITE_API_BASE_URL'),
+  timeout: parseInt(getConfig('VITE_API_TIMEOUT')),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -25,7 +26,7 @@ const fetchAboutData = async () => {
     loading.value = true
     error.value = null
 
-    const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_ABOUT, {
+    const response = await apiClient.get(getConfig('VITE_API_CONTENT_ABOUT'), {
       params: {
         lang: languageStore.language || 'en',
       },

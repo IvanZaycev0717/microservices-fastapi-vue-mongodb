@@ -6,16 +6,10 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
     container_name: frontend
     ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      - VITE_API_BASE_URL=http://localhost:50055/api/v1
+      - "3000:80"
     depends_on:
       - api_gateway
     restart: unless-stopped
@@ -335,63 +329,63 @@ services:
   # MANAGEMENT TOOLS
   # =====================
 
-  kafka-ui:
-    container_name: kafka-ui
-    image: kafbat/kafka-ui:5ba27d9
-    ports:
-      - "8084:8080"
-    environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
-      KAFKA_CLUSTERS_0_NAME: 'auth-cluster'
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'broker-1:19092,broker-2:19092,broker-3:19092'
-      KAFKA_CLUSTERS_0_READONLY: 'false'
-    depends_on:
-      - broker-1
-      - broker-2
-      - broker-3
-    restart: unless-stopped
+  # kafka-ui:
+  #   container_name: kafka-ui
+  #   image: kafbat/kafka-ui:5ba27d9
+  #   ports:
+  #     - "8084:8080"
+  #   environment:
+  #     DYNAMIC_CONFIG_ENABLED: 'true'
+  #     KAFKA_CLUSTERS_0_NAME: 'auth-cluster'
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'broker-1:19092,broker-2:19092,broker-3:19092'
+  #     KAFKA_CLUSTERS_0_READONLY: 'false'
+  #   depends_on:
+  #     - broker-1
+  #     - broker-2
+  #     - broker-3
+  #   restart: unless-stopped
 
-  mongo-express-content:
-    image: mongo-express:1.0.2-20-alpine3.19
-    container_name: mongo_express_content
-    env_file:
-      - .env.example
-    restart: always
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@content_db:27017/?authSource=admin"
-      ME_CONFIG_BASICAUTH: false
-    depends_on:
-      - content_db
+  # mongo-express-content:
+  #   image: mongo-express:1.0.2-20-alpine3.19
+  #   container_name: mongo_express_content
+  #   env_file:
+  #     - .env.example
+  #   restart: always
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@content_db:27017/?authSource=admin"
+  #     ME_CONFIG_BASICAUTH: false
+  #   depends_on:
+  #     - content_db
 
-  mongo-express-auth:
-    image: mongo-express:1.0.2-20-alpine3.19
-    container_name: mongo_express_auth
-    env_file:
-      - .env.example
-    restart: always
-    ports:
-      - "8082:8081"
-    environment:
-      ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@auth_db:27017/?authSource=admin"
-      ME_CONFIG_BASICAUTH: false
-    depends_on:
-      - auth_db
+  # mongo-express-auth:
+  #   image: mongo-express:1.0.2-20-alpine3.19
+  #   container_name: mongo_express_auth
+  #   env_file:
+  #     - .env.example
+  #   restart: always
+  #   ports:
+  #     - "8082:8081"
+  #   environment:
+  #     ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@auth_db:27017/?authSource=admin"
+  #     ME_CONFIG_BASICAUTH: false
+  #   depends_on:
+  #     - auth_db
 
-  mongo-express-notification:
-    image: mongo-express:1.0.2-20-alpine3.19
-    container_name: mongo_express_notification
-    env_file:
-      - .env.example
-    restart: always
-    ports:
-      - "8083:8081"
-    environment:
-      ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@notification_db:27017/?authSource=admin"
-      ME_CONFIG_BASICAUTH: false
-    depends_on:
-      - notification_db
+  # mongo-express-notification:
+  #   image: mongo-express:1.0.2-20-alpine3.19
+  #   container_name: mongo_express_notification
+  #   env_file:
+  #     - .env.example
+  #   restart: always
+  #   ports:
+  #     - "8083:8081"
+  #   environment:
+  #     ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@notification_db:27017/?authSource=admin"
+  #     ME_CONFIG_BASICAUTH: false
+  #   depends_on:
+  #     - notification_db
 
   # =====================
   # STORAGE SERVICES

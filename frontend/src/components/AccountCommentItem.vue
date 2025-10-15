@@ -50,12 +50,13 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import createAuthInterceptor from '@utils/axiosInterceptor.js'
+import { getConfig } from '@utils/config'
 
 const { t } = useI18n()
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+  baseURL: getConfig('VITE_API_BASE_URL'),
+  timeout: parseInt(getConfig('VITE_API_TIMEOUT')),
 })
 
 createAuthInterceptor(apiClient)
@@ -88,7 +89,7 @@ const saveEdit = async () => {
   if (!editText.value.trim()) return
 
   try {
-    await apiClient.put(`${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`, {
+    await apiClient.put(`${getConfig('VITE_API_CONTENT_COMMENTS')}/${props.comment.id}`, {
       new_text: editText.value,
     })
     showEditForm.value = false
@@ -105,7 +106,7 @@ const cancelEdit = () => {
 
 const performDelete = async () => {
   try {
-    await apiClient.delete(`${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`)
+    await apiClient.delete(`${getConfig('VITE_API_CONTENT_COMMENTS')}/${props.comment.id}`)
     emit('delete', props.comment.id)
     showDeleteConfirm.value = false
   } catch (err) {

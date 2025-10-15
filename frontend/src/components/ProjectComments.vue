@@ -39,10 +39,11 @@ import { useAuthStore } from '@stores/authStore.js'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
+import { getConfig } from '@utils/config'
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+  baseURL: getConfig('VITE_API_BASE_URL'),
+  timeout: parseInt(getConfig('VITE_API_TIMEOUT')),
 })
 
 createAuthInterceptor(apiClient)
@@ -62,7 +63,7 @@ const fetchComments = async (projectId) => {
   try {
     loading.value = true
     const response = await apiClient.get(
-      `${import.meta.env.VITE_API_CONTENT_COMMENTS}/project/${projectId}`,
+      `${getConfig('VITE_API_CONTENT_COMMENTS')}/project/${projectId}`,
     )
     comments.value = response.data.comments || []
   } catch (err) {
@@ -88,7 +89,7 @@ const addComment = async () => {
   if (!newComment.value.trim()) return
 
   try {
-    const response = await apiClient.post(import.meta.env.VITE_API_CONTENT_COMMENTS, {
+    const response = await apiClient.post(getConfig('VITE_API_CONTENT_COMMENTS'), {
       project_id: props.projectId,
       comment_text: newComment.value,
     })
@@ -102,7 +103,7 @@ const addComment = async () => {
 
 const handleReply = async (parentComment, replyText) => {
   try {
-    const response = await apiClient.post(import.meta.env.VITE_API_CONTENT_COMMENTS, {
+    const response = await apiClient.post(getConfig('VITE_API_CONTENT_COMMENTS'), {
       project_id: props.projectId,
       comment_text: replyText,
       parent_comment_id: parentComment.id,

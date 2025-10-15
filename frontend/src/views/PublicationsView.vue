@@ -30,6 +30,7 @@ import axios from 'axios'
 import { useI18n } from 'vue-i18n'
 import { useSortStore } from '@stores/sortStore.js'
 import { useLanguageStore } from '@stores/languageStore.js'
+import { getConfig } from '@utils/config'
 
 const { t } = useI18n()
 const sortStore = useSortStore()
@@ -39,14 +40,14 @@ const articles = ref([])
 const loading = ref(false)
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+  baseURL: getConfig('VITE_API_BASE_URL'),
+  timeout: parseInt(getConfig('VITE_API_TIMEOUT')),
 })
 
 const fetchPublications = async () => {
   try {
     loading.value = true
-    const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_PUBLICATIONS, {
+    const response = await apiClient.get(getConfig('VITE_API_CONTENT_PUBLICATIONS'), {
       params: {
         lang: languageStore.language,
         sort: sortStore.selectedOption,
