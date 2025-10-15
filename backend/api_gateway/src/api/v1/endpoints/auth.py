@@ -136,26 +136,18 @@ async def register(response: Response, register_data: RegisterRequest):
 @router.post("/refresh", response_model=RefreshResponse)
 async def refresh_token(
     response: Response,
-    current_user: dict = Depends(get_current_user),
-    refresh_data: RefreshRequest = None,
-    refresh_token: str = Cookie(None),
+    refresh_token: str = Cookie(None, alias=settings.COOKIE_KEY),
 ):
     try:
-        logger.info(f"Token refresh requested by: {current_user['email']}")
-
-        token_to_refresh = refresh_token or (
-            refresh_data.refresh_token if refresh_data else None
-        )
-
-        if not token_to_refresh:
-            logger.warning(
-                f"Refresh token missing for user: {current_user['email']}"
-            )
+        if not refresh_token:
+            logger.warning("Refresh token missing in cookie")
             raise HTTPException(
                 status_code=401, detail="Refresh token required"
             )
 
-        grpc_response = auth_client.refresh_token(token_to_refresh)
+        logger.info("Token refresh requested")
+
+        grpc_response = auth_client.refresh_token(refresh_token)
 
         response.set_cookie(
             key=settings.COOKIE_KEY,
@@ -167,9 +159,7 @@ async def refresh_token(
             path=settings.COOKIE_PATH,
         )
 
-        logger.info(
-            f"Tokens refreshed successfully for: {current_user['email']}"
-        )
+        logger.info("Tokens refreshed successfully")
 
         return RefreshResponse(
             access_token=grpc_response.access_token,
@@ -178,9 +168,7 @@ async def refresh_token(
         )
     except RpcError as e:
         if e.code() == grpc.StatusCode.UNAUTHENTICATED:
-            logger.warning(
-                f"Token refresh failed for {current_user['email']}: Invalid refresh token"
-            )
+            logger.warning("Token refresh failed: Invalid refresh token")
             raise HTTPException(
                 status_code=401, detail="Invalid refresh token"
             )

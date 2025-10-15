@@ -4,11 +4,11 @@
     :class="{ 'HamburgerMenu--active': isMenuOpen }"
     @click="toggleMenu"
     aria-label="Меню"
-    aria-expanded="isMenuOpen"
+    :aria-expanded="isMenuOpen"
   >
-    <span class="HamburgerMenu__line" :class="{ 'HamburgerMenu__line--active': isOpen }"></span>
-    <span class="HamburgerMenu__line" :class="{ 'HamburgerMenu__line--active': isOpen }"></span>
-    <span class="HamburgerMenu__line" :class="{ 'HamburgerMenu__line--active': isOpen }"></span>
+    <span class="HamburgerMenu__line" :class="{ 'HamburgerMenu__line--active': isMenuOpen }"></span>
+    <span class="HamburgerMenu__line" :class="{ 'HamburgerMenu__line--active': isMenuOpen }"></span>
+    <span class="HamburgerMenu__line" :class="{ 'HamburgerMenu__line--active': isMenuOpen }"></span>
   </button>
 
   <div v-if="isMenuOpen" class="menu-overlay" @click="closeMenu"></div>

@@ -46,7 +46,7 @@
         draggable="false"
         ref="mapImageRef"
       />
-      <MapMarkers class="map-markers" @marker-hover="handleHover" @marker-click="handleClick" />
+      <MapMarkers class="map-markers" @marker-click="handleClick" />
     </div>
 
     <div class="map-controls">

@@ -43,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, markRaw } from 'vue'
 import Multiselect from 'vue-multiselect'
 import { useLanguageStore } from '@stores/languageStore.js'
 import { useI18n } from 'vue-i18n'
@@ -60,12 +60,12 @@ const languageOptions = ref([
   {
     code: 'en',
     name: 'English',
-    img: UKFlagIcon,
+    img: markRaw(UKFlagIcon),
   },
   {
     code: 'ru',
     name: 'Русский',
-    img: RussianFlagIcon,
+    img: markRaw(RussianFlagIcon),
   },
 ])
 

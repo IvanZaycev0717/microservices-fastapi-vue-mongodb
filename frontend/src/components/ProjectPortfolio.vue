@@ -195,7 +195,7 @@ const closeModal = () => {
   max-width: 800px;
   width: 90%;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow-y: hidden;
   position: relative;
 }
 
@@ -249,6 +249,7 @@ img[lazy='error'] {
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   height: 100%;
+  
 }
 
 .project-side {
@@ -274,6 +275,7 @@ img[lazy='error'] {
 .comments-section {
   padding: 0.5rem;
   height: 100%;
+  width: 100%;
 }
 
 .comments-section h4 {
@@ -297,6 +299,5 @@ img[lazy='error'] {
 
 .comments-list {
   max-height: 400px;
-  overflow-y: auto;
 }
 </style>

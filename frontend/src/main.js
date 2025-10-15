@@ -19,6 +19,21 @@ import cardPlaceholder from '@assets/placeholders/card-placeholder.webp'
 
 import '@utils/axiosInterceptor.js'
 
+// Добавляем passive event listeners
+const originalAddEventListener = EventTarget.prototype.addEventListener
+EventTarget.prototype.addEventListener = function(type, listener, options) {
+  const scrollBlockingEvents = ['wheel', 'touchstart', 'touchmove', 'touchend']
+  
+  if (scrollBlockingEvents.includes(type)) {
+    if (typeof options === 'object') {
+      options = { ...options, passive: true }
+    } else if (options === undefined || typeof options === 'boolean') {
+      options = { passive: true }
+    }
+  }
+  
+  originalAddEventListener.call(this, type, listener, options)
+}
 
 const i18n = createI18n({
   legacy: false,
@@ -28,7 +43,23 @@ const i18n = createI18n({
   messages: { en, ru },
 })
 
+const pinia = createPinia()
 const app = createApp(App)
+
+// Автоматически обновляем токен при загрузке приложения
+app.use(pinia)
+import { useAuthStore } from '@stores/authStore.js'
+const authStore = useAuthStore()
+
+// Если нет access токена, пробуем обновить его
+if (!authStore.accessToken) {
+  authStore.refreshToken().then(success => {
+    if (success) {
+      console.log('Access token refreshed on app start')
+    }
+  })
+}
+
 app.component('EasyDataTable', Vue3EasyDataTable)
 app.use(VueEasyLightbox)
 app.use(VueLazyLoad, {
@@ -38,7 +69,6 @@ app.use(VueLazyLoad, {
   attempt: 2,
   throttleWait: 300,
 })
-app.use(createPinia())
 app.use(i18n)
 app.use(toast)
 app.use(router)

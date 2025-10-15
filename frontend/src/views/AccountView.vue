@@ -20,6 +20,7 @@ import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@stores/authStore.js'
 import axios from 'axios'
+import createAuthInterceptor from '@utils/axiosInterceptor.js'
 import AccountCommentItem from '@components/AccountCommentItem.vue'
 
 const { t } = useI18n()
@@ -30,17 +31,16 @@ const apiClient = axios.create({
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
 })
 
+// Применяем interceptor к нашему экземпляру axios
+createAuthInterceptor(apiClient)
+
 const userComments = ref([])
 const loading = ref(false)
 
 const fetchUserComments = async () => {
   try {
     loading.value = true
-    const response = await apiClient.get(`${import.meta.env.VITE_API_CONTENT_COMMENTS}/my`, {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`
-      }
-    })
+    const response = await apiClient.get(`${import.meta.env.VITE_API_CONTENT_COMMENTS}/my`)
     userComments.value = response.data.comments || []
   } catch (err) {
     console.error('Ошибка загрузки комментариев:', err)
@@ -71,6 +71,7 @@ onMounted(() => {
 <style scoped>
 .AccountView {
   padding: 1rem;
+  overflow: auto;
 }
 
 .comments-list {

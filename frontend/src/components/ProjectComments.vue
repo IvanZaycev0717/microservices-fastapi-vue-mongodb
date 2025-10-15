@@ -34,6 +34,7 @@ import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import CommentItem from '@components/CommentItem.vue'
 import axios from 'axios'
+import createAuthInterceptor from '@utils/axiosInterceptor.js'
 import { useAuthStore } from '@stores/authStore.js'
 
 const { t } = useI18n()
@@ -43,6 +44,9 @@ const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
 })
+
+// Применяем interceptor к нашему экземпляру axios
+createAuthInterceptor(apiClient)
 
 const props = defineProps({
   projectId: {
@@ -83,13 +87,16 @@ const getReplies = (parentId) =>
 
 const addComment = async () => {
   if (!newComment.value.trim()) return
-
+  
   try {
-    const response = await apiClient.post(import.meta.env.VITE_API_CONTENT_COMMENTS, {
-      project_id: props.projectId,
-      comment_text: newComment.value,
-    })
-
+    const response = await apiClient.post(
+      import.meta.env.VITE_API_CONTENT_COMMENTS,
+      {
+        project_id: props.projectId,
+        comment_text: newComment.value
+      }
+    )
+    
     await fetchComments(props.projectId)
     newComment.value = ''
   } catch (err) {
@@ -99,27 +106,46 @@ const addComment = async () => {
 
 const handleReply = async (parentComment, replyText) => {
   try {
-    const response = await apiClient.post(import.meta.env.VITE_API_CONTENT_COMMENTS, {
+    const response = await apiClient.post(
+      import.meta.env.VITE_API_CONTENT_COMMENTS,
+      {
+        project_id: props.projectId,
+        comment_text: replyText,
+        parent_comment_id: parentComment.id
+      }
+    )
+    
+    const newComment = {
+      id: response.data.comment_id,
       project_id: props.projectId,
+      author_id: authStore.user?.id,
+      author_email: authStore.user?.email,
       comment_text: replyText,
+      created_at: new Date().toISOString(),
       parent_comment_id: parentComment.id,
-    })
-
-    await fetchComments(props.projectId)
+      likes: 0,
+      dislikes: 0
+    }
+    
+    comments.value.push(newComment)
+    
   } catch (err) {
     console.error('Ошибка добавления ответа:', err)
   }
 }
 
-const handleUpdate = async (commentId, newText) => {
-  try {
-    const comment = comments.value.find(c => c.id === commentId)
-    if (comment) {
-      comment.comment_text = newText
+const handleUpdate = (commentId, newText) => {
+  const updateNested = (comments) => {
+    for (let i = 0; i < comments.length; i++) {
+      if (comments[i].id === commentId) {
+        comments[i].comment_text = newText
+        return true
+      }
     }
-  } catch (err) {
-    console.error('Ошибка обновления комментария:', err)
+    return false
   }
+  
+  updateNested(comments.value)
 }
 
 const handleDelete = async (commentId) => {
@@ -164,7 +190,7 @@ watch(
   margin-top: 0.5rem;
   padding: 0.5rem 1rem;
   background: var(--button-background-color, #007bff);
-  color: var(--text-color);
+  color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;

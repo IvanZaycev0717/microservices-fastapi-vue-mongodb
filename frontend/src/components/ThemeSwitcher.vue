@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue'
+import { ref, computed, inject, markRaw } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Multiselect from 'vue-multiselect'
 import DarkThemeIcon from '@icons/DarkThemeIcon.vue'
@@ -65,12 +65,12 @@ const themeOptions = ref([
   {
     code: 'light',
     name: 'Light',
-    img: LightThemeIcon,
+    img: markRaw(LightThemeIcon),
   },
   {
     code: 'dark',
     name: 'Dark',
-    img: DarkThemeIcon,
+    img: markRaw(DarkThemeIcon),
   },
 ])
 

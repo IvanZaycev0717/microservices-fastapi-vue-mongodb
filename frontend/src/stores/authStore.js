@@ -9,6 +9,7 @@ export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(localStorage.getItem('access_token'))
   const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
 
+  // Автоматическая проверка при инициализации
   if (accessToken.value) {
     isAuthenticated.value = true
   }
@@ -32,7 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
   const checkAuth = async () => {
     try {
       isLoading.value = true
-      
+
       if (!accessToken.value) {
         isAuthenticated.value = false
         return false
@@ -40,20 +41,20 @@ export const useAuthStore = defineStore('auth', () => {
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_VERIFY}`,
-        { token: accessToken.value }
+        { token: accessToken.value },
       )
 
       if (response.data.valid) {
         isAuthenticated.value = true
         return true
       } else {
-        clearAuthData()
-        return false
+        // Если токен невалидный, пробуем обновить
+        return await refreshToken()
       }
     } catch (err) {
       console.error('Auth check failed:', err)
-      clearAuthData()
-      return false
+      // При ошибке пробуем обновить токен
+      return await refreshToken()
     } finally {
       isLoading.value = false
     }
@@ -67,7 +68,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_LOGIN}`,
         credentials,
-        { withCredentials: true }
+        { withCredentials: true },
       )
 
       setAuthData(response.data.access_token, response.data.user)
@@ -88,7 +89,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_REGISTER}`,
         userData,
-        { withCredentials: true }
+        { withCredentials: true },
       )
 
       setAuthData(response.data.access_token, response.data.user)
@@ -104,16 +105,16 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = async () => {
     try {
       isLoading.value = true
-      
+
       await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_LOGOUT}`,
         {},
-        { 
+        {
           withCredentials: true,
           headers: {
-            Authorization: `Bearer ${accessToken.value}`
-          }
-        }
+            Authorization: `Bearer ${accessToken.value}`,
+          },
+        },
       )
     } catch (err) {
       console.error('Logout error:', err)
@@ -125,17 +126,29 @@ export const useAuthStore = defineStore('auth', () => {
 
   const refreshToken = async () => {
     try {
+      console.log('Attempting token refresh...')
+
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_REFRESH}`,
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: {
+            Authorization: undefined,
+          },
+        },
       )
 
-      accessToken.value = response.data.access_token
-      localStorage.setItem('access_token', response.data.access_token)
+      console.log('Refresh successful:', response.data)
+      setAuthData(response.data.access_token, user.value)
       return true
     } catch (err) {
       console.error('Token refresh failed:', err)
+      console.error('Error details:', {
+        status: err.response?.status,
+        data: err.response?.data,
+        url: err.config?.url,
+      })
       clearAuthData()
       return false
     }
@@ -151,6 +164,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
-    refreshToken
+    refreshToken,
   }
 })

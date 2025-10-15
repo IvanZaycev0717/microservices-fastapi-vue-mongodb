@@ -113,5 +113,26 @@
     "title": "My Account",
     "description": "Manage your comments"
   },
+  "Comment": {
+    "deleteConfirm": "Delete comment?",
+    "delete": "Delete",
+    "cancel": "Cancel"
+  },
+  "ThemeSelector": {
+  "Label": "Select theme",
+  "Description": "Choose between light and dark theme",
+  "Options": {
+    "light": "Light",
+    "dark": "Dark"
+  }
+},
+"LanguageSelector": {
+  "Label": "Select language", 
+  "Description": "Choose interface language",
+  "Options": {
+    "en": "English",
+    "ru": "Russian"
+  }
+},
   "removed": "This feature is excluded from the public release but available in the project's GitHub repo"
 }

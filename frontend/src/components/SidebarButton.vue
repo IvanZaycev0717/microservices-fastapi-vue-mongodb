@@ -17,6 +17,7 @@
 <script setup>
 const props = defineProps({
   disabled: Boolean,
+  active: Boolean
 })
 
 const emit = defineEmits(['click'])

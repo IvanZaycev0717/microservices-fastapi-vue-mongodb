@@ -10,15 +10,28 @@
     </div>
 
     <div class="comment-actions" v-if="authStore.isAuthenticated">
-      <button @click="toggleReply" class="action-btn">
+      <button v-if="!showDeleteConfirm" @click="toggleReply" class="action-btn">
         {{ t('ProjectComments.reply') }}
       </button>
-      <button v-if="isAuthor" @click="toggleEdit" class="action-btn">
+      <button v-if="!showDeleteConfirm && isAuthor" @click="toggleEdit" class="action-btn">
         {{ t('ProjectComments.edit') }}
       </button>
-      <button v-if="isAuthor" @click="deleteComment" class="action-btn delete">
+      
+      <!-- Кнопка удаления -->
+      <button v-if="!showDeleteConfirm && isAuthor" @click="showDeleteConfirm = true" class="action-btn delete">
         {{ t('ProjectComments.delete') }}
       </button>
+
+      <!-- Подтверждение удаления -->
+      <div v-if="showDeleteConfirm" class="delete-confirm">
+        <span class="confirm-text">{{ t('Comment.deleteConfirm') }}</span>
+        <button @click="performDelete" class="confirm-btn delete">
+          {{ t('Comment.delete') }}
+        </button>
+        <button @click="showDeleteConfirm = false" class="confirm-btn cancel">
+          {{ t('Comment.cancel') }}
+        </button>
+      </div>
     </div>
 
     <!-- Форма ответа -->
@@ -56,6 +69,7 @@
         :replies="getReplies(reply.id)"
         :depth="depth + 1"
         @reply="$emit('reply', $event)"
+        @delete="$emit('delete', $event)"
       />
     </div>
   </div>
@@ -66,6 +80,7 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@stores/authStore.js'
 import axios from 'axios'
+import createAuthInterceptor from '@utils/axiosInterceptor.js'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -74,6 +89,9 @@ const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
 })
+
+// Применяем interceptor к нашему экземпляру axios
+createAuthInterceptor(apiClient)
 
 const props = defineProps({
   comment: Object,
@@ -84,11 +102,12 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['reply', 'update', 'delete'])
+const emit = defineEmits(['reply', 'delete'])
 
 // Локальные состояния
 const showReplyForm = ref(false)
 const showEditForm = ref(false)
+const showDeleteConfirm = ref(false)
 const replyText = ref('')
 const editText = ref(props.comment.comment_text)
 
@@ -141,8 +160,9 @@ const saveEdit = async () => {
         new_text: editText.value
       }
     )
+    // Обновляем локально в компоненте
+    props.comment.comment_text = editText.value
     showEditForm.value = false
-    emit('update', props.comment.id, editText.value)
   } catch (err) {
     console.error('Ошибка редактирования комментария:', err)
   }
@@ -153,16 +173,16 @@ const cancelEdit = () => {
   showEditForm.value = false
 }
 
-const deleteComment = async () => {
-  if (!confirm('Delete this comment?')) return
-  
+const performDelete = async () => {
   try {
     await apiClient.delete(
       `${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`
     )
     emit('delete', props.comment.id)
+    showDeleteConfirm.value = false
   } catch (err) {
     console.error('Ошибка удаления комментария:', err)
+    showDeleteConfirm.value = false
   }
 }
 
@@ -221,6 +241,7 @@ const getReplies = (parentId) => {
   color: var(--text-color, #007bff);
   cursor: pointer;
   font-size: 0.75rem;
+  margin-right: 0.5rem;
 }
 
 .action-btn:hover {
@@ -229,6 +250,36 @@ const getReplies = (parentId) => {
 
 .action-btn.delete {
   color: #dc3545;
+}
+
+.delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.confirm-text {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.confirm-btn {
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.confirm-btn.delete {
+  background: #dc3545;
+  color: white;
+}
+
+.confirm-btn.cancel {
+  background: #6c757d;
+  color: white;
 }
 
 .reply-form,
@@ -262,7 +313,7 @@ const getReplies = (parentId) => {
 }
 
 .comment-submit-btn {
-  background: var(--button-background-color, red) !important;
+  background: var(--button-background-color, #007bff);
   color: white;
 }
 
