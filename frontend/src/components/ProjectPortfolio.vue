@@ -15,7 +15,7 @@
     <div v-if="selectedProject" class="modal" @click.self="closeModal">
       <div class="modal-content">
         <button class="close-btn" @click="closeModal">×</button>
-        
+
         <div class="modal-layout">
           <!-- Левая часть - проект -->
           <div class="project-side">
@@ -31,8 +31,7 @@
               {{ t('ProjectPortfolio.look') }}
             </a>
           </div>
-          
-          <!-- Правая часть - комментарии -->
+
           <div class="comments-side">
             <ProjectComments :projectId="selectedProject.id" />
           </div>
@@ -249,7 +248,6 @@ img[lazy='error'] {
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   height: 100%;
-  
 }
 
 .project-side {

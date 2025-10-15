@@ -181,7 +181,6 @@ import LoginIcon from '@icons/LoginIcon.vue'
 import LogoutIcon from '@icons/LogoutIcon.vue'
 import { useAuthStore } from '@stores/authStore.js'
 
-
 const { t, locale } = useI18n()
 const authError = ref('')
 const authStore = useAuthStore()
@@ -301,8 +300,16 @@ const handleRegSubmit = regForm.handleSubmit((values) => {
   handleRegister(values.email, values.password)
 })
 
-const handleResetSubmit = resetForm.handleSubmit((values) => {
-  switchToEmailSentModal()
+const handleResetSubmit = resetForm.handleSubmit(async (values) => {
+  try {
+    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/forgot-password`, {
+      email: values.email,
+    })
+    switchToEmailSentModal()
+  } catch (err) {
+    console.error('Ошибка восстановления пароля:', err)
+    switchToEmailSentModal()
+  }
 })
 
 /* Динамическая смена языка в модальных окнах */
@@ -315,7 +322,7 @@ watch(locale, () => {
 const handleLogin = async (email, password) => {
   try {
     const result = await authStore.login({ email, password })
-    
+
     if (result.success) {
       toast.success(t('auth.successful'))
       closeModals()
@@ -336,12 +343,12 @@ const handleLogout = async () => {
 
 const handleRegister = async (email, password) => {
   try {
-    const result = await authStore.register({ 
-      email, 
+    const result = await authStore.register({
+      email,
       password,
-      roles: ["user"]
+      roles: ['user'],
     })
-    
+
     if (result.success) {
       toast.success(t('auth.successful'))
       closeModals()

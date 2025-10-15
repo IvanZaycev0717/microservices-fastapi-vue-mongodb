@@ -45,7 +45,6 @@ const apiClient = axios.create({
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
 })
 
-// Применяем interceptor к нашему экземпляру axios
 createAuthInterceptor(apiClient)
 
 const props = defineProps({
@@ -87,16 +86,13 @@ const getReplies = (parentId) =>
 
 const addComment = async () => {
   if (!newComment.value.trim()) return
-  
+
   try {
-    const response = await apiClient.post(
-      import.meta.env.VITE_API_CONTENT_COMMENTS,
-      {
-        project_id: props.projectId,
-        comment_text: newComment.value
-      }
-    )
-    
+    const response = await apiClient.post(import.meta.env.VITE_API_CONTENT_COMMENTS, {
+      project_id: props.projectId,
+      comment_text: newComment.value,
+    })
+
     await fetchComments(props.projectId)
     newComment.value = ''
   } catch (err) {
@@ -106,15 +102,12 @@ const addComment = async () => {
 
 const handleReply = async (parentComment, replyText) => {
   try {
-    const response = await apiClient.post(
-      import.meta.env.VITE_API_CONTENT_COMMENTS,
-      {
-        project_id: props.projectId,
-        comment_text: replyText,
-        parent_comment_id: parentComment.id
-      }
-    )
-    
+    const response = await apiClient.post(import.meta.env.VITE_API_CONTENT_COMMENTS, {
+      project_id: props.projectId,
+      comment_text: replyText,
+      parent_comment_id: parentComment.id,
+    })
+
     const newComment = {
       id: response.data.comment_id,
       project_id: props.projectId,
@@ -124,11 +117,10 @@ const handleReply = async (parentComment, replyText) => {
       created_at: new Date().toISOString(),
       parent_comment_id: parentComment.id,
       likes: 0,
-      dislikes: 0
+      dislikes: 0,
     }
-    
+
     comments.value.push(newComment)
-    
   } catch (err) {
     console.error('Ошибка добавления ответа:', err)
   }
@@ -144,13 +136,13 @@ const handleUpdate = (commentId, newText) => {
     }
     return false
   }
-  
+
   updateNested(comments.value)
 }
 
 const handleDelete = async (commentId) => {
   try {
-    comments.value = comments.value.filter(c => c.id !== commentId)
+    comments.value = comments.value.filter((c) => c.id !== commentId)
   } catch (err) {
     console.error('Ошибка удаления комментария:', err)
   }

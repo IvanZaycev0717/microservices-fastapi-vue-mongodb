@@ -44,7 +44,12 @@ const router = createRouter({
       path: '/account',
       name: 'account',
       component: () => import('@views/AccountView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/reset_password',
+      name: 'reset_password',
+      component: () => import('@views/ResetPasswordView.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
@@ -67,7 +72,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  
+
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/')
   } else {

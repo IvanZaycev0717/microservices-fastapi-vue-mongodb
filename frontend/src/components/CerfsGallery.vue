@@ -42,7 +42,7 @@ const fetchCertificates = async (sortOption) => {
   try {
     loading.value = true
     const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_CERTIFICATES, {
-      params: { sort: sortOption }
+      params: { sort: sortOption },
     })
     images.value = response.data.certificates
   } catch (err) {
@@ -67,10 +67,12 @@ onMounted(() => {
   fetchCertificates(sortStore.selectedOption)
 })
 
-
-watch(() => sortStore.selectedOption, (newSort) => {
-  fetchCertificates(newSort)
-})
+watch(
+  () => sortStore.selectedOption,
+  (newSort) => {
+    fetchCertificates(newSort)
+  },
+)
 </script>
 
 <style scoped>

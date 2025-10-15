@@ -24,7 +24,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
@@ -50,8 +49,8 @@ const fetchPublications = async () => {
     const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_PUBLICATIONS, {
       params: {
         lang: languageStore.language,
-        sort: sortStore.selectedOption
-      }
+        sort: sortStore.selectedOption,
+      },
     })
     articles.value = response.data.publications || []
   } catch (err) {
@@ -78,9 +77,9 @@ const formatDate = (dateString) => {
 }
 
 const formattedArticles = computed(() => {
-  return (articles.value || []).map(article => ({
+  return (articles.value || []).map((article) => ({
     ...article,
-    date: formatDate(article.date)
+    date: formatDate(article.date),
   }))
 })
 

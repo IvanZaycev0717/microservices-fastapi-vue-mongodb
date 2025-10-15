@@ -67,15 +67,6 @@ import { useSkills } from '@composables/useSkills.js'
 
 const [skillsData, fetchTechData, loading, error] = useSkills()
 
-const loadTechData = async () => {
-  try {
-    const response = await fetchTechData()
-    console.log('Данные с бекенда:', response.data)
-  } catch (err) {
-    console.error('Ошибка при загрузке данных:', err)
-  }
-}
-
 const mapImage = mapImageUrl
 const scale = ref(1)
 const position = ref({ x: 0, y: 0 })

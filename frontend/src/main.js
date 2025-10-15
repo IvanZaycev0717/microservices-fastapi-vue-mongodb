@@ -19,11 +19,10 @@ import cardPlaceholder from '@assets/placeholders/card-placeholder.webp'
 
 import '@utils/axiosInterceptor.js'
 
-// Добавляем passive event listeners
 const originalAddEventListener = EventTarget.prototype.addEventListener
-EventTarget.prototype.addEventListener = function(type, listener, options) {
+EventTarget.prototype.addEventListener = function (type, listener, options) {
   const scrollBlockingEvents = ['wheel', 'touchstart', 'touchmove', 'touchend']
-  
+
   if (scrollBlockingEvents.includes(type)) {
     if (typeof options === 'object') {
       options = { ...options, passive: true }
@@ -31,7 +30,7 @@ EventTarget.prototype.addEventListener = function(type, listener, options) {
       options = { passive: true }
     }
   }
-  
+
   originalAddEventListener.call(this, type, listener, options)
 }
 
@@ -46,14 +45,12 @@ const i18n = createI18n({
 const pinia = createPinia()
 const app = createApp(App)
 
-// Автоматически обновляем токен при загрузке приложения
 app.use(pinia)
 import { useAuthStore } from '@stores/authStore.js'
 const authStore = useAuthStore()
 
-// Если нет access токена, пробуем обновить его
 if (!authStore.accessToken) {
-  authStore.refreshToken().then(success => {
+  authStore.refreshToken().then((success) => {
     if (success) {
       console.log('Access token refreshed on app start')
     }

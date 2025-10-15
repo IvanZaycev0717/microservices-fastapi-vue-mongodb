@@ -16,9 +16,13 @@
       <button v-if="!showDeleteConfirm && isAuthor" @click="toggleEdit" class="action-btn">
         {{ t('ProjectComments.edit') }}
       </button>
-      
+
       <!-- Кнопка удаления -->
-      <button v-if="!showDeleteConfirm && isAuthor" @click="showDeleteConfirm = true" class="action-btn delete">
+      <button
+        v-if="!showDeleteConfirm && isAuthor"
+        @click="showDeleteConfirm = true"
+        class="action-btn delete"
+      >
         {{ t('ProjectComments.delete') }}
       </button>
 
@@ -90,7 +94,6 @@ const apiClient = axios.create({
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
 })
 
-// Применяем interceptor к нашему экземпляру axios
 createAuthInterceptor(apiClient)
 
 const props = defineProps({
@@ -104,14 +107,12 @@ const props = defineProps({
 
 const emit = defineEmits(['reply', 'delete'])
 
-// Локальные состояния
 const showReplyForm = ref(false)
 const showEditForm = ref(false)
 const showDeleteConfirm = ref(false)
 const replyText = ref('')
 const editText = ref(props.comment.comment_text)
 
-// Проверка авторства
 const isAuthor = computed(() => props.comment.author_id === authStore.user?.id)
 
 const formatDate = (dateString) => {
@@ -152,15 +153,11 @@ const cancelReply = () => {
 
 const saveEdit = async () => {
   if (!editText.value.trim()) return
-  
+
   try {
-    await apiClient.put(
-      `${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`,
-      {
-        new_text: editText.value
-      }
-    )
-    // Обновляем локально в компоненте
+    await apiClient.put(`${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`, {
+      new_text: editText.value,
+    })
     props.comment.comment_text = editText.value
     showEditForm.value = false
   } catch (err) {
@@ -175,9 +172,7 @@ const cancelEdit = () => {
 
 const performDelete = async () => {
   try {
-    await apiClient.delete(
-      `${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`
-    )
+    await apiClient.delete(`${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`)
     emit('delete', props.comment.id)
     showDeleteConfirm.value = false
   } catch (err) {

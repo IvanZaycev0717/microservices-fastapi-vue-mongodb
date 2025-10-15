@@ -4,7 +4,7 @@ let isRefreshing = false
 let failedQueue = []
 
 const processQueue = (error, token = null) => {
-  failedQueue.forEach(prom => {
+  failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error)
     } else {
@@ -15,10 +15,8 @@ const processQueue = (error, token = null) => {
 }
 
 const createAuthInterceptor = (axiosInstance) => {
-  // Request interceptor
   axiosInstance.interceptors.request.use(
     (config) => {
-      // Не добавляем токен к refresh запросам
       if (!config.url.includes('/refresh')) {
         const token = localStorage.getItem('access_token')
         if (token) {
@@ -29,46 +27,46 @@ const createAuthInterceptor = (axiosInstance) => {
     },
     (error) => {
       return Promise.reject(error)
-    }
+    },
   )
 
-  // Response interceptor
   axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
       const originalRequest = error.config
 
-      // Пропускаем refresh запросы и уже повторенные запросы
-      if (error.response?.status === 401 && 
-          !originalRequest._retry && 
-          !originalRequest.url.includes('/refresh')) {
-        
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        !originalRequest.url.includes('/refresh')
+      ) {
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject })
-          }).then(token => {
-            originalRequest.headers.Authorization = `Bearer ${token}`
-            return axiosInstance(originalRequest)
-          }).catch(err => Promise.reject(err))
+          })
+            .then((token) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`
+              return axiosInstance(originalRequest)
+            })
+            .catch((err) => Promise.reject(err))
         }
 
         originalRequest._retry = true
         isRefreshing = true
 
         try {
-          // Используем чистый axios для refresh чтобы избежать цикла
           const refreshResponse = await axios.post(
             `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_API_AUTH_REFRESH}`,
             {},
-            { 
+            {
               withCredentials: true,
-              headers: { Authorization: undefined }
-            }
+              headers: { Authorization: undefined },
+            },
           )
 
           const newToken = refreshResponse.data.access_token
           localStorage.setItem('access_token', newToken)
-          
+
           processQueue(null, newToken)
           originalRequest.headers.Authorization = `Bearer ${newToken}`
           return axiosInstance(originalRequest)
@@ -84,7 +82,7 @@ const createAuthInterceptor = (axiosInstance) => {
       }
 
       return Promise.reject(error)
-    }
+    },
   )
 
   return axiosInstance

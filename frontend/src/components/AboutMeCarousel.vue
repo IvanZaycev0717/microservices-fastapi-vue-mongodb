@@ -27,13 +27,13 @@ const fetchAboutData = async () => {
 
     const response = await apiClient.get(import.meta.env.VITE_API_CONTENT_ABOUT, {
       params: {
-        lang: languageStore.language || 'en'
-      }
+        lang: languageStore.language || 'en',
+      },
     })
 
     cards.value = response.data.about.map((item) => ({
       ...item,
-      image: item.image_url
+      image: item.image_url,
     }))
   } catch (err) {
     if (err.response) {
@@ -54,9 +54,12 @@ onMounted(() => {
   fetchAboutData()
 })
 
-watch(() => languageStore.language, () => {
-  fetchAboutData()
-})
+watch(
+  () => languageStore.language,
+  () => {
+    fetchAboutData()
+  },
+)
 
 const carouselConfig = {
   itemsToShow: 1,

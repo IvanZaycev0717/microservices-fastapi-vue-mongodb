@@ -7,14 +7,27 @@
         <span class="date">{{ formatDate(comment.created_at) }}</span>
       </div>
     </div>
-    
+
     <div class="comment-actions">
-      <button @click="toggleEdit" class="action-btn">
+      <button v-if="!showDeleteConfirm" @click="toggleEdit" class="action-btn">
         {{ t('ProjectComments.edit') }}
       </button>
-      <button @click="deleteComment" class="action-btn delete">
+
+      <!-- Кнопка удаления -->
+      <button v-if="!showDeleteConfirm" @click="showDeleteConfirm = true" class="action-btn delete">
         {{ t('ProjectComments.delete') }}
       </button>
+
+      <!-- Подтверждение удаления -->
+      <div v-if="showDeleteConfirm" class="delete-confirm">
+        <span class="confirm-text">{{ t('Comment.deleteConfirm') }}</span>
+        <button @click="performDelete" class="confirm-btn delete">
+          {{ t('Comment.delete') }}
+        </button>
+        <button @click="showDeleteConfirm = false" class="confirm-btn cancel">
+          {{ t('Comment.cancel') }}
+        </button>
+      </div>
     </div>
 
     <!-- Форма редактирования -->
@@ -36,6 +49,7 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
+import createAuthInterceptor from '@utils/axiosInterceptor.js'
 
 const { t } = useI18n()
 
@@ -44,19 +58,25 @@ const apiClient = axios.create({
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
 })
 
+createAuthInterceptor(apiClient)
+
 const props = defineProps({
-  comment: Object
+  comment: Object,
 })
 
 const emit = defineEmits(['update', 'delete'])
 
 const showEditForm = ref(false)
+const showDeleteConfirm = ref(false)
 const editText = ref(props.comment.comment_text)
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString() + ' ' + 
+  return (
+    date.toLocaleDateString() +
+    ' ' +
     date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  )
 }
 
 const toggleEdit = () => {
@@ -66,14 +86,11 @@ const toggleEdit = () => {
 
 const saveEdit = async () => {
   if (!editText.value.trim()) return
-  
+
   try {
-    await apiClient.put(
-      `${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`,
-      {
-        new_text: editText.value
-      }
-    )
+    await apiClient.put(`${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`, {
+      new_text: editText.value,
+    })
     showEditForm.value = false
     emit('update', props.comment.id, editText.value)
   } catch (err) {
@@ -86,16 +103,14 @@ const cancelEdit = () => {
   showEditForm.value = false
 }
 
-const deleteComment = async () => {
-  if (!confirm('Delete this comment?')) return
-  
+const performDelete = async () => {
   try {
-    await apiClient.delete(
-      `${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`
-    )
+    await apiClient.delete(`${import.meta.env.VITE_API_CONTENT_COMMENTS}/${props.comment.id}`)
     emit('delete', props.comment.id)
+    showDeleteConfirm.value = false
   } catch (err) {
     console.error('Ошибка удаления комментария:', err)
+    showDeleteConfirm.value = false
   }
 }
 </script>
@@ -144,6 +159,36 @@ const deleteComment = async () => {
 
 .action-btn.delete {
   color: #dc3545;
+}
+
+.delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.confirm-text {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.confirm-btn {
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.confirm-btn.delete {
+  background: #dc3545;
+  color: white;
+}
+
+.confirm-btn.cancel {
+  background: #6c757d;
+  color: white;
 }
 
 .edit-form {

@@ -9,7 +9,6 @@ export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(localStorage.getItem('access_token'))
   const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
 
-  // Автоматическая проверка при инициализации
   if (accessToken.value) {
     isAuthenticated.value = true
   }
@@ -48,12 +47,10 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated.value = true
         return true
       } else {
-        // Если токен невалидный, пробуем обновить
         return await refreshToken()
       }
     } catch (err) {
       console.error('Auth check failed:', err)
-      // При ошибке пробуем обновить токен
       return await refreshToken()
     } finally {
       isLoading.value = false

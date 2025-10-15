@@ -63,8 +63,6 @@ onMounted(async () => {
       applyTheme(e.matches ? 'dark' : 'light')
     }
   })
-
-  // await authStore.checkAuth()
 })
 
 const toggleTheme = () => {

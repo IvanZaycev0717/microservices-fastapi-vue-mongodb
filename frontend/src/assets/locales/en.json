@@ -119,20 +119,34 @@
     "cancel": "Cancel"
   },
   "ThemeSelector": {
-  "Label": "Select theme",
-  "Description": "Choose between light and dark theme",
-  "Options": {
-    "light": "Light",
-    "dark": "Dark"
-  }
-},
-"LanguageSelector": {
-  "Label": "Select language", 
-  "Description": "Choose interface language",
-  "Options": {
-    "en": "English",
-    "ru": "Russian"
-  }
-},
+    "Label": "Select theme",
+    "Description": "Choose between light and dark theme",
+    "Options": {
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "LanguageSelector": {
+    "Label": "Select language",
+    "Description": "Choose interface language",
+    "Options": {
+      "en": "English",
+      "ru": "Russian"
+    }
+  },
+  "ResetPassword": {
+    "title": "Reset Password",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Repeat new password",
+    "submit": "Reset Password",
+    "success": "Password has been successfully reset",
+    "error": "Error resetting password",
+    "networkError": "Network error",
+    "invalidToken": "Invalid or missing reset token"
+  },
   "removed": "This feature is excluded from the public release but available in the project's GitHub repo"
 }

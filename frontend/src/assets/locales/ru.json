@@ -134,5 +134,19 @@
       "ru": "Русский"
     }
   },
+  "ResetPassword": {
+    "title": "Сброс пароля",
+    "email": "Email",
+    "emailPlaceholder": "Введите ваш email",
+    "newPassword": "Новый пароль",
+    "newPasswordPlaceholder": "Введите новый пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "confirmPasswordPlaceholder": "Повторите новый пароль",
+    "submit": "Сбросить пароль",
+    "success": "Пароль успешно изменен",
+    "error": "Ошибка при сбросе пароля",
+    "networkError": "Ошибка сети",
+    "invalidToken": "Неверная или отсутствующая ссылка для сброса"
+  },
   "removed": "Функция не включена в публичную сборку, но присутствует в исходном коде на GitHub"
 }

@@ -2,9 +2,9 @@
   <div class="AccountView">
     <h2>{{ t('AccountView.title') }}</h2>
     <p>{{ t('AccountView.description') }}</p>
-    
+
     <div class="comments-list">
-      <AccountCommentItem 
+      <AccountCommentItem
         v-for="comment in userComments"
         :key="comment.id"
         :comment="comment"
@@ -31,7 +31,6 @@ const apiClient = axios.create({
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
 })
 
-// Применяем interceptor к нашему экземпляру axios
 createAuthInterceptor(apiClient)
 
 const userComments = ref([])
@@ -51,14 +50,14 @@ const fetchUserComments = async () => {
 }
 
 const handleUpdate = (commentId, newText) => {
-  const comment = userComments.value.find(c => c.id === commentId)
+  const comment = userComments.value.find((c) => c.id === commentId)
   if (comment) {
     comment.comment_text = newText
   }
 }
 
 const handleDelete = (commentId) => {
-  userComments.value = userComments.value.filter(c => c.id !== commentId)
+  userComments.value = userComments.value.filter((c) => c.id !== commentId)
 }
 
 onMounted(() => {

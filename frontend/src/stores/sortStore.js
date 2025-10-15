@@ -22,6 +22,6 @@ export const useSortStore = defineStore('sort', () => {
 
   return {
     selectedOption,
-    setSortOption
+    setSortOption,
   }
 })

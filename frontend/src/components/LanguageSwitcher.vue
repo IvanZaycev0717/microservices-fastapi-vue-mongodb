@@ -1,6 +1,5 @@
 <template>
   <div class="language-selector">
-    <!-- Добавляем визуально скрытый, но доступный label -->
     <label for="language-select" class="visually-hidden">
       {{ t('LanguageSelector.Label') }}
     </label>
@@ -35,7 +34,6 @@
       </template>
     </multiselect>
 
-    <!-- Скрытое описание для скринридеров -->
     <span :id="languageDescriptionId" class="visually-hidden">
       {{ t('LanguageSelector.Description') }}
     </span>
@@ -53,7 +51,6 @@ import RussianFlagIcon from '@icons/RussianFlagIcon.vue'
 const { t } = useI18n()
 const languageStore = useLanguageStore()
 
-// Генерируем уникальный ID для описания
 const languageDescriptionId = ref('language-desc-' + Math.random().toString(36).substr(2, 9))
 
 const languageOptions = ref([
