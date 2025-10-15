@@ -57,6 +57,44 @@ async def get_all_comments():
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
+@router.get("/comments/my")
+async def get_my_comments(current_user: dict = Depends(get_current_user)):
+    try:
+        response = comments_client.get_comments_by_author_id(
+            current_user["user_id"]
+        )
+        return {
+            "comments": [
+                {
+                    "id": comment.id,
+                    "project_id": comment.project_id,
+                    "author_id": comment.author_id,
+                    "author_email": comment.author_email,
+                    "comment_text": comment.comment_text,
+                    "created_at": comment.created_at,
+                    "parent_comment_id": comment.parent_comment_id
+                    if comment.parent_comment_id
+                    else None,
+                    "likes": comment.likes,
+                    "dislikes": comment.dislikes,
+                }
+                for comment in response.comments
+            ]
+        }
+    except RpcError as e:
+        if e.code() == grpc.StatusCode.NOT_FOUND:
+            return {"comments": []}
+        logger.error(
+            f"gRPC error in get_my_comments: {e.code()} - {e.details()}"
+        )
+        raise HTTPException(
+            status_code=500, detail="Comments service unavailable"
+        )
+    except Exception as e:
+        logger.exception(f"Unexpected error in get_my_comments: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 @router.get("/comments/project/{project_id}")
 async def get_comments_by_project_id(project_id: str):
     try:
@@ -153,42 +191,7 @@ async def create_comment(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.get("/comments/my")
-async def get_my_comments(current_user: dict = Depends(get_current_user)):
-    try:
-        response = comments_client.get_comments_by_author_id(
-            current_user["user_id"]
-        )
-        return {
-            "comments": [
-                {
-                    "id": comment.id,
-                    "project_id": comment.project_id,
-                    "author_id": comment.author_id,
-                    "author_email": comment.author_email,
-                    "comment_text": comment.comment_text,
-                    "created_at": comment.created_at,
-                    "parent_comment_id": comment.parent_comment_id
-                    if comment.parent_comment_id
-                    else None,
-                    "likes": comment.likes,
-                    "dislikes": comment.dislikes,
-                }
-                for comment in response.comments
-            ]
-        }
-    except RpcError as e:
-        if e.code() == grpc.StatusCode.NOT_FOUND:
-            return {"comments": []}
-        logger.error(
-            f"gRPC error in get_my_comments: {e.code()} - {e.details()}"
-        )
-        raise HTTPException(
-            status_code=500, detail="Comments service unavailable"
-        )
-    except Exception as e:
-        logger.exception(f"Unexpected error in get_my_comments: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+
 
 
 @router.put("/comments/{comment_id}")
