@@ -31,12 +31,20 @@ class Settings(BaseSettings):
     COOKIE_SAMESITE: str = "lax"
     COOKIE_PATH: str = "/"
 
-    # Caching Redis
+    # Redis Settings
     REDIS_HOST: str
     REDIS_PORT: int
     REDIS_PASSWORD: str
-    REDIS_DB: int = 0
+
+    # Cache Settings
+    REDIS_CACHE_DB: int = 0
+    REDIS_RATE_LIMIT_DB: int = 1
     CACHE_TTL_MINUTES: int = 60  # 1 hour
+
+    # Rate Limiter Settings
+    REDIS_RATE_LIMIT_DB: int = 1
+    RATE_LIMIT_REQUESTS: int = 100
+    RATE_LIMIT_WINDOW_MINUTES: int = 60  # 1 hour
 
 
 settings = Settings()
