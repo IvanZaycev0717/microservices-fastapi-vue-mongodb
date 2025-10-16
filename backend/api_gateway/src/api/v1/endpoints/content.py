@@ -23,6 +23,25 @@ async def get_about(
     lang: str = Query(None),
     cache_service: CacheService = Depends(get_cache_service),
 ):
+    """
+    Retrieve about page content with optional language and caching.
+
+    Args:
+        lang (str, optional): Language code for localized content. Defaults to None.
+        cache_service (CacheService): Cache service dependency for response caching.
+
+    Returns:
+        dict: Dictionary containing about page content items.
+
+    Raises:
+        HTTPException:
+            - 500: If content service is unavailable or internal error occurs
+
+    Note:
+        - Uses response caching with dynamic key based on language parameter
+        - Returns empty list if no about content found for specified language
+        - Each about item contains image, title, and description
+    """
     try:
         response = content_client.get_about(lang)
         return {
@@ -54,6 +73,24 @@ async def get_about(
 @router.get("/tech")
 @cache_response(key_prefix="content")
 async def get_tech(cache_service: CacheService = Depends(get_cache_service)):
+    """
+    Retrieve technology stack information with caching.
+
+    Args:
+        cache_service (CacheService): Cache service dependency for response caching.
+
+    Returns:
+        dict: Dictionary containing technology kingdoms and their items.
+
+    Raises:
+        HTTPException:
+            - 500: If content service is unavailable or internal error occurs
+
+    Note:
+        - Uses response caching to improve performance for static technology data
+        - Organizes technologies into kingdoms/categories with associated items
+        - Returns hierarchical structure of technology stack
+    """
     try:
         response = content_client.get_tech()
         return {
@@ -83,6 +120,26 @@ async def get_projects(
     sort: str = Query("date_desc"),
     cache_service: CacheService = Depends(get_cache_service),
 ):
+    """
+    Retrieve projects list with language, sorting and caching.
+
+    Args:
+        lang (str): Language code for localized project content. Defaults to "en".
+        sort (str): Sorting criteria for projects. Defaults to "date_desc".
+        cache_service (CacheService): Cache service dependency for response caching.
+
+    Returns:
+        dict: Dictionary containing list of projects with details.
+
+    Raises:
+        HTTPException:
+            - 500: If content service is unavailable or internal error occurs
+
+    Note:
+        - Uses response caching with dynamic key based on language and sort parameters
+        - Returns comprehensive project data including thumbnails, descriptions and metadata
+        - Supports different sorting options and language localizations
+    """
     try:
         response = content_client.get_projects(lang, sort)
         return {
@@ -120,6 +177,25 @@ async def get_certificates(
     sort: str = Query("date_desc"),
     cache_service: CacheService = Depends(get_cache_service),
 ):
+    """
+    Retrieve certificates list with sorting and caching.
+
+    Args:
+        sort (str): Sorting criteria for certificates. Defaults to "date_desc".
+        cache_service (CacheService): Cache service dependency for response caching.
+
+    Returns:
+        dict: Dictionary containing list of certificates with details.
+
+    Raises:
+        HTTPException:
+            - 500: If content service is unavailable or internal error occurs
+
+    Note:
+        - Uses response caching with dynamic key based on sort parameter
+        - Returns certificate data including thumbnails, source images and metadata
+        - Supports different sorting options for certificate display
+    """
     try:
         response = content_client.get_certificates(sort)
         return {
@@ -156,6 +232,26 @@ async def get_publications(
     sort: str = Query("date_desc"),
     cache_service: CacheService = Depends(get_cache_service),
 ):
+    """
+    Retrieve publications list with language, sorting and caching.
+
+    Args:
+        lang (str): Language code for localized publication content. Defaults to "en".
+        sort (str): Sorting criteria for publications. Defaults to "date_desc".
+        cache_service (CacheService): Cache service dependency for response caching.
+
+    Returns:
+        dict: Dictionary containing list of publications with details.
+
+    Raises:
+        HTTPException:
+            - 500: If content service is unavailable or internal error occurs
+
+    Note:
+        - Uses response caching with dynamic key based on language and sort parameters
+        - Returns publication data including titles, site information and ratings
+        - Supports different sorting options and language localizations
+    """
     try:
         response = content_client.get_publications(lang, sort)
         return {

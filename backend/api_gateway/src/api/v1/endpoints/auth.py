@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response, Cookie, Depends
+from fastapi import APIRouter, HTTPException, Response, Cookie, Depends, status
 from grpc import RpcError
 import grpc
 
@@ -8,7 +8,6 @@ from settings import settings
 from api.v1.schemas.auth import (
     LoginRequest,
     RegisterRequest,
-    RefreshRequest,
     VerifyRequest,
     ForgotPasswordRequest,
     ResetPasswordRequest,
@@ -29,6 +28,27 @@ auth_client = AuthClient()
 
 @router.post("/login", response_model=LoginResponse)
 async def login(response: Response, login_data: LoginRequest):
+    """
+    Authenticate user and set refresh token as HTTP-only cookie.
+
+    Args:
+        response (Response): FastAPI response object for setting cookies.
+        login_data (LoginRequest): Login credentials containing email and password.
+
+    Returns:
+        LoginResponse: Authentication tokens and user information.
+
+    Raises:
+        HTTPException:
+            - 401: If authentication fails due to invalid credentials
+            - 403: If user account is banned
+            - 500: If auth service is unavailable or internal error occurs
+
+    Note:
+        - Sets refresh token as secure HTTP-only cookie for automatic token refresh
+        - Returns access token in response body for API authorization
+        - Converts gRPC errors to appropriate HTTP status codes
+    """
     try:
         grpc_response = auth_client.login(
             login_data.email, login_data.password
@@ -63,24 +83,53 @@ async def login(response: Response, login_data: LoginRequest):
             logger.warning(
                 f"Login failed for {login_data.email}: Invalid credentials"
             )
-            raise HTTPException(status_code=401, detail="Invalid credentials")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials",
+            )
         elif e.code() == grpc.StatusCode.PERMISSION_DENIED:
             logger.warning(f"Login failed for {login_data.email}: User banned")
             raise HTTPException(
-                status_code=403, detail="User account is banned"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User account is banned",
             )
         else:
             logger.error(f"gRPC error in login: {e.code()} - {e.details()}")
             raise HTTPException(
-                status_code=500, detail="Auth service unavailable"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Auth service unavailable",
             )
     except Exception as e:
         logger.exception(f"Unexpected error in login: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post("/register", response_model=RegisterResponse)
 async def register(response: Response, register_data: RegisterRequest):
+    """
+    Register new user and set refresh token as HTTP-only cookie.
+
+    Args:
+        response (Response): FastAPI response object for setting cookies.
+        register_data (RegisterRequest): Registration data containing email, password and optional roles.
+
+    Returns:
+        RegisterResponse: Authentication tokens and user information.
+
+    Raises:
+        HTTPException:
+            - 400: If email format is invalid
+            - 409: If user with email already exists
+            - 500: If auth service is unavailable or internal error occurs
+
+    Note:
+        - Sets refresh token as secure HTTP-only cookie for automatic token refresh
+        - Returns access token in response body for API authorization
+        - Converts gRPC errors to appropriate HTTP status codes
+    """
     try:
         grpc_response = auth_client.register(
             register_data.email, register_data.password, register_data.roles
@@ -116,21 +165,29 @@ async def register(response: Response, register_data: RegisterRequest):
                 f"Registration failed: User already exists - {register_data.email}"
             )
             raise HTTPException(
-                status_code=409, detail="User with this email already exists"
+                status_code=status.HTTP_409_CONFLICT,
+                detail="User with this email already exists",
             )
         elif e.code() == grpc.StatusCode.INVALID_ARGUMENT:
             logger.warning(
                 f"Registration failed: Invalid email - {register_data.email}"
             )
-            raise HTTPException(status_code=400, detail="Invalid email format")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid email format",
+            )
         else:
             logger.error(f"gRPC error in register: {e.code()} - {e.details()}")
             raise HTTPException(
-                status_code=500, detail="Auth service unavailable"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Auth service unavailable",
             )
     except Exception as e:
         logger.exception(f"Unexpected error in register: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post("/refresh", response_model=RefreshResponse)
@@ -138,11 +195,32 @@ async def refresh_token(
     response: Response,
     refresh_token: str = Cookie(None, alias=settings.COOKIE_KEY),
 ):
+    """
+    Refresh authentication tokens using refresh token from cookie.
+
+    Args:
+        response (Response): FastAPI response object for setting new cookies.
+        refresh_token (str): Refresh token extracted from HTTP-only cookie.
+
+    Returns:
+        RefreshResponse: New access token and token metadata.
+
+    Raises:
+        HTTPException:
+            - 401: If refresh token is missing or invalid
+            - 500: If auth service is unavailable or internal error occurs
+
+    Note:
+        - Extracts refresh token from HTTP-only cookie automatically
+        - Sets new refresh token cookie with updated expiration
+        - Returns new access token for continued API access
+    """
     try:
         if not refresh_token:
             logger.warning("Refresh token missing in cookie")
             raise HTTPException(
-                status_code=401, detail="Refresh token required"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token required",
             )
 
         logger.info("Token refresh requested")
@@ -170,18 +248,23 @@ async def refresh_token(
         if e.code() == grpc.StatusCode.UNAUTHENTICATED:
             logger.warning("Token refresh failed: Invalid refresh token")
             raise HTTPException(
-                status_code=401, detail="Invalid refresh token"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
             )
         else:
             logger.error(
                 f"gRPC error in refresh_token: {e.code()} - {e.details()}"
             )
             raise HTTPException(
-                status_code=500, detail="Auth service unavailable"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Auth service unavailable",
             )
     except Exception as e:
         logger.exception(f"Unexpected error in refresh_token: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post("/logout", response_model=LogoutResponse)
@@ -190,6 +273,27 @@ async def logout(
     current_user: dict = Depends(get_current_user),
     refresh_token: str = Cookie(None),
 ):
+    """
+    Logout user by invalidating refresh token and removing cookie.
+
+    Args:
+        response (Response): FastAPI response object for cookie deletion.
+        current_user (dict): Authenticated user data from dependency.
+        refresh_token (str): Refresh token extracted from HTTP-only cookie.
+
+    Returns:
+        LogoutResponse: Empty response confirming logout operation.
+
+    Raises:
+        HTTPException:
+            - 401: If user is not authenticated (handled by get_current_user dependency)
+
+    Note:
+        - Always deletes the refresh token cookie from client
+        - Attempts to invalidate refresh token on server if present
+        - Gracefully handles cases where refresh token is missing
+        - Returns success even if gRPC call fails to ensure cookie cleanup
+    """
     try:
         response.delete_cookie(
             key=settings.COOKIE_KEY,
@@ -217,6 +321,23 @@ async def logout(
 
 @router.post("/verify", response_model=VerifyResponse)
 async def verify_token(verify_data: VerifyRequest):
+    """
+    Verify the validity of an authentication token.
+
+    Args:
+        verify_data (VerifyRequest): Request containing token to verify.
+
+    Returns:
+        VerifyResponse: Token verification result with user claims if valid.
+
+    Raises:
+        HTTPException:
+            - 500: If auth service is unavailable or internal error occurs
+
+    Note:
+        - Returns detailed user information including roles if token is valid
+        - Suitable for token validation from external services or frontend
+    """
     try:
         grpc_response = auth_client.verify_token(verify_data.token)
         return VerifyResponse(
@@ -228,14 +349,37 @@ async def verify_token(verify_data: VerifyRequest):
         )
     except RpcError as e:
         logger.error(f"gRPC error in verify_token: {e.code()} - {e.details()}")
-        raise HTTPException(status_code=500, detail="Auth service unavailable")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Auth service unavailable",
+        )
     except Exception as e:
         logger.exception(f"Unexpected error in verify_token: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
 async def forgot_password(forgot_data: ForgotPasswordRequest):
+    """
+    Initiate password reset process for a user.
+
+    Args:
+        forgot_data (ForgotPasswordRequest): Request containing user's email.
+
+    Returns:
+        ForgotPasswordResponse: Password reset initiation result.
+
+    Raises:
+        HTTPException:
+            - 500: If auth service is unavailable or internal error occurs
+
+    Note:
+        - Typically sends password reset instructions to the user's email
+        - Returns success even for non-existent emails to prevent email enumeration
+    """
     try:
         grpc_response = auth_client.forgot_password(forgot_data.email)
         return ForgotPasswordResponse(
@@ -247,14 +391,38 @@ async def forgot_password(forgot_data: ForgotPasswordRequest):
         logger.error(
             f"gRPC error in forgot_password: {e.code()} - {e.details()}"
         )
-        raise HTTPException(status_code=500, detail="Auth service unavailable")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Auth service unavailable",
+        )
     except Exception as e:
         logger.exception(f"Unexpected error in forgot_password: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post("/reset-password", response_model=ResetPasswordResponse)
 async def reset_password(reset_data: ResetPasswordRequest):
+    """
+    Reset user password using valid reset token.
+
+    Args:
+        reset_data (ResetPasswordRequest): Request containing reset token, new password and email.
+
+    Returns:
+        ResetPasswordResponse: Password reset operation result.
+
+    Raises:
+        HTTPException:
+            - 500: If auth service is unavailable or internal error occurs
+
+    Note:
+        - Validates reset token and email combination for security
+        - Logs both successful and failed password reset attempts
+        - Updates user password if all validation checks pass
+    """
     try:
         logger.info(f"Password reset attempt for: {reset_data.email}")
 
@@ -277,7 +445,13 @@ async def reset_password(reset_data: ResetPasswordRequest):
         logger.error(
             f"gRPC error in reset_password: {e.code()} - {e.details()}"
         )
-        raise HTTPException(status_code=500, detail="Auth service unavailable")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Auth service unavailable",
+        )
     except Exception as e:
         logger.exception(f"Unexpected error in reset_password: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )

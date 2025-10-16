@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
+    # Logging
     LOG_LEVEL: str
 
     # Cookie Settings
@@ -39,12 +40,12 @@ class Settings(BaseSettings):
     # Cache Settings
     REDIS_CACHE_DB: int = 0
     REDIS_RATE_LIMIT_DB: int = 1
-    CACHE_TTL_MINUTES: int = 60  # 1 hour
+    CACHE_TTL_MINUTES: int = 60
 
     # Rate Limiter Settings
     REDIS_RATE_LIMIT_DB: int = 1
     RATE_LIMIT_REQUESTS: int = 100
-    RATE_LIMIT_WINDOW_MINUTES: int = 60  # 1 hour
+    RATE_LIMIT_WINDOW_MINUTES: int = 60
 
     # Kafka Settings
     KAFKA_BOOTSTRAP_SERVERS: str

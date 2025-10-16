@@ -1,4 +1,4 @@
-from fastapi import Request, Depends
+from fastapi import Request
 from redis import Redis
 from services.redis_connect_management import RedisDatabase
 

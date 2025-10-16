@@ -35,7 +35,6 @@ class KafkaCacheInvalidationConsumer:
 
         while asyncio.get_event_loop().time() - start_time < timeout:
             try:
-                # Run synchronous Kafka check in thread pool
                 success = await asyncio.get_event_loop().run_in_executor(
                     None, self._check_kafka_connection
                 )
@@ -47,7 +46,6 @@ class KafkaCacheInvalidationConsumer:
             except Exception as e:
                 logger.debug(f"Kafka check failed: {e}")
 
-            # Use async sleep to not block event loop
             await asyncio.sleep(2)
 
         logger.warning(
@@ -70,13 +68,11 @@ class KafkaCacheInvalidationConsumer:
                 }
             )
 
-            # Check if we can get metadata for the topic
             metadata = consumer.list_topics(
                 settings.KAFKA_CACHE_INVALIDATION_TOPIC, timeout=10
             )
             consumer.close()
 
-            # Check if topic exists in metadata
             topic_metadata = metadata.topics.get(
                 settings.KAFKA_CACHE_INVALIDATION_TOPIC
             )
@@ -139,7 +135,6 @@ class KafkaCacheInvalidationConsumer:
                             logger.error(f"Consumer error: {msg.error()}")
                             continue
 
-                    # Use the main event loop to put message in queue
                     asyncio.run_coroutine_threadsafe(
                         self.message_queue.put(msg), self.main_loop
                     )

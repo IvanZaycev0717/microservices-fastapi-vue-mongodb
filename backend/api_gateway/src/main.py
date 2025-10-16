@@ -52,6 +52,14 @@ app.include_router(api_router)
 
 @app.get("/health")
 async def health_check():
+    """
+    Health check endpoint for the service.
+
+    Returns:
+        dict: Dictionary containing service status information with:
+            - status (str): Service health status ("healthy")
+            - service (str): Service name from settings
+    """
     return {"status": "healthy", "service": settings.API_GATEWAY_NAME}
 
 

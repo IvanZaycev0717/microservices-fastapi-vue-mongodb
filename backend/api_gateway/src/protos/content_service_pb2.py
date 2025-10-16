@@ -4,65 +4,64 @@
 # source: content_service.proto
 # Protobuf Python Version: 6.31.1
 """Generated protocol buffer code."""
+
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
+
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC,
-    6,
-    31,
-    1,
-    '',
-    'content_service.proto'
+    _runtime_version.Domain.PUBLIC, 6, 31, 1, "", "content_service.proto"
 )
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-
-
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x63ontent_service.proto\x12\x07\x63ontent\"\x07\n\x05\x45mpty\"\x1c\n\x0c\x41\x62outRequest\x12\x0c\n\x04lang\x18\x01 \x01(\t\"2\n\rAboutResponse\x12!\n\x05\x61\x62out\x18\x01 \x03(\x0b\x32\x12.content.AboutItem\"N\n\tAboutItem\x12\n\n\x02id\x18\x01 \x01(\t\x12\x11\n\timage_url\x18\x02 \x01(\t\x12\r\n\x05title\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\"\r\n\x0bTechRequest\"6\n\x0cTechResponse\x12&\n\x08kingdoms\x18\x01 \x03(\x0b\x32\x14.content.TechKingdom\"-\n\x0bTechKingdom\x12\x0f\n\x07kingdom\x18\x01 \x01(\t\x12\r\n\x05items\x18\x02 \x03(\t\"-\n\x0fProjectsRequest\x12\x0c\n\x04lang\x18\x01 \x01(\t\x12\x0c\n\x04sort\x18\x02 \x01(\t\":\n\x10ProjectsResponse\x12&\n\x08projects\x18\x01 \x03(\x0b\x32\x14.content.ProjectItem\"\x8f\x01\n\x0bProjectItem\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x11\n\tthumbnail\x18\x03 \x01(\t\x12\r\n\x05image\x18\x04 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\x12\x0c\n\x04link\x18\x06 \x01(\t\x12\x0c\n\x04\x64\x61te\x18\x07 \x01(\t\x12\x12\n\npopularity\x18\x08 \x01(\x05\"#\n\x13\x43\x65rtificatesRequest\x12\x0c\n\x04sort\x18\x01 \x01(\t\"F\n\x14\x43\x65rtificatesResponse\x12.\n\x0c\x63\x65rtificates\x18\x01 \x03(\x0b\x32\x18.content.CertificateItem\"h\n\x0f\x43\x65rtificateItem\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05thumb\x18\x02 \x01(\t\x12\x0b\n\x03src\x18\x03 \x01(\t\x12\x0c\n\x04\x64\x61te\x18\x04 \x01(\t\x12\x12\n\npopularity\x18\x05 \x01(\x05\x12\x0b\n\x03\x61lt\x18\x06 \x01(\t\"1\n\x13PublicationsRequest\x12\x0c\n\x04lang\x18\x01 \x01(\t\x12\x0c\n\x04sort\x18\x02 \x01(\t\"F\n\x14PublicationsResponse\x12.\n\x0cpublications\x18\x01 \x03(\x0b\x32\x18.content.PublicationItem\"f\n\x0fPublicationItem\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x0c\n\x04page\x18\x03 \x01(\t\x12\x0c\n\x04site\x18\x04 \x01(\t\x12\x0e\n\x06rating\x18\x05 \x01(\x05\x12\x0c\n\x04\x64\x61te\x18\x06 \x01(\t2\xf1\x02\n\x0e\x43ontentService\x12;\n\x08GetAbout\x12\x15.content.AboutRequest\x1a\x16.content.AboutResponse\"\x00\x12\x38\n\x07GetTech\x12\x14.content.TechRequest\x1a\x15.content.TechResponse\"\x00\x12\x44\n\x0bGetProjects\x12\x18.content.ProjectsRequest\x1a\x19.content.ProjectsResponse\"\x00\x12P\n\x0fGetCertificates\x12\x1c.content.CertificatesRequest\x1a\x1d.content.CertificatesResponse\"\x00\x12P\n\x0fGetPublications\x12\x1c.content.PublicationsRequest\x1a\x1d.content.PublicationsResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x15\x63ontent_service.proto\x12\x07\x63ontent"\x07\n\x05\x45mpty"\x1c\n\x0c\x41\x62outRequest\x12\x0c\n\x04lang\x18\x01 \x01(\t"2\n\rAboutResponse\x12!\n\x05\x61\x62out\x18\x01 \x03(\x0b\x32\x12.content.AboutItem"N\n\tAboutItem\x12\n\n\x02id\x18\x01 \x01(\t\x12\x11\n\timage_url\x18\x02 \x01(\t\x12\r\n\x05title\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t"\r\n\x0bTechRequest"6\n\x0cTechResponse\x12&\n\x08kingdoms\x18\x01 \x03(\x0b\x32\x14.content.TechKingdom"-\n\x0bTechKingdom\x12\x0f\n\x07kingdom\x18\x01 \x01(\t\x12\r\n\x05items\x18\x02 \x03(\t"-\n\x0fProjectsRequest\x12\x0c\n\x04lang\x18\x01 \x01(\t\x12\x0c\n\x04sort\x18\x02 \x01(\t":\n\x10ProjectsResponse\x12&\n\x08projects\x18\x01 \x03(\x0b\x32\x14.content.ProjectItem"\x8f\x01\n\x0bProjectItem\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x11\n\tthumbnail\x18\x03 \x01(\t\x12\r\n\x05image\x18\x04 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\x12\x0c\n\x04link\x18\x06 \x01(\t\x12\x0c\n\x04\x64\x61te\x18\x07 \x01(\t\x12\x12\n\npopularity\x18\x08 \x01(\x05"#\n\x13\x43\x65rtificatesRequest\x12\x0c\n\x04sort\x18\x01 \x01(\t"F\n\x14\x43\x65rtificatesResponse\x12.\n\x0c\x63\x65rtificates\x18\x01 \x03(\x0b\x32\x18.content.CertificateItem"h\n\x0f\x43\x65rtificateItem\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05thumb\x18\x02 \x01(\t\x12\x0b\n\x03src\x18\x03 \x01(\t\x12\x0c\n\x04\x64\x61te\x18\x04 \x01(\t\x12\x12\n\npopularity\x18\x05 \x01(\x05\x12\x0b\n\x03\x61lt\x18\x06 \x01(\t"1\n\x13PublicationsRequest\x12\x0c\n\x04lang\x18\x01 \x01(\t\x12\x0c\n\x04sort\x18\x02 \x01(\t"F\n\x14PublicationsResponse\x12.\n\x0cpublications\x18\x01 \x03(\x0b\x32\x18.content.PublicationItem"f\n\x0fPublicationItem\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x0c\n\x04page\x18\x03 \x01(\t\x12\x0c\n\x04site\x18\x04 \x01(\t\x12\x0e\n\x06rating\x18\x05 \x01(\x05\x12\x0c\n\x04\x64\x61te\x18\x06 \x01(\t2\xf1\x02\n\x0e\x43ontentService\x12;\n\x08GetAbout\x12\x15.content.AboutRequest\x1a\x16.content.AboutResponse"\x00\x12\x38\n\x07GetTech\x12\x14.content.TechRequest\x1a\x15.content.TechResponse"\x00\x12\x44\n\x0bGetProjects\x12\x18.content.ProjectsRequest\x1a\x19.content.ProjectsResponse"\x00\x12P\n\x0fGetCertificates\x12\x1c.content.CertificatesRequest\x1a\x1d.content.CertificatesResponse"\x00\x12P\n\x0fGetPublications\x12\x1c.content.PublicationsRequest\x1a\x1d.content.PublicationsResponse"\x00\x62\x06proto3'
+)
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'content_service_pb2', _globals)
+_builder.BuildTopDescriptorsAndMessages(
+    DESCRIPTOR, "content_service_pb2", _globals
+)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
-  _globals['_EMPTY']._serialized_start=34
-  _globals['_EMPTY']._serialized_end=41
-  _globals['_ABOUTREQUEST']._serialized_start=43
-  _globals['_ABOUTREQUEST']._serialized_end=71
-  _globals['_ABOUTRESPONSE']._serialized_start=73
-  _globals['_ABOUTRESPONSE']._serialized_end=123
-  _globals['_ABOUTITEM']._serialized_start=125
-  _globals['_ABOUTITEM']._serialized_end=203
-  _globals['_TECHREQUEST']._serialized_start=205
-  _globals['_TECHREQUEST']._serialized_end=218
-  _globals['_TECHRESPONSE']._serialized_start=220
-  _globals['_TECHRESPONSE']._serialized_end=274
-  _globals['_TECHKINGDOM']._serialized_start=276
-  _globals['_TECHKINGDOM']._serialized_end=321
-  _globals['_PROJECTSREQUEST']._serialized_start=323
-  _globals['_PROJECTSREQUEST']._serialized_end=368
-  _globals['_PROJECTSRESPONSE']._serialized_start=370
-  _globals['_PROJECTSRESPONSE']._serialized_end=428
-  _globals['_PROJECTITEM']._serialized_start=431
-  _globals['_PROJECTITEM']._serialized_end=574
-  _globals['_CERTIFICATESREQUEST']._serialized_start=576
-  _globals['_CERTIFICATESREQUEST']._serialized_end=611
-  _globals['_CERTIFICATESRESPONSE']._serialized_start=613
-  _globals['_CERTIFICATESRESPONSE']._serialized_end=683
-  _globals['_CERTIFICATEITEM']._serialized_start=685
-  _globals['_CERTIFICATEITEM']._serialized_end=789
-  _globals['_PUBLICATIONSREQUEST']._serialized_start=791
-  _globals['_PUBLICATIONSREQUEST']._serialized_end=840
-  _globals['_PUBLICATIONSRESPONSE']._serialized_start=842
-  _globals['_PUBLICATIONSRESPONSE']._serialized_end=912
-  _globals['_PUBLICATIONITEM']._serialized_start=914
-  _globals['_PUBLICATIONITEM']._serialized_end=1016
-  _globals['_CONTENTSERVICE']._serialized_start=1019
-  _globals['_CONTENTSERVICE']._serialized_end=1388
+    DESCRIPTOR._loaded_options = None
+    _globals["_EMPTY"]._serialized_start = 34
+    _globals["_EMPTY"]._serialized_end = 41
+    _globals["_ABOUTREQUEST"]._serialized_start = 43
+    _globals["_ABOUTREQUEST"]._serialized_end = 71
+    _globals["_ABOUTRESPONSE"]._serialized_start = 73
+    _globals["_ABOUTRESPONSE"]._serialized_end = 123
+    _globals["_ABOUTITEM"]._serialized_start = 125
+    _globals["_ABOUTITEM"]._serialized_end = 203
+    _globals["_TECHREQUEST"]._serialized_start = 205
+    _globals["_TECHREQUEST"]._serialized_end = 218
+    _globals["_TECHRESPONSE"]._serialized_start = 220
+    _globals["_TECHRESPONSE"]._serialized_end = 274
+    _globals["_TECHKINGDOM"]._serialized_start = 276
+    _globals["_TECHKINGDOM"]._serialized_end = 321
+    _globals["_PROJECTSREQUEST"]._serialized_start = 323
+    _globals["_PROJECTSREQUEST"]._serialized_end = 368
+    _globals["_PROJECTSRESPONSE"]._serialized_start = 370
+    _globals["_PROJECTSRESPONSE"]._serialized_end = 428
+    _globals["_PROJECTITEM"]._serialized_start = 431
+    _globals["_PROJECTITEM"]._serialized_end = 574
+    _globals["_CERTIFICATESREQUEST"]._serialized_start = 576
+    _globals["_CERTIFICATESREQUEST"]._serialized_end = 611
+    _globals["_CERTIFICATESRESPONSE"]._serialized_start = 613
+    _globals["_CERTIFICATESRESPONSE"]._serialized_end = 683
+    _globals["_CERTIFICATEITEM"]._serialized_start = 685
+    _globals["_CERTIFICATEITEM"]._serialized_end = 789
+    _globals["_PUBLICATIONSREQUEST"]._serialized_start = 791
+    _globals["_PUBLICATIONSREQUEST"]._serialized_end = 840
+    _globals["_PUBLICATIONSRESPONSE"]._serialized_start = 842
+    _globals["_PUBLICATIONSRESPONSE"]._serialized_end = 912
+    _globals["_PUBLICATIONITEM"]._serialized_start = 914
+    _globals["_PUBLICATIONITEM"]._serialized_end = 1016
+    _globals["_CONTENTSERVICE"]._serialized_start = 1019
+    _globals["_CONTENTSERVICE"]._serialized_end = 1388
 # @@protoc_insertion_point(module_scope)
