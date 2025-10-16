@@ -15,7 +15,8 @@ dependencies = [
     "grpcio (>=1.75.1,<2.0.0)",
     "grpcio-tools (>=1.75.1,<2.0.0)",
     "colorlog (>=6.9.0,<7.0.0)",
-    "pydantic[email] (>=2.12.0,<3.0.0)"
+    "pydantic[email] (>=2.12.0,<3.0.0)",
+    "redis (>=6.4.0,<7.0.0)"
 ]
 
 

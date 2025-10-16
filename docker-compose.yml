@@ -190,6 +190,21 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  # =====================
+  # CACHE SERVICES
+  # =====================
+
+  redis:
+    image: redis:8.2.2-alpine3.22
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+
 # =====================
 # MESSAGE BROKERS
 # =====================
@@ -328,6 +343,21 @@ services:
   # =====================
   # MANAGEMENT TOOLS
   # =====================
+  redisinsight:
+    image: redis/redisinsight:2.70
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
+    environment:
+      - RI_REDIS_HOST0=redis
+      - RI_REDIS_PORT0=6379
+      - RI_REDIS_USERNAME0=default
+      - RI_REDIS_PASSWORD0=${REDIS_PASSWORD}
+    depends_on:
+      - redis
+    restart: unless-stopped
 
   # kafka-ui:
   #   container_name: kafka-ui
@@ -420,3 +450,5 @@ volumes:
   kafka_broker1_data:
   kafka_broker2_data:
   kafka_broker3_data:
+  redis_data:
+  redisinsight_data:

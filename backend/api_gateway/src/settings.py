@@ -31,5 +31,12 @@ class Settings(BaseSettings):
     COOKIE_SAMESITE: str = "lax"
     COOKIE_PATH: str = "/"
 
+    # Caching Redis
+    REDIS_HOST: str
+    REDIS_PORT: int
+    REDIS_PASSWORD: str
+    REDIS_DB: int = 0
+    CACHE_TTL_MINUTES: int = 60  # 1 hour
+
 
 settings = Settings()
