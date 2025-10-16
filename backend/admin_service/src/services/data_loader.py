@@ -253,16 +253,13 @@ class DataLoader:
                 settings.AUTH_ADMIN_MONGO_DATABASE_NAME
             ]["users"]
 
-            # Check if admin already exists
             existing_admin = await collection.find_one({"email": admin_email})
             if existing_admin:
                 logger.info(f"Admin user already exists: {admin_email}")
                 return True
 
-            # Hash password
             hashed_password = get_password_hash(admin_password)
 
-            # Create admin user document
             admin_user = {
                 "_id": ObjectId(),
                 "email": admin_email,
@@ -274,7 +271,6 @@ class DataLoader:
                 "last_login_at": None,
             }
 
-            # Insert admin user
             result = await collection.insert_one(admin_user)
 
             if result.inserted_id:
@@ -312,11 +308,9 @@ class DataLoader:
         """
         file_path = self.content_admin_path / filename
 
-        # Read file content asynchronously
         async with aiofiles.open(file_path, "rb") as f:
             file_data = await f.read()
 
-        # Upload to MinIO using the existing MinioCRUD class
         return await minio_crud.upload_file(bucket_name, filename, file_data)
 
     async def _path_exists(self, path: Path) -> bool:

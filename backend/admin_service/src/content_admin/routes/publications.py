@@ -51,7 +51,8 @@ async def get_publications(
         )
         if not results:
             raise HTTPException(
-                status_code=404, detail="Publications not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Publications not found",
             )
 
         logger.info("Publications data fetched successfully")
@@ -61,7 +62,10 @@ async def get_publications(
         raise
     except Exception as e:
         logger.exception(f"Database error: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.get("/{document_id}")
@@ -92,7 +96,8 @@ async def get_publication_by_id(
         result = await publications_crud.read_by_id(document_id)
         if result is None:
             raise HTTPException(
-                status_code=404, detail="Publication not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Publication not found",
             )
         logger.info(f"Publication {document_id} fetched successfully")
         return result
@@ -100,7 +105,10 @@ async def get_publication_by_id(
         raise
     except Exception as e:
         logger.exception(f"Database error: {e}")
-        raise HTTPException(500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -141,7 +149,10 @@ async def create_publication(
         raise
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
-        raise HTTPException(500, "Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.patch("/{document_id}")
@@ -172,13 +183,17 @@ async def update_publication(
     """
     try:
         if not ObjectId.is_valid(document_id):
-            raise HTTPException(404, f"Invalid Document ID': {document_id}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Invalid Document ID': {document_id}",
+            )
 
         current_publication = await publications_crud.read_by_id(document_id)
 
         if not current_publication:
             raise HTTPException(
-                404, f"Document with id {document_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document with id {document_id} not found",
             )
 
         if form_data.title_en is None or form_data.title_en == "":
@@ -208,7 +223,10 @@ async def update_publication(
         raise
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
-        raise HTTPException(500, "Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.delete("/{document_id}")
@@ -239,13 +257,15 @@ async def delete_publication(
         publication = await publications_crud.read_by_id(document_id)
         if not publication:
             raise HTTPException(
-                404, f"Publication with id={document_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Publication with id={document_id} not found",
             )
 
         deleted = await publications_crud.delete(document_id)
         if not deleted:
             raise HTTPException(
-                500, "Failed to delete publication from database"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to delete publication from database",
             )
 
         deleted_message = f"Publication with id={document_id} has been deleted"
@@ -256,4 +276,7 @@ async def delete_publication(
         raise
     except Exception as e:
         logger.exception(f"Error deleting publication: {e}")
-        raise HTTPException(500, "Failed to delete publication")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete publication",
+        )

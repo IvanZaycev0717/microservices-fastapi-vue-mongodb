@@ -1,6 +1,7 @@
 import asyncio
-from typing import Any
+
 from fastapi import Request
+
 from services.logger import get_logger
 
 logger = get_logger("CacheInvalidation")

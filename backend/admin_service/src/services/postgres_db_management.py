@@ -167,7 +167,9 @@ class PostgresDatabaseManager:
             logger.exception(f"Database check failed: {e}")
             return False
 
-    async def create_database(self, db_name: str, host: str, port: int, user: str, password: str) -> bool:
+    async def create_database(
+        self, db_name: str, host: str, port: int, user: str, password: str
+    ) -> bool:
         """Creates a new database if it doesn't exist.
 
         Args:

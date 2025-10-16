@@ -1,8 +1,8 @@
-import json
 import asyncio
-from typing import Any
-from confluent_kafka import Producer
+import json
+
 from confluent_kafka.experimental.aio import AIOProducer
+
 from services.logger import get_logger
 from settings import settings
 
@@ -67,7 +67,7 @@ class KafkaCacheInvalidationProducer:
             logger.debug(f"Cache invalidation sent: {entity_type}.{action}")
             return True
 
-        except Exception as e:
+        except Exception:
             logger.exception(
                 f"Failed to send cache invalidation for {entity_type}"
             )

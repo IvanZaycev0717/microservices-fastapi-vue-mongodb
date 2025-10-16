@@ -1,4 +1,5 @@
 from confluent_kafka.admin import AdminClient, NewTopic
+
 from services.logger import get_logger
 from settings import settings
 

@@ -20,9 +20,9 @@ from content_admin.routes import (
     tech,
 )
 from notification_admin.routes import notification
-from services.kafka_producer import kafka_producer
-from  services.kafka_topic_management import kafka_topic_manager
 from services.data_loader import DataLoader
+from services.kafka_producer import kafka_producer
+from services.kafka_topic_management import kafka_topic_manager
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
 from services.mongo_db_management import (
@@ -111,7 +111,7 @@ async def lifespan(app: FastAPI):
                 settings.COMMENTS_ADMIN_POSTGRES_ROOT_NAME,
                 settings.COMMENTS_ADMIN_POSTGRES_PORT,
                 settings.POSTGRES_USER,
-                settings.POSTGRES_PASSWORD
+                settings.POSTGRES_PASSWORD,
             )
             if success:
                 logger.info(
@@ -136,7 +136,7 @@ async def lifespan(app: FastAPI):
             password=settings.POSTGRES_PASSWORD,
             database=settings.COMMENTS_ADMIN_POSTGRES_DB_NAME,  # ← теперь к нашей БД
         )
-        
+
         comments_admin_client = await connections[
             "comments_admin"
         ].open_connection()

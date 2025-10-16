@@ -57,7 +57,7 @@ class NotificationCRUD:
             cursor = self.collection.find().sort("created_at", DESCENDING)
             notifications = await cursor.to_list(length=100)
             return notifications
-        except Exception as e:
+        except Exception:
             raise
 
     async def get_by_email(self, email: str) -> list[dict]:
@@ -89,7 +89,7 @@ class NotificationCRUD:
                 {"$set": {"status": status, "sent_at": datetime.now()}},
             )
             return result.modified_count > 0
-        except Exception as e:
+        except Exception:
             return False
 
     # DELETE

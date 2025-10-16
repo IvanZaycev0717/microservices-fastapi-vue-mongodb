@@ -203,7 +203,6 @@ async def create_about_content(
         result = await about_crud.create(data.model_dump(exclude_none=True))
         logger.info(f"Document created with _id={result}")
 
-        # Send cache invalidation after successful creation
         await send_cache_invalidation(request, "about", "create", str(result))
 
         return f"Document created with _id={result}"
