@@ -17,6 +17,7 @@ dependencies = [
     "colorlog (>=6.9.0,<7.0.0)",
     "pydantic[email] (>=2.12.0,<3.0.0)",
     "redis (>=6.4.0,<7.0.0)",
+    "confluent-kafka (>=2.12.0,<3.0.0)",
 ]
 
 

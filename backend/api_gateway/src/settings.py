@@ -46,5 +46,12 @@ class Settings(BaseSettings):
     RATE_LIMIT_REQUESTS: int = 100
     RATE_LIMIT_WINDOW_MINUTES: int = 60  # 1 hour
 
+    # Kafka Settings
+    KAFKA_BOOTSTRAP_SERVERS: str
+    KAFKA_CACHE_INVALIDATION_TOPIC: str
+    KAFKA_CONSUMER_GROUP_ID: str
+    KAFKA_AUTO_OFFSET_RESET: str
+    KAFKA_ENABLE_AUTO_COMMIT: bool = True
+
 
 settings = Settings()

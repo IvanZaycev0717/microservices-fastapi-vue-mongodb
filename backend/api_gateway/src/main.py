@@ -7,6 +7,7 @@ from api.v1.endpoints import content, auth, comments
 from logger import get_logger
 from settings import settings
 from services.redis_connect_management import redis_manager
+from services.kafka_consumer import kafka_consumer
 
 logger = get_logger("API Gateway")
 
@@ -22,7 +23,9 @@ async def lifespan(app: FastAPI):
     )
     await redis_manager.connect()
     app.state.redis_manager = redis_manager
+    await kafka_consumer.start(redis_manager)
     yield
+    await kafka_consumer.stop()
     await redis_manager.disconnect()
     logger.info(f"{settings.API_GATEWAY_NAME} shutting down")
 
