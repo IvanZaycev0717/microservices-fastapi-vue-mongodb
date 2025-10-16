@@ -20,6 +20,8 @@ from content_admin.routes import (
     tech,
 )
 from notification_admin.routes import notification
+from services.kafka_producer import kafka_producer
+from  services.kafka_topic_management import kafka_topic_manager
 from services.data_loader import DataLoader
 from services.logger import get_logger
 from services.minio_management import MinioCRUD
@@ -49,7 +51,6 @@ async def lifespan(app: FastAPI):
     databases = {}
 
     try:
-        # MongoDB connections
         connections["content_admin"] = MongoConnectionManager(
             host=settings.CONTENT_ADMIN_MONGODB_URL
         )
@@ -60,16 +61,14 @@ async def lifespan(app: FastAPI):
             host=settings.NOTIFICATION_ADMIN_MONGODB_URL
         )
 
-        # PostgreSQL connection - сначала подключаемся к системной БД
         connections["comments_admin"] = PostgresConnectionManager(
             host=settings.COMMENTS_ADMIN_POSTGRES_ROOT_NAME,
             port=settings.COMMENTS_ADMIN_POSTGRES_PORT,
             user=settings.POSTGRES_USER,
             password=settings.POSTGRES_PASSWORD,
-            database="postgres",  # ← подключаемся к системной БД сначала
+            database="postgres",
         )
 
-        # MongoDB initialization
         (
             clients["content_admin"],
             databases["content_admin"],
@@ -97,7 +96,6 @@ async def lifespan(app: FastAPI):
             "notification admin",
         )
 
-        # PostgreSQL database creation
         comments_admin_client = await connections[
             "comments_admin"
         ].open_connection()
@@ -131,7 +129,6 @@ async def lifespan(app: FastAPI):
 
         await connections["comments_admin"].close_connection()
 
-        # Переподключаемся к созданной БД
         connections["comments_admin"] = PostgresConnectionManager(
             host=settings.COMMENTS_ADMIN_POSTGRES_ROOT_NAME,
             port=settings.COMMENTS_ADMIN_POSTGRES_PORT,
@@ -144,12 +141,10 @@ async def lifespan(app: FastAPI):
             "comments_admin"
         ].open_connection()
 
-        # Создаем таблицы в целевой БД
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Comments database tables created successfully")
 
-        # Остальная логика инициализации...
         minio_crud = MinioCRUD()
         data_loader = DataLoader(
             settings.CONTENT_ADMIN_PATH, settings.INITIAL_DATA_LOADING_FILES
@@ -209,6 +204,9 @@ async def lifespan(app: FastAPI):
             "Content admin database collections initialized successfully"
         )
 
+        await kafka_topic_manager.ensure_cache_topics_exist()
+        await kafka_producer.connect()
+
         # Content states
         app.state.content_admin_mongo_client = clients["content_admin"]
         app.state.content_admin_mongo_db = databases["content_admin"]
@@ -228,6 +226,9 @@ async def lifespan(app: FastAPI):
         # Minio States
         app.state.minio_crud = minio_crud
 
+        # Kafka States
+        app.state.kafka_producer = kafka_producer
+
         logger.info("Application startup complete - all services initialized")
         yield
 
@@ -244,6 +245,8 @@ async def lifespan(app: FastAPI):
 
         if "engine" in locals():
             await engine.dispose()
+
+        close_tasks.append(kafka_producer.close())
 
         if close_tasks:
             results = await asyncio.gather(

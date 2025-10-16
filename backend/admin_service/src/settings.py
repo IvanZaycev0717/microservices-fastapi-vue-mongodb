@@ -78,6 +78,10 @@ class Settings(BaseSettings):
         description="Mongo Express connection URL for auth database"
     )
 
+    # Kafka Settings
+    KAFKA_BOOTSTRAP_SERVERS: str
+    KAFKA_CACHE_INVALIDATION_TOPIC: str = "cache-invalidation"
+
     # Tokens Settings
     ACCESS_TOKEN_EXPIRE_AT: timedelta = timedelta(minutes=30)
     REFRESH_TOKEN_EXPIRES_AT: timedelta = timedelta(days=7)

@@ -11,6 +11,7 @@ from fastapi import (
     HTTPException,
     Path,
     Query,
+    Request,
     UploadFile,
     status,
 )
@@ -29,6 +30,7 @@ from content_admin.models.about import (
     AboutUpdateForm,
     CreateAboutRequest,
 )
+from services.cache_invalidation import send_cache_invalidation
 from services.image_processor import (
     convert_image_to_webp,
     has_image_allowed_extention,
@@ -147,6 +149,7 @@ async def get_about_content_by_id(
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_about_content(
+    request: Request,
     form_data: Annotated[AboutCreateForm, Depends(AboutCreateForm.as_form)],
     about_crud: Annotated[AboutCRUD, Depends(get_about_crud)],
     minio_crud: Annotated[MinioCRUD, Depends(get_minio_crud)],
@@ -156,30 +159,7 @@ async def create_about_content(
     ],
     image: Annotated[UploadFile, File(description="Изображение для загрузки")],
 ):
-    """Creates new about content entry with image upload and translations.
-
-    Processes multipart form data containing image file
-    and text fields in multiple languages.
-    Validates image format and size,
-    converts to WEBP format, uploads to MinIO storage,
-    and creates database entry with structured translations.
-
-    Args:
-        form_data: Form data
-        containing title and description in multiple languages.
-        about_crud: Dependency injection for AboutCRUD database operations.
-        minio_crud: Dependency injection for MinIO file storage operations.
-        logger: Dependency injection for logging instance.
-        image: Image file to upload with validation for format and size.
-
-    Returns:
-        str: Success message containing ID of created document.
-
-    Raises:
-        HTTPException:400 for invalid image format or size,
-                      422 for validation errors,
-                      500 for MinIO upload failures or unexpected errors.
-    """
+    """Creates new about content entry with image upload and translations."""
     try:
         if not await has_image_allowed_extention(image):
             error_message = "Image invalid format"
@@ -222,6 +202,10 @@ async def create_about_content(
 
         result = await about_crud.create(data.model_dump(exclude_none=True))
         logger.info(f"Document created with _id={result}")
+
+        # Send cache invalidation after successful creation
+        await send_cache_invalidation(request, "about", "create", str(result))
+
         return f"Document created with _id={result}"
 
     except HTTPException:
