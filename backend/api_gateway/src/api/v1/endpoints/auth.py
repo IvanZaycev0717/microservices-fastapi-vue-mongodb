@@ -1,4 +1,12 @@
-from fastapi import APIRouter, HTTPException, Response, Cookie, Depends, status
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Request,
+    Response,
+    Cookie,
+    Depends,
+    status,
+)
 from grpc import RpcError
 import grpc
 
@@ -20,6 +28,9 @@ from api.v1.schemas.auth import (
     LogoutResponse,
 )
 from api.v1.dependencies import get_current_user
+from services.rate_limit_decorator import rate_limited
+from services.dependencies import get_auth_token_bucket
+from services.token_bucket import TokenBucket
 
 router = APIRouter()
 logger = get_logger("AuthEndpoints")
@@ -27,7 +38,13 @@ auth_client = AuthClient()
 
 
 @router.post("/login", response_model=LoginResponse)
-async def login(response: Response, login_data: LoginRequest):
+@rate_limited()
+async def login(
+    request: Request,
+    response: Response,
+    login_data: LoginRequest,
+    token_bucket: TokenBucket = Depends(get_auth_token_bucket),
+):
     """
     Authenticate user and set refresh token as HTTP-only cookie.
 
@@ -108,7 +125,13 @@ async def login(response: Response, login_data: LoginRequest):
 
 
 @router.post("/register", response_model=RegisterResponse)
-async def register(response: Response, register_data: RegisterRequest):
+@rate_limited()
+async def register(
+    request: Request,
+    response: Response,
+    register_data: RegisterRequest,
+    token_bucket: TokenBucket = Depends(get_auth_token_bucket),
+):
     """
     Register new user and set refresh token as HTTP-only cookie.
 
@@ -362,7 +385,12 @@ async def verify_token(verify_data: VerifyRequest):
 
 
 @router.post("/forgot-password", response_model=ForgotPasswordResponse)
-async def forgot_password(forgot_data: ForgotPasswordRequest):
+@rate_limited()
+async def forgot_password(
+    request: Request,
+    forgot_data: ForgotPasswordRequest,
+    token_bucket: TokenBucket = Depends(get_auth_token_bucket),
+):
     """
     Initiate password reset process for a user.
 
@@ -404,7 +432,12 @@ async def forgot_password(forgot_data: ForgotPasswordRequest):
 
 
 @router.post("/reset-password", response_model=ResetPasswordResponse)
-async def reset_password(reset_data: ResetPasswordRequest):
+@rate_limited()
+async def reset_password(
+    request: Request,
+    reset_data: ResetPasswordRequest,
+    token_bucket: TokenBucket = Depends(get_auth_token_bucket),
+):
     """
     Reset user password using valid reset token.
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, Request, status
 from grpc import RpcError
 import grpc
 from pydantic import BaseModel
@@ -6,6 +6,9 @@ from pydantic import BaseModel
 from grpc_clients.comments_client import CommentsClient
 from logger import get_logger
 from api.v1.dependencies import get_comment_author, get_current_user
+from services.dependencies import get_comments_token_bucket
+from services.rate_limit_decorator import rate_limited
+from services.token_bucket import TokenBucket
 
 router = APIRouter()
 logger = get_logger("CommentsEndpoints")
@@ -254,9 +257,12 @@ async def get_comment(comment_id: int):
 
 
 @router.post("/comments")
+@rate_limited()
 async def create_comment(
+    request: Request,
     comment_data: CommentCreateRequest,
     current_user: dict = Depends(get_current_user),
+    token_bucket: TokenBucket = Depends(get_comments_token_bucket),
 ):
     """
     Create a new comment for a project.

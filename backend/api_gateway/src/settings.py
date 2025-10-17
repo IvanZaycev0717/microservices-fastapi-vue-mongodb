@@ -43,9 +43,13 @@ class Settings(BaseSettings):
     CACHE_TTL_MINUTES: int = 60
 
     # Rate Limiter Settings
-    REDIS_RATE_LIMIT_DB: int = 1
-    RATE_LIMIT_REQUESTS: int = 100
-    RATE_LIMIT_WINDOW_MINUTES: int = 60
+    RATE_LIMIT_CAPACITY: int = 100
+    RATE_LIMIT_REFILL_RATE: float = 100.0 / 3600
+    AUTH_RATE_LIMIT_CAPACITY: int = 10
+    AUTH_RATE_LIMIT_REFILL_RATE: float = 10.0 / 3600
+    COMMENTS_RATE_LIMIT_CAPACITY: int = 30
+    COMMENTS_RATE_LIMIT_REFILL_RATE: float = 30.0 / 3600
+    CACHE_TTL_MINUTES: int = 30
 
     # Kafka Settings
     KAFKA_BOOTSTRAP_SERVERS: str

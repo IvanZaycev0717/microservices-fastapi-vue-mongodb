@@ -1,27 +1,32 @@
-from fastapi import APIRouter, HTTPException, Query, Depends, status
+from fastapi import APIRouter, HTTPException, Query, Depends, Request, status
 from grpc import RpcError
 import grpc
 from grpc_clients.content_service import ContentClient
-from services.cache_service import CacheService
+
 from services.cache_decorator import cache_response
-from services.dependencies import get_redis_cache
+
 from logger import get_logger
+from services.rate_limit_decorator import rate_limited
+from services.dependencies import (
+    get_token_bucket,
+)
+from services.token_bucket import TokenBucket
+from services.cache_service import CacheService
+from services.cache_dependencies import get_cache_service
 
 router = APIRouter()
 logger = get_logger("ContentEndpoints")
 content_client = ContentClient()
 
 
-def get_cache_service(redis_client=Depends(get_redis_cache)) -> CacheService:
-    """Dependency to get CacheService instance."""
-    return CacheService(redis_client)
-
-
 @router.get("/about")
+@rate_limited()
 @cache_response(key_prefix="content")
 async def get_about(
+    request: Request,
     lang: str = Query(None),
     cache_service: CacheService = Depends(get_cache_service),
+    token_bucket: TokenBucket = Depends(get_token_bucket),
 ):
     """
     Retrieve about page content with optional language and caching.
@@ -71,8 +76,13 @@ async def get_about(
 
 
 @router.get("/tech")
+@rate_limited()
 @cache_response(key_prefix="content")
-async def get_tech(cache_service: CacheService = Depends(get_cache_service)):
+async def get_tech(
+    request: Request,
+    cache_service: CacheService = Depends(get_cache_service),
+    token_bucket: TokenBucket = Depends(get_token_bucket),
+):
     """
     Retrieve technology stack information with caching.
 
@@ -114,11 +124,14 @@ async def get_tech(cache_service: CacheService = Depends(get_cache_service)):
 
 
 @router.get("/projects")
+@rate_limited()
 @cache_response(key_prefix="content")
 async def get_projects(
+    request: Request,
     lang: str = Query("en"),
     sort: str = Query("date_desc"),
     cache_service: CacheService = Depends(get_cache_service),
+    token_bucket: TokenBucket = Depends(get_token_bucket),
 ):
     """
     Retrieve projects list with language, sorting and caching.
@@ -172,10 +185,13 @@ async def get_projects(
 
 
 @router.get("/certificates")
+@rate_limited()
 @cache_response(key_prefix="content")
 async def get_certificates(
+    request: Request,
     sort: str = Query("date_desc"),
     cache_service: CacheService = Depends(get_cache_service),
+    token_bucket: TokenBucket = Depends(get_token_bucket),
 ):
     """
     Retrieve certificates list with sorting and caching.
@@ -226,11 +242,14 @@ async def get_certificates(
 
 
 @router.get("/publications")
+@rate_limited()
 @cache_response(key_prefix="content")
 async def get_publications(
+    request: Request,
     lang: str = Query("en"),
     sort: str = Query("date_desc"),
     cache_service: CacheService = Depends(get_cache_service),
+    token_bucket: TokenBucket = Depends(get_token_bucket),
 ):
     """
     Retrieve publications list with language, sorting and caching.
