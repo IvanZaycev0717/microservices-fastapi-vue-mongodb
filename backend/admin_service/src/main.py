@@ -1,5 +1,6 @@
 import asyncio
 from contextlib import asynccontextmanager
+from datetime import datetime
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -146,6 +147,8 @@ async def lifespan(app: FastAPI):
         logger.info("Comments database tables created successfully")
 
         minio_crud = MinioCRUD()
+
+        
         data_loader = DataLoader(
             settings.CONTENT_ADMIN_PATH, settings.INITIAL_DATA_LOADING_FILES
         )
@@ -159,7 +162,11 @@ async def lifespan(app: FastAPI):
         buckets = [
             (settings.ABOUT_BUCKET_NAME, "ABOUT"),
             (settings.PROJECTS_BUCKET_NAME, "PROJECTS"),
+            (settings.CERTIFICATES_BUCKET_NAME, "CERTIFICATES")
         ]
+
+        for bucket_name, bucket_type in buckets:
+            await minio_crud.create_bucket_if_not_exists(bucket_name)
 
         for bucket_name, bucket_type in buckets:
             if not await data_loader.check_minio_files_existence(
@@ -392,10 +399,3 @@ async def ensure_mongo_database(
         if client:
             await connection_manager.close_connection()
         raise
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    logger.info("Starting Uvicorn server...")
-    uvicorn.run(app, host=settings.BASE_HOST, port=settings.BASE_PORT)

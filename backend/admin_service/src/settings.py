@@ -110,7 +110,7 @@ class Settings(BaseSettings):
     MINIO_ROOT_PASSWORD: str
     MINIO_HOST: str = "minio"
     MINIO_API_PORT: int = 9000
-    MINIO_PUBLIC_URL: str = "http://localhost:9000"
+    MINIO_PUBLIC_URL: str = Field("http://localhost:9000", description="MinIO public URL for container access")
 
     # Service Names Configurations
     SERVICE_NAME: str = "ADMIN_SERVICE"

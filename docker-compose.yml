@@ -42,7 +42,6 @@ services:
       - .env.example
     depends_on:
       - content_db
-      - admin_service
     restart: unless-stopped
 
   auth_service:
@@ -56,7 +55,6 @@ services:
       - .env.example
     depends_on:
       - auth_db
-      - admin_service
       - broker-1
       - broker-2
       - broker-3
@@ -76,7 +74,6 @@ services:
       - .env.example
     depends_on:
       - comments_db
-      - admin_service
     restart: unless-stopped
   
   notification_service:
@@ -90,7 +87,6 @@ services:
       - .env.example
     depends_on:
       - notification_db
-      - admin_service
       - broker-1
       - broker-2
       - broker-3
