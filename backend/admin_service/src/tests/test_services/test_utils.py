@@ -1,6 +1,6 @@
 import pytest
 
-from src.services.utils import extract_bucket_and_object_from_url
+from services.utils import extract_bucket_and_object_from_url
 
 
 class TestExtractBucketAndObjectFromUrl:

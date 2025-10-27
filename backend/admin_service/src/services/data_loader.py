@@ -112,6 +112,9 @@ class DataLoader:
             for filename, result in zip(image_files, results):
                 if isinstance(result, Exception):
                     logger.exception(f"Failed to upload {filename}: {result}")
+                    if "BucketAlreadyOwnedByYou" in str(result):
+                        logger.info(f"Bucket already exists for {filename}, skipping")
+                        continue
                     raise DataLoaderError(
                         f"Failed to upload {filename}: {result}"
                     )

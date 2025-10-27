@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.comments_admin.crud import CommentsCRUD
+from comments_admin.crud import CommentsCRUD
 
 
 @pytest.fixture

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.auth_admin.models.user_role import UserRole
+from auth_admin.models.user_role import UserRole
 
 
 class TestAuthCRUD:

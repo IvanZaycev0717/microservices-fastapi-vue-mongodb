@@ -2,7 +2,7 @@ import pytest
 from mimesis import Generic
 from mongomock_motor import AsyncMongoMockClient
 
-from src.notification_admin.crud.notification import NotificationCRUD
+from notification_admin.crud.notification import NotificationCRUD
 
 
 @pytest.fixture

@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.comments_admin.models import Comment
+from comments_admin.models import Comment
 
 
 class TestCommentsCRUD:

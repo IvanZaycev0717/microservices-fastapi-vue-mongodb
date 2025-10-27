@@ -2,11 +2,11 @@ import pytest
 from mimesis import Generic
 from mongomock_motor import AsyncMongoMockClient
 
-from src.content_admin.crud.about import AboutCRUD
-from src.content_admin.crud.certificates import CertificatesCRUD
-from src.content_admin.crud.projects import ProjectsCRUD
-from src.content_admin.crud.publications import PublicationsCRUD
-from src.content_admin.crud.tech import TechCRUD
+from content_admin.crud.about import AboutCRUD
+from content_admin.crud.certificates import CertificatesCRUD
+from content_admin.crud.projects import ProjectsCRUD
+from content_admin.crud.publications import PublicationsCRUD
+from content_admin.crud.tech import TechCRUD
 
 
 @pytest.fixture

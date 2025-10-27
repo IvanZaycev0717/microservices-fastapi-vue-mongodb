@@ -2,8 +2,8 @@ import pytest
 from mimesis import Generic
 from mongomock_motor import AsyncMongoMockClient
 
-from src.auth_admin.crud.auth import AuthCRUD
-from src.auth_admin.crud.token import TokenCRUD
+from auth_admin.crud.auth import AuthCRUD
+from auth_admin.crud.token import TokenCRUD
 
 
 @pytest.fixture
