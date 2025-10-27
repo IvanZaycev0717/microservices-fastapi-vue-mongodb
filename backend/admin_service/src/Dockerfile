@@ -13,7 +13,8 @@ RUN poetry install --only main --no-interaction --no-ansi --no-root
 COPY . .
 
 COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && \
+    chmod +x /app/docker-entrypoint.sh
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["poetry", "run", "python", "main.py"]
