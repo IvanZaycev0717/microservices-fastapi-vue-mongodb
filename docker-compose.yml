@@ -192,10 +192,12 @@ services:
       COMMENTS_ADMIN_POSTGRES_DB_NAME: comments_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432" # Порт открыт на время разработки
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init-scripts:/docker-entrypoint-initdb.d
 
   # =====================
   # CACHE SERVICES
