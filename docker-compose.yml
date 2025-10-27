@@ -42,6 +42,7 @@ services:
       - .env.example
     depends_on:
       - content_db
+      - admin_service
     restart: unless-stopped
 
   auth_service:
@@ -55,6 +56,7 @@ services:
       - .env.example
     depends_on:
       - auth_db
+      - admin_service
       - broker-1
       - broker-2
       - broker-3
@@ -74,6 +76,7 @@ services:
       - .env.example
     depends_on:
       - comments_db
+      - admin_service
     restart: unless-stopped
   
   notification_service:
@@ -87,6 +90,7 @@ services:
       - .env.example
     depends_on:
       - notification_db
+      - admin_service
       - broker-1
       - broker-2
       - broker-3
@@ -146,6 +150,7 @@ services:
         - "27017"
       volumes:
         - content_db_data:/data/db
+        - ./mongo-init-scripts/content-init.js:/docker-entrypoint-initdb.d/content-init.js:ro
 
   auth_db:
     image: mongo:8.0
@@ -160,6 +165,7 @@ services:
       - "27017"
     volumes:
       - auth_db_data:/data/db
+      - ./mongo-init-scripts/auth-init.js:/docker-entrypoint-initdb.d/auth-init.js:ro
 
   notification_db:
     image: mongo:8.0
@@ -174,6 +180,7 @@ services:
       - "27017"
     volumes:
       - notification_db_data:/data/db
+      - ./mongo-init-scripts/notification-init.js:/docker-entrypoint-initdb.d/notification-init.js:ro
 
   comments_db:
     image: postgres:17.6
@@ -182,9 +189,9 @@ services:
     env_file:
       - .env.example
     environment:
-      COMMENTS_ADMIN_POSTGRES_DB_NAME: ${COMMENTS_ADMIN_POSTGRES_ROOT_NAME}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      COMMENTS_ADMIN_POSTGRES_DB_NAME: comments_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432" # Порт открыт на время разработки
     volumes:
@@ -375,47 +382,47 @@ services:
       - broker-3
     restart: unless-stopped
 
-  # mongo-express-content:
-  #   image: mongo-express:1.0.2-20-alpine3.19
-  #   container_name: mongo_express_content
-  #   env_file:
-  #     - .env.example
-  #   restart: always
-  #   ports:
-  #     - "8081:8081"
-  #   environment:
-  #     ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@content_db:27017/?authSource=admin"
-  #     ME_CONFIG_BASICAUTH: false
-  #   depends_on:
-  #     - content_db
+  mongo-express-content:
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: mongo_express_content
+    env_file:
+      - .env.example
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@content_db:27017/content_db?authSource=content_db"
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - content_db
 
-  # mongo-express-auth:
-  #   image: mongo-express:1.0.2-20-alpine3.19
-  #   container_name: mongo_express_auth
-  #   env_file:
-  #     - .env.example
-  #   restart: always
-  #   ports:
-  #     - "8082:8081"
-  #   environment:
-  #     ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@auth_db:27017/?authSource=admin"
-  #     ME_CONFIG_BASICAUTH: false
-  #   depends_on:
-  #     - auth_db
+  mongo-express-auth:
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: mongo_express_auth
+    env_file:
+      - .env.example
+    restart: always
+    ports:
+      - "8082:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@auth_db:27017/auth_db?authSource=auth_db"
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - auth_db
 
-  # mongo-express-notification:
-  #   image: mongo-express:1.0.2-20-alpine3.19
-  #   container_name: mongo_express_notification
-  #   env_file:
-  #     - .env.example
-  #   restart: always
-  #   ports:
-  #     - "8083:8081"
-  #   environment:
-  #     ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@notification_db:27017/?authSource=admin"
-  #     ME_CONFIG_BASICAUTH: false
-  #   depends_on:
-  #     - notification_db
+  mongo-express-notification:
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: mongo_express_notification
+    env_file:
+      - .env.example
+    restart: always
+    ports:
+      - "8083:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@notification_db:27017/notification_db?authSource=notification_db"
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - notification_db
 
   # =====================
   # STORAGE SERVICES
