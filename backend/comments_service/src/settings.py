@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     GRPC_COMMENTS_HOST: str
     GRPC_COMMENTS_PORT: int
 
-    LOG_LEVEL: str
+    SERVICE_NAME: str = "COMMENTS_SERVICE"
+    LOG_LEVEL: str = "INFO"
 
     POSTGRES_CONNECTION_TIMEOUT: int = 30
     POSTGRES_COMMAND_TIMEOUT: int = 60

@@ -15,7 +15,8 @@ class Settings(BaseSettings):
     GRPC_AUTH_PORT: int
 
     # Logging
-    LOG_LEVEL: str
+    SERVICE_NAME: str = "AUTH_SERVICE"
+    LOG_LEVEL: str = "INFO"
 
     # MongoDB Connection Timeouts
     MONGO_CONNECTION_TIMEOUT_MS: int

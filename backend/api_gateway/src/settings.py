@@ -23,7 +23,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
     # Logging
-    LOG_LEVEL: str
+    SERVICE_NAME: str = "API_GATEWAY"
+    LOG_LEVEL: str = "INFO"
 
     # Cookie Settings
     COOKIE_KEY: str = "refresh_token"

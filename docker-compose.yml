@@ -99,6 +99,9 @@ services:
     build:
       context: ./backend/admin_service/src
       dockerfile: Dockerfile
+    container_name: admin_service
+    labels:
+      - "service.name=admin_service"
     env_file:
       - .env.example
     ports:
@@ -110,6 +113,7 @@ services:
       - comments_db
       - notification_db
       - minio
+      - elasticsearch
 
   admin_gui:
     build:
@@ -346,81 +350,121 @@ services:
       - controller-3
 
   # =====================
+  # ELASTIC STACK
+  # =====================
+  elasticsearch:
+      image: elasticsearch:9.1.5
+      container_name: elasticsearch
+      environment:
+        - discovery.type=single-node
+        - xpack.security.enabled=false
+        - ES_JAVA_OPTS=-Xms512m -Xmx512m
+        - indices.query.bool.max_clause_count=1024
+        - thread_pool.write.queue_size=100
+      ports:
+        - "9200:9200"
+      volumes:
+        - es_data:/usr/share/elasticsearch/data
+      deploy:
+        resources:
+          limits:
+            memory: 1G
+            cpus: '1.0'
+          reservations:
+            memory: 512M
+            cpus: '0.5'
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:9200"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+        start_period: 60s
+  
+  kibana:
+    image: kibana:9.1.5
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - NODE_OPTIONS=--max-old-space-size=1024
+
+  # =====================
   # MANAGEMENT TOOLS
   # =====================
-  redisinsight:
-    image: redis/redisinsight:2.70
-    container_name: redisinsight
-    ports:
-      - "5540:5540"
-    volumes:
-      - redisinsight_data:/data
-    environment:
-      - RI_REDIS_HOST0=redis
-      - RI_REDIS_PORT0=6379
-      - RI_REDIS_USERNAME0=default
-      - RI_REDIS_PASSWORD0=${REDIS_PASSWORD}
-    depends_on:
-      - redis
-    restart: unless-stopped
+  # redisinsight:
+  #   image: redis/redisinsight:2.70
+  #   container_name: redisinsight
+  #   ports:
+  #     - "5540:5540"
+  #   volumes:
+  #     - redisinsight_data:/data
+  #   environment:
+  #     - RI_REDIS_HOST0=redis
+  #     - RI_REDIS_PORT0=6379
+  #     - RI_REDIS_USERNAME0=default
+  #     - RI_REDIS_PASSWORD0=${REDIS_PASSWORD}
+  #   depends_on:
+  #     - redis
+  #   restart: unless-stopped
 
-  kafka-ui:
-    container_name: kafka-ui
-    image: kafbat/kafka-ui:5ba27d9
-    ports:
-      - "8084:8080"
-    environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
-      KAFKA_CLUSTERS_0_NAME: 'auth-cluster'
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'broker-1:19092,broker-2:19092,broker-3:19092'
-      KAFKA_CLUSTERS_0_READONLY: 'false'
-    depends_on:
-      - broker-1
-      - broker-2
-      - broker-3
-    restart: unless-stopped
+  # kafka-ui:
+  #   container_name: kafka-ui
+  #   image: kafbat/kafka-ui:5ba27d9
+  #   ports:
+  #     - "8084:8080"
+  #   environment:
+  #     DYNAMIC_CONFIG_ENABLED: 'true'
+  #     KAFKA_CLUSTERS_0_NAME: 'auth-cluster'
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'broker-1:19092,broker-2:19092,broker-3:19092'
+  #     KAFKA_CLUSTERS_0_READONLY: 'false'
+  #   depends_on:
+  #     - broker-1
+  #     - broker-2
+  #     - broker-3
+  #   restart: unless-stopped
 
-  mongo-express-content:
-    image: mongo-express:1.0.2-20-alpine3.19
-    container_name: mongo_express_content
-    env_file:
-      - .env.example
-    restart: always
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@content_db:27017/content_db?authSource=content_db"
-      ME_CONFIG_BASICAUTH: false
-    depends_on:
-      - content_db
+  # mongo-express-content:
+  #   image: mongo-express:1.0.2-20-alpine3.19
+  #   container_name: mongo_express_content
+  #   env_file:
+  #     - .env.example
+  #   restart: always
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@content_db:27017/content_db?authSource=content_db"
+  #     ME_CONFIG_BASICAUTH: false
+  #   depends_on:
+  #     - content_db
 
-  mongo-express-auth:
-    image: mongo-express:1.0.2-20-alpine3.19
-    container_name: mongo_express_auth
-    env_file:
-      - .env.example
-    restart: always
-    ports:
-      - "8082:8081"
-    environment:
-      ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@auth_db:27017/auth_db?authSource=auth_db"
-      ME_CONFIG_BASICAUTH: false
-    depends_on:
-      - auth_db
+  # mongo-express-auth:
+  #   image: mongo-express:1.0.2-20-alpine3.19
+  #   container_name: mongo_express_auth
+  #   env_file:
+  #     - .env.example
+  #   restart: always
+  #   ports:
+  #     - "8082:8081"
+  #   environment:
+  #     ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@auth_db:27017/auth_db?authSource=auth_db"
+  #     ME_CONFIG_BASICAUTH: false
+  #   depends_on:
+  #     - auth_db
 
-  mongo-express-notification:
-    image: mongo-express:1.0.2-20-alpine3.19
-    container_name: mongo_express_notification
-    env_file:
-      - .env.example
-    restart: always
-    ports:
-      - "8083:8081"
-    environment:
-      ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@notification_db:27017/notification_db?authSource=notification_db"
-      ME_CONFIG_BASICAUTH: false
-    depends_on:
-      - notification_db
+  # mongo-express-notification:
+  #   image: mongo-express:1.0.2-20-alpine3.19
+  #   container_name: mongo_express_notification
+  #   env_file:
+  #     - .env.example
+  #   restart: always
+  #   ports:
+  #     - "8083:8081"
+  #   environment:
+  #     ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@notification_db:27017/notification_db?authSource=notification_db"
+  #     ME_CONFIG_BASICAUTH: false
+  #   depends_on:
+  #     - notification_db
 
   # =====================
   # STORAGE SERVICES
@@ -457,3 +501,5 @@ volumes:
   kafka_broker3_data:
   redis_data:
   redisinsight_data:
+  es_data:
+  filebeat-data:

@@ -24,7 +24,7 @@ from notification_admin.routes import notification
 from services.data_loader import DataLoader
 from services.kafka_producer import kafka_producer
 from services.kafka_topic_management import kafka_topic_manager
-from services.logger import get_logger
+from services.logger import close_logging, get_logger
 from services.minio_management import MinioCRUD
 from services.mongo_db_management import (
     MongoCollectionsManager,
@@ -254,6 +254,7 @@ async def lifespan(app: FastAPI):
             await engine.dispose()
 
         close_tasks.append(kafka_producer.close())
+        await close_logging()
 
         if close_tasks:
             results = await asyncio.gather(
@@ -399,3 +400,34 @@ async def ensure_mongo_database(
         if client:
             await connection_manager.close_connection()
         raise
+
+
+if __name__ == "__main__":
+    import uvicorn
+    
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        log_config={
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {
+                "json": {
+                    "()": "services.logger.JSONFormatter"
+                }
+            },
+            "handlers": {
+                "default": {
+                    "formatter": "json",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout"
+                }
+            },
+            "loggers": {
+                "uvicorn": {"handlers": ["default"], "level": "INFO", "propagate": False},
+                "uvicorn.access": {"handlers": ["default"], "level": "INFO", "propagate": False},
+                "uvicorn.error": {"handlers": ["default"], "level": "INFO", "propagate": False},
+            }
+        }
+    )

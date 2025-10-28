@@ -9,7 +9,8 @@ class Settings(BaseSettings):
     NOTIFICATION_HOST: str
     NOTIFICATION_PORT: int
 
-    LOG_LEVEL: str
+    SERVICE_NAME: str = "NOTIFICATION_SERVICE"
+    LOG_LEVEL: str = "INFO"
 
     MONGO_CONNECTION_TIMEOUT_MS: int
     MONGO_SERVER_SELECTION_TIMEOUT_MS: int

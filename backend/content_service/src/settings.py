@@ -17,7 +17,8 @@ class Settings(BaseSettings):
     GRPC_CONTENT_PORT: int
 
     # Logging
-    LOG_LEVEL: str
+    SERVICE_NAME: str = "CONTENT_SERVICE"
+    LOG_LEVEL: str = "INFO"
 
     # Validation boundaries
     MIN_TITLE_LENGTH: int
