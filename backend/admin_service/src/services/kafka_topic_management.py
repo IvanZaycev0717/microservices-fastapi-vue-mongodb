@@ -54,7 +54,10 @@ class KafkaTopicManager:
         Returns:
             bool: True if all topics exist or were created successfully.
         """
-        topics = [(settings.KAFKA_CACHE_INVALIDATION_TOPIC, 1, 1)]
+        topics = [
+            (settings.KAFKA_CACHE_INVALIDATION_TOPIC, 1, 1),
+            (settings.KAFKA_LOGS_TOPIC, 1, 1)  # Добавляем топик для логов
+        ]
 
         results = []
         for topic_name, partitions, replication in topics:

@@ -36,6 +36,7 @@ from services.postgres_db_management import (
     PostgresDatabaseManager,
 )
 from settings import settings
+from services.kafka_logger_producer import kafka_logger_producer
 
 logger = get_logger("main")
 
@@ -212,6 +213,7 @@ async def lifespan(app: FastAPI):
 
         await kafka_topic_manager.ensure_cache_topics_exist()
         await kafka_producer.connect()
+        await kafka_logger_producer.connect()
 
         # Content states
         app.state.content_admin_mongo_client = clients["content_admin"]
@@ -253,6 +255,7 @@ async def lifespan(app: FastAPI):
             await engine.dispose()
 
         close_tasks.append(kafka_producer.close())
+        close_tasks.append(kafka_logger_producer.close())
 
         if close_tasks:
             results = await asyncio.gather(

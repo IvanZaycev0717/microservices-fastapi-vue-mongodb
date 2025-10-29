@@ -114,6 +114,8 @@ services:
       - notification_db
       - minio
       - elasticsearch
+    volumes:
+    - ./backend/admin_service/src:/app/src
 
   admin_gui:
     build:
@@ -408,21 +410,21 @@ services:
   #     - redis
   #   restart: unless-stopped
 
-  # kafka-ui:
-  #   container_name: kafka-ui
-  #   image: kafbat/kafka-ui:5ba27d9
-  #   ports:
-  #     - "8084:8080"
-  #   environment:
-  #     DYNAMIC_CONFIG_ENABLED: 'true'
-  #     KAFKA_CLUSTERS_0_NAME: 'auth-cluster'
-  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'broker-1:19092,broker-2:19092,broker-3:19092'
-  #     KAFKA_CLUSTERS_0_READONLY: 'false'
-  #   depends_on:
-  #     - broker-1
-  #     - broker-2
-  #     - broker-3
-  #   restart: unless-stopped
+  kafka-ui:
+    container_name: kafka-ui
+    image: kafbat/kafka-ui:5ba27d9
+    ports:
+      - "8084:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: 'auth-cluster'
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'broker-1:19092,broker-2:19092,broker-3:19092'
+      KAFKA_CLUSTERS_0_READONLY: 'false'
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+    restart: unless-stopped
 
   # mongo-express-content:
   #   image: mongo-express:1.0.2-20-alpine3.19

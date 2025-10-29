@@ -1,9 +1,11 @@
+import asyncio
 import logging
 import sys
 import json
 from datetime import datetime
 
 from settings import settings
+from services.kafka_logger_producer import kafka_logger_producer
 
 
 class AppLogger:
@@ -37,7 +39,16 @@ class JSONFormatter(logging.Formatter):
             "function": record.funcName,
             "line": record.lineno,
         }
+
+        asyncio.create_task(self._send_to_kafka(log_entry))
+
         return json.dumps(log_entry)
+
+    async def _send_to_kafka(self, log_data: dict):
+        try:
+            await kafka_logger_producer.send_log(log_data)
+        except Exception:
+            pass
 
 
 def get_logger(name: str = "app") -> logging.Logger:
