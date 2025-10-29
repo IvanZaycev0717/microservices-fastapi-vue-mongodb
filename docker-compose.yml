@@ -114,8 +114,6 @@ services:
       - notification_db
       - minio
       - elasticsearch
-    volumes:
-    - ./backend/admin_service/src:/app/src
 
   admin_gui:
     build:
@@ -381,6 +379,22 @@ services:
         timeout: 10s
         retries: 5
         start_period: 60s
+  
+  filebeat:
+    build:
+      context: ./filebeat
+      dockerfile: Dockerfile
+    container_name: filebeat
+    depends_on:
+      - broker-1
+      - broker-2
+      - broker-3
+      - controller-1
+      - controller-2
+      - controller-3
+      - elasticsearch
+    restart: unless-stopped
+    command: ["filebeat", "-e", "-c", "/usr/share/filebeat/filebeat.yml"]
   
   kibana:
     image: kibana:9.1.5

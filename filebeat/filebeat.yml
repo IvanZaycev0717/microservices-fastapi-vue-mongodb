@@ -1,0 +1,30 @@
+filebeat.inputs:
+- type: kafka
+  hosts: ["broker-1:19092", "broker-2:19092", "broker-3:19092"]
+  topics: ["admin_service_logs"]
+  group_id: "filebeat"
+  consumer_group: "filebeat-logs-group"
+
+processors:
+  - decode_json_fields:
+      fields: ["message"]
+      target: ""
+      overwrite_keys: true
+      add_error_key: true
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "admin_service_logs"
+  protocol: "http"
+
+setup.ilm.enabled: false
+setup.template.enabled: false
+output.elasticsearch.allow_auto_create: true
+
+logging.level: debug
+logging.to_files: true
+logging.files:
+  path: /usr/share/filebeat/logs
+  name: filebeat
+  keepfields: 7
+  permissions: 0644
