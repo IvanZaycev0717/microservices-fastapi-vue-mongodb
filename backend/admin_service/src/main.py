@@ -24,7 +24,7 @@ from notification_admin.routes import notification
 from services.data_loader import DataLoader
 from services.kafka_producer import kafka_producer
 from services.kafka_topic_management import kafka_topic_manager
-from services.logger import close_logging, get_logger
+from services.logger import get_logger
 from services.minio_management import MinioCRUD
 from services.mongo_db_management import (
     MongoCollectionsManager,
@@ -148,7 +148,6 @@ async def lifespan(app: FastAPI):
 
         minio_crud = MinioCRUD()
 
-        
         data_loader = DataLoader(
             settings.CONTENT_ADMIN_PATH, settings.INITIAL_DATA_LOADING_FILES
         )
@@ -254,7 +253,6 @@ async def lifespan(app: FastAPI):
             await engine.dispose()
 
         close_tasks.append(kafka_producer.close())
-        await close_logging()
 
         if close_tasks:
             results = await asyncio.gather(
@@ -407,8 +405,8 @@ if __name__ == "__main__":
     
     uvicorn.run(
         app,
-        host="0.0.0.0",
-        port=8000,
+        host=settings.BASE_HOST,
+        port=settings.BASE_PORT,
         log_config={
             "version": 1,
             "disable_existing_loggers": False,
