@@ -1,4 +1,3 @@
-from bson import ObjectId
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.database import AsyncDatabase
 
@@ -7,7 +6,7 @@ from crud.token import TokenCRUD
 from logger import get_logger
 from settings import settings
 
-logger = get_logger(f"{settings.GRPC_AUTH_NAME} - Database")
+logger = get_logger("Database")
 
 
 class DatabaseManager:
@@ -54,5 +53,4 @@ class DatabaseManager:
         return TokenCRUD(self.db)
 
 
-# Global database instance
 db_manager = DatabaseManager()

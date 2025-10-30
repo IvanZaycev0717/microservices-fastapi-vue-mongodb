@@ -4,63 +4,62 @@
 # source: auth.proto
 # Protobuf Python Version: 6.31.1
 """Generated protocol buffer code."""
-from google.protobuf import descriptor as _descriptor
-from google.protobuf import descriptor_pool as _descriptor_pool
-from google.protobuf import runtime_version as _runtime_version
-from google.protobuf import symbol_database as _symbol_database
+
+from google.protobuf import (
+    descriptor as _descriptor,
+    descriptor_pool as _descriptor_pool,
+    runtime_version as _runtime_version,
+    symbol_database as _symbol_database,
+)
 from google.protobuf.internal import builder as _builder
+
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC,
-    6,
-    31,
-    1,
-    '',
-    'auth.proto'
+    _runtime_version.Domain.PUBLIC, 6, 31, 1, "", "auth.proto"
 )
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-
-
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nauth.proto\x12\x04\x61uth\"/\n\x0cLoginRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"\x8f\x01\n\rLoginResponse\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\x12\x15\n\rrefresh_token\x18\x02 \x01(\t\x12\x12\n\ntoken_type\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\t\x12\x12\n\nexpires_in\x18\x05 \x01(\x03\x12\x18\n\x04user\x18\x06 \x01(\x0b\x32\n.auth.User\"A\n\x0fRegisterRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\r\n\x05roles\x18\x03 \x03(\t\"\x92\x01\n\x10RegisterResponse\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\x12\x15\n\rrefresh_token\x18\x02 \x01(\t\x12\x12\n\ntoken_type\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\t\x12\x12\n\nexpires_in\x18\x05 \x01(\x03\x12\x18\n\x04user\x18\x06 \x01(\x0b\x32\n.auth.User\"&\n\rLogoutRequest\x12\x15\n\rrefresh_token\x18\x01 \x01(\t\"2\n\x0eLogoutResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\",\n\x13RefreshTokenRequest\x12\x15\n\rrefresh_token\x18\x01 \x01(\t\"k\n\x14RefreshTokenResponse\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\x12\x15\n\rrefresh_token\x18\x02 \x01(\t\x12\x12\n\ntoken_type\x18\x03 \x01(\t\x12\x12\n\nexpires_in\x18\x04 \x01(\x03\"#\n\x12VerifyTokenRequest\x12\r\n\x05token\x18\x01 \x01(\t\"b\n\x13VerifyTokenResponse\x12\r\n\x05valid\x18\x01 \x01(\x08\x12\x0f\n\x07user_id\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\r\n\x05roles\x18\x04 \x03(\t\x12\r\n\x05\x65rror\x18\x05 \x01(\t\"&\n\x15\x46orgotPasswordRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\"O\n\x16\x46orgotPasswordResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x13\n\x0breset_token\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"P\n\x14ResetPasswordRequest\x12\x13\n\x0breset_token\x18\x01 \x01(\t\x12\x14\n\x0cnew_password\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\"Y\n\x15ResetPasswordResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\t\x12\r\n\x05\x65mail\x18\x04 \x01(\t\"n\n\x04User\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\r\n\x05roles\x18\x03 \x03(\t\x12\x11\n\tis_banned\x18\x04 \x01(\x08\x12\x12\n\ncreated_at\x18\x05 \x01(\t\x12\x15\n\rlast_login_at\x18\x06 \x01(\t2\xd1\x03\n\x0b\x41uthService\x12\x30\n\x05Login\x12\x12.auth.LoginRequest\x1a\x13.auth.LoginResponse\x12\x39\n\x08Register\x12\x15.auth.RegisterRequest\x1a\x16.auth.RegisterResponse\x12\x33\n\x06Logout\x12\x13.auth.LogoutRequest\x1a\x14.auth.LogoutResponse\x12\x45\n\x0cRefreshToken\x12\x19.auth.RefreshTokenRequest\x1a\x1a.auth.RefreshTokenResponse\x12\x42\n\x0bVerifyToken\x12\x18.auth.VerifyTokenRequest\x1a\x19.auth.VerifyTokenResponse\x12K\n\x0e\x46orgotPassword\x12\x1b.auth.ForgotPasswordRequest\x1a\x1c.auth.ForgotPasswordResponse\x12H\n\rResetPassword\x12\x1a.auth.ResetPasswordRequest\x1a\x1b.auth.ResetPasswordResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\nauth.proto\x12\x04\x61uth"/\n\x0cLoginRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t"\x8f\x01\n\rLoginResponse\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\x12\x15\n\rrefresh_token\x18\x02 \x01(\t\x12\x12\n\ntoken_type\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\t\x12\x12\n\nexpires_in\x18\x05 \x01(\x03\x12\x18\n\x04user\x18\x06 \x01(\x0b\x32\n.auth.User"A\n\x0fRegisterRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\r\n\x05roles\x18\x03 \x03(\t"\x92\x01\n\x10RegisterResponse\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\x12\x15\n\rrefresh_token\x18\x02 \x01(\t\x12\x12\n\ntoken_type\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\t\x12\x12\n\nexpires_in\x18\x05 \x01(\x03\x12\x18\n\x04user\x18\x06 \x01(\x0b\x32\n.auth.User"&\n\rLogoutRequest\x12\x15\n\rrefresh_token\x18\x01 \x01(\t"2\n\x0eLogoutResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t",\n\x13RefreshTokenRequest\x12\x15\n\rrefresh_token\x18\x01 \x01(\t"k\n\x14RefreshTokenResponse\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\t\x12\x15\n\rrefresh_token\x18\x02 \x01(\t\x12\x12\n\ntoken_type\x18\x03 \x01(\t\x12\x12\n\nexpires_in\x18\x04 \x01(\x03"#\n\x12VerifyTokenRequest\x12\r\n\x05token\x18\x01 \x01(\t"b\n\x13VerifyTokenResponse\x12\r\n\x05valid\x18\x01 \x01(\x08\x12\x0f\n\x07user_id\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\r\n\x05roles\x18\x04 \x03(\t\x12\r\n\x05\x65rror\x18\x05 \x01(\t"&\n\x15\x46orgotPasswordRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t"O\n\x16\x46orgotPasswordResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x13\n\x0breset_token\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t"P\n\x14ResetPasswordRequest\x12\x13\n\x0breset_token\x18\x01 \x01(\t\x12\x14\n\x0cnew_password\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t"Y\n\x15ResetPasswordResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\t\x12\r\n\x05\x65mail\x18\x04 \x01(\t"n\n\x04User\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\r\n\x05roles\x18\x03 \x03(\t\x12\x11\n\tis_banned\x18\x04 \x01(\x08\x12\x12\n\ncreated_at\x18\x05 \x01(\t\x12\x15\n\rlast_login_at\x18\x06 \x01(\t2\xd1\x03\n\x0b\x41uthService\x12\x30\n\x05Login\x12\x12.auth.LoginRequest\x1a\x13.auth.LoginResponse\x12\x39\n\x08Register\x12\x15.auth.RegisterRequest\x1a\x16.auth.RegisterResponse\x12\x33\n\x06Logout\x12\x13.auth.LogoutRequest\x1a\x14.auth.LogoutResponse\x12\x45\n\x0cRefreshToken\x12\x19.auth.RefreshTokenRequest\x1a\x1a.auth.RefreshTokenResponse\x12\x42\n\x0bVerifyToken\x12\x18.auth.VerifyTokenRequest\x1a\x19.auth.VerifyTokenResponse\x12K\n\x0e\x46orgotPassword\x12\x1b.auth.ForgotPasswordRequest\x1a\x1c.auth.ForgotPasswordResponse\x12H\n\rResetPassword\x12\x1a.auth.ResetPasswordRequest\x1a\x1b.auth.ResetPasswordResponseb\x06proto3'
+)
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'auth_pb2', _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "auth_pb2", _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
-  _globals['_LOGINREQUEST']._serialized_start=20
-  _globals['_LOGINREQUEST']._serialized_end=67
-  _globals['_LOGINRESPONSE']._serialized_start=70
-  _globals['_LOGINRESPONSE']._serialized_end=213
-  _globals['_REGISTERREQUEST']._serialized_start=215
-  _globals['_REGISTERREQUEST']._serialized_end=280
-  _globals['_REGISTERRESPONSE']._serialized_start=283
-  _globals['_REGISTERRESPONSE']._serialized_end=429
-  _globals['_LOGOUTREQUEST']._serialized_start=431
-  _globals['_LOGOUTREQUEST']._serialized_end=469
-  _globals['_LOGOUTRESPONSE']._serialized_start=471
-  _globals['_LOGOUTRESPONSE']._serialized_end=521
-  _globals['_REFRESHTOKENREQUEST']._serialized_start=523
-  _globals['_REFRESHTOKENREQUEST']._serialized_end=567
-  _globals['_REFRESHTOKENRESPONSE']._serialized_start=569
-  _globals['_REFRESHTOKENRESPONSE']._serialized_end=676
-  _globals['_VERIFYTOKENREQUEST']._serialized_start=678
-  _globals['_VERIFYTOKENREQUEST']._serialized_end=713
-  _globals['_VERIFYTOKENRESPONSE']._serialized_start=715
-  _globals['_VERIFYTOKENRESPONSE']._serialized_end=813
-  _globals['_FORGOTPASSWORDREQUEST']._serialized_start=815
-  _globals['_FORGOTPASSWORDREQUEST']._serialized_end=853
-  _globals['_FORGOTPASSWORDRESPONSE']._serialized_start=855
-  _globals['_FORGOTPASSWORDRESPONSE']._serialized_end=934
-  _globals['_RESETPASSWORDREQUEST']._serialized_start=936
-  _globals['_RESETPASSWORDREQUEST']._serialized_end=1016
-  _globals['_RESETPASSWORDRESPONSE']._serialized_start=1018
-  _globals['_RESETPASSWORDRESPONSE']._serialized_end=1107
-  _globals['_USER']._serialized_start=1109
-  _globals['_USER']._serialized_end=1219
-  _globals['_AUTHSERVICE']._serialized_start=1222
-  _globals['_AUTHSERVICE']._serialized_end=1687
+    DESCRIPTOR._loaded_options = None
+    _globals["_LOGINREQUEST"]._serialized_start = 20
+    _globals["_LOGINREQUEST"]._serialized_end = 67
+    _globals["_LOGINRESPONSE"]._serialized_start = 70
+    _globals["_LOGINRESPONSE"]._serialized_end = 213
+    _globals["_REGISTERREQUEST"]._serialized_start = 215
+    _globals["_REGISTERREQUEST"]._serialized_end = 280
+    _globals["_REGISTERRESPONSE"]._serialized_start = 283
+    _globals["_REGISTERRESPONSE"]._serialized_end = 429
+    _globals["_LOGOUTREQUEST"]._serialized_start = 431
+    _globals["_LOGOUTREQUEST"]._serialized_end = 469
+    _globals["_LOGOUTRESPONSE"]._serialized_start = 471
+    _globals["_LOGOUTRESPONSE"]._serialized_end = 521
+    _globals["_REFRESHTOKENREQUEST"]._serialized_start = 523
+    _globals["_REFRESHTOKENREQUEST"]._serialized_end = 567
+    _globals["_REFRESHTOKENRESPONSE"]._serialized_start = 569
+    _globals["_REFRESHTOKENRESPONSE"]._serialized_end = 676
+    _globals["_VERIFYTOKENREQUEST"]._serialized_start = 678
+    _globals["_VERIFYTOKENREQUEST"]._serialized_end = 713
+    _globals["_VERIFYTOKENRESPONSE"]._serialized_start = 715
+    _globals["_VERIFYTOKENRESPONSE"]._serialized_end = 813
+    _globals["_FORGOTPASSWORDREQUEST"]._serialized_start = 815
+    _globals["_FORGOTPASSWORDREQUEST"]._serialized_end = 853
+    _globals["_FORGOTPASSWORDRESPONSE"]._serialized_start = 855
+    _globals["_FORGOTPASSWORDRESPONSE"]._serialized_end = 934
+    _globals["_RESETPASSWORDREQUEST"]._serialized_start = 936
+    _globals["_RESETPASSWORDREQUEST"]._serialized_end = 1016
+    _globals["_RESETPASSWORDRESPONSE"]._serialized_start = 1018
+    _globals["_RESETPASSWORDRESPONSE"]._serialized_end = 1107
+    _globals["_USER"]._serialized_start = 1109
+    _globals["_USER"]._serialized_end = 1219
+    _globals["_AUTHSERVICE"]._serialized_start = 1222
+    _globals["_AUTHSERVICE"]._serialized_end = 1687
 # @@protoc_insertion_point(module_scope)

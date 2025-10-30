@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from settings import settings
 
-logger = logging.getLogger(f"{settings.GRPC_AUTH_NAME} - KafkaProducer")
+logger = logging.getLogger("KafkaProducer")
 
 
 class PasswordResetMessage(BaseModel):
@@ -142,7 +142,9 @@ class KafkaProducer:
             logger.exception(f"Failed to send password reset message: {e}")
             return False
 
-    def send_password_reset_success(self, message: PasswordResetSuccessMessage) -> bool:
+    def send_password_reset_success(
+        self, message: PasswordResetSuccessMessage
+    ) -> bool:
         """Send password reset success message to Kafka topic.
 
         Args:
@@ -162,14 +164,18 @@ class KafkaProducer:
             )
 
             self.producer.poll(1)
-            logger.info(f"Password reset success message sent for: {message.email}")
+            logger.info(
+                f"Password reset success message sent for: {message.email}"
+            )
             return True
 
         except BufferError as e:
             logger.error(f"Producer queue full: {e}")
             return False
         except Exception as e:
-            logger.exception(f"Failed to send password reset success message: {e}")
+            logger.exception(
+                f"Failed to send password reset success message: {e}"
+            )
             return False
 
     def flush(self) -> None:

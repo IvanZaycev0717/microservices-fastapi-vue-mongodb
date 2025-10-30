@@ -3,7 +3,7 @@ import bcrypt
 from logger import get_logger
 from settings import settings
 
-logger = get_logger(f"{settings.GRPC_AUTH_NAME} - password-processor")
+logger = get_logger("password-processor")
 
 
 def get_password_hash(password: str) -> str | None:

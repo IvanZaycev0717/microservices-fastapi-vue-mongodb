@@ -4,6 +4,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from services.database import db_manager
+
 os.environ.update(
     {
         "GRPC_AUTH_MONGODB_URL": "mongodb://test:test@localhost:27017/test",
@@ -28,7 +30,6 @@ os.environ.update(
     }
 )
 
-from services.database import db_manager
 
 
 @pytest.fixture(scope="session")

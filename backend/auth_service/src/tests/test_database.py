@@ -1,7 +1,7 @@
+import datetime
 from unittest.mock import AsyncMock
 
 from services.database import db_manager
-import datetime
 
 
 class TestDatabase:

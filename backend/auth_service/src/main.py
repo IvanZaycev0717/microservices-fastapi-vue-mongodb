@@ -13,11 +13,35 @@ from services.kafka_producer import kafka_producer
 from services.kafka_topic_management import ensure_topics_exist
 from settings import settings
 
-logger = get_logger(f"{settings.GRPC_AUTH_NAME} - Main")
+logger = get_logger("Main")
 
 
 class HealthServicer(health_pb2_grpc.HealthServicer):
+    """gRPC health check servicer implementation for database connectivity.
+
+    Implements the Health service Check method to verify database connectivity
+    and report service health status.
+
+    Methods:
+        Check: Performs health check by testing database connection.
+    """
+
     async def Check(self, request, context):
+        """Performs health check by testing database connectivity.
+
+        Args:
+            request: The health check request object.
+            context: gRPC servicer context.
+
+        Returns:
+            health_pb2.HealthCheckResponse: Health check response with status:
+                - SERVING if database ping succeeds
+                - NOT_SERVING if database ping fails
+
+        Note:
+            Uses MongoDB's ping command to verify database connectivity.
+            Returns NOT_SERVING status for any exception during ping.
+        """
         try:
             await db_manager.db.command("ping")
             return health_pb2.HealthCheckResponse(
@@ -30,7 +54,24 @@ class HealthServicer(health_pb2_grpc.HealthServicer):
 
 
 async def serve() -> None:
-    """Starts the gRPC server and manages dependencies."""
+    """Starts and runs the gRPC server with all required dependencies.
+
+    Initializes database connection, Kafka producer, and gRPC server with
+    service registration and reflection. Manages server lifecycle and
+    graceful shutdown.
+
+    Raises:
+        Exception: Any exception encountered during server startup that
+        prevents the server from starting properly.
+
+    Note:
+        - Establishes database connection before starting services
+        - Verifies Kafka topics exist and initializes producer
+        - Registers HealthServicer and AuthService with gRPC server
+        - Enables server reflection for service discovery
+        - Uses configuration from settings for server address
+        - Ensures proper cleanup of resources on shutdown
+    """
     try:
         await db_manager.connect()
         logger.info("Database connection established")

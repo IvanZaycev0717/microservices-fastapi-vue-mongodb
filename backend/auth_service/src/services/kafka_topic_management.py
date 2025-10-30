@@ -5,7 +5,7 @@ from confluent_kafka.admin import AdminClient, NewTopic
 
 from settings import settings
 
-logger = logging.getLogger(f"{settings.GRPC_AUTH_NAME} - KafkaTopics")
+logger = logging.getLogger("KafkaTopics")
 
 
 async def wait_for_kafka_ready(
@@ -32,7 +32,6 @@ async def wait_for_kafka_ready(
                 }
             )
 
-            # Try to list topics - this validates cluster connectivity
             admin.list_topics(timeout=5)
             logger.info("Kafka cluster is ready")
             return
@@ -70,7 +69,7 @@ async def create_kafka_topics():
             settings.KAFKA_PASSWORD_RESET_SUCCESS_TOPIC,
             num_partitions=3,
             replication_factor=1,
-        )
+        ),
     ]
 
     try:

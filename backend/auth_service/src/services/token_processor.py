@@ -9,7 +9,7 @@ from pydantic import SecretStr
 from logger import get_logger
 from settings import settings
 
-logger = get_logger(f"{settings.GRPC_AUTH_NAME} - token-processor")
+logger = get_logger("token-processor")
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
