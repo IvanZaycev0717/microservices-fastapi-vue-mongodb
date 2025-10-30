@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from bson import ObjectId
 from pymongo import ASCENDING, DESCENDING
@@ -15,7 +15,7 @@ class CertificatesCRUD:
         """Create new certificate document in MongoDB collection.
 
         Args:
-            certificate_data: Dictionary with certificate data.
+            certificate_data: dictionary with certificate data.
 
         Returns:
             str: String representation of inserted document's ObjectId.
@@ -27,7 +27,7 @@ class CertificatesCRUD:
         return str(result.inserted_id)
 
     # READ
-    async def read_all(self, sort: str = "date_desc") -> List[Dict[str, Any]]:
+    async def read_all(self, sort: str = "date_desc") -> list[dict[str, Any]]:
         if sort.startswith("date"):
             sort_field = "date"
             sort_direction = DESCENDING if sort.endswith("desc") else ASCENDING
@@ -56,14 +56,14 @@ class CertificatesCRUD:
 
     async def read_one_by_id(
         self, certificate_id: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[dict[str, Any]]:
         """Get single certificate by ID.
 
         Args:
             certificate_id: MongoDB document ID as string.
 
         Returns:
-            Optional[Dict]: Certificate data if found, None otherwise.
+            Optional[dict]: Certificate data if found, None otherwise.
 
         Raises:
             InvalidId: If certificate_id is not a valid ObjectId.
@@ -87,13 +87,13 @@ class CertificatesCRUD:
 
     # UPDATE
     async def update(
-        self, certificate_id: str, update_data: Dict[str, Any]
+        self, certificate_id: str, update_data: dict[str, Any]
     ) -> bool:
         """Update certificate document by ID.
 
         Args:
             certificate_id: MongoDB document ID as string.
-            update_data: Dictionary with fields to update.
+            update_data: dictionary with fields to update.
 
         Returns:
             bool: True if document was updated, False if not found.

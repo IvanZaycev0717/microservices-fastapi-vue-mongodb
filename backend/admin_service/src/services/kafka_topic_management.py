@@ -56,7 +56,7 @@ class KafkaTopicManager:
         """
         topics = [
             (settings.KAFKA_CACHE_INVALIDATION_TOPIC, 1, 1),
-            (settings.KAFKA_LOGS_TOPIC, 1, 1)  # Добавляем топик для логов
+            (settings.KAFKA_LOGS_TOPIC, 1, 1),
         ]
 
         results = []

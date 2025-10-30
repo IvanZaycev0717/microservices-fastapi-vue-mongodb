@@ -66,7 +66,7 @@ class PostgresConnectionManager:
             logger.info("PostgreSQL connection successful")
             return self.connection
 
-        except InvalidPasswordError as e:
+        except InvalidPasswordError:
             logger.exception(
                 "PostgreSQL authentication failed: invalid login or password"
             )

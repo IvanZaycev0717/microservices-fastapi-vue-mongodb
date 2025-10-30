@@ -1,6 +1,5 @@
 import asyncio
 from contextlib import asynccontextmanager
-from datetime import datetime
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,6 +21,7 @@ from content_admin.routes import (
 )
 from notification_admin.routes import notification
 from services.data_loader import DataLoader
+from services.kafka_logger_producer import kafka_logger_producer
 from services.kafka_producer import kafka_producer
 from services.kafka_topic_management import kafka_topic_manager
 from services.logger import get_logger
@@ -36,7 +36,6 @@ from services.postgres_db_management import (
     PostgresDatabaseManager,
 )
 from settings import settings
-from services.kafka_logger_producer import kafka_logger_producer
 
 logger = get_logger("main")
 
@@ -136,7 +135,7 @@ async def lifespan(app: FastAPI):
             port=settings.COMMENTS_ADMIN_POSTGRES_PORT,
             user=settings.POSTGRES_USER,
             password=settings.POSTGRES_PASSWORD,
-            database=settings.COMMENTS_ADMIN_POSTGRES_DB_NAME,  # ← теперь к нашей БД
+            database=settings.COMMENTS_ADMIN_POSTGRES_DB_NAME,
         )
 
         comments_admin_client = await connections[
@@ -162,7 +161,7 @@ async def lifespan(app: FastAPI):
         buckets = [
             (settings.ABOUT_BUCKET_NAME, "ABOUT"),
             (settings.PROJECTS_BUCKET_NAME, "PROJECTS"),
-            (settings.CERTIFICATES_BUCKET_NAME, "CERTIFICATES")
+            (settings.CERTIFICATES_BUCKET_NAME, "CERTIFICATES"),
         ]
 
         for bucket_name, bucket_type in buckets:
@@ -405,7 +404,7 @@ async def ensure_mongo_database(
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         app,
         host=settings.BASE_HOST,
@@ -413,22 +412,30 @@ if __name__ == "__main__":
         log_config={
             "version": 1,
             "disable_existing_loggers": False,
-            "formatters": {
-                "json": {
-                    "()": "services.logger.JSONFormatter"
-                }
-            },
+            "formatters": {"json": {"()": "services.logger.JSONFormatter"}},
             "handlers": {
                 "default": {
                     "formatter": "json",
                     "class": "logging.StreamHandler",
-                    "stream": "ext://sys.stdout"
+                    "stream": "ext://sys.stdout",
                 }
             },
             "loggers": {
-                "uvicorn": {"handlers": ["default"], "level": "INFO", "propagate": False},
-                "uvicorn.access": {"handlers": ["default"], "level": "INFO", "propagate": False},
-                "uvicorn.error": {"handlers": ["default"], "level": "INFO", "propagate": False},
-            }
-        }
+                "uvicorn": {
+                    "handlers": ["default"],
+                    "level": "INFO",
+                    "propagate": False,
+                },
+                "uvicorn.access": {
+                    "handlers": ["default"],
+                    "level": "INFO",
+                    "propagate": False,
+                },
+                "uvicorn.error": {
+                    "handlers": ["default"],
+                    "level": "INFO",
+                    "propagate": False,
+                },
+            },
+        },
     )

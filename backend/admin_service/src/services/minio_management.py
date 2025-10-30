@@ -1,6 +1,5 @@
 import io
 import json
-from urllib.parse import urlparse
 
 from minio import Minio
 from starlette.concurrency import run_in_threadpool
@@ -93,28 +92,6 @@ class MinioCRUD(MinioManager):
         super().__init__()
         self.minio_host = settings.MINIO_PUBLIC_URL
         self.minio_port = settings.MINIO_API_PORT
-
-    async def upload_file(
-        self, bucket_name: str, object_name: str, file_data: bytes
-    ) -> str:
-        """Uploads file data to existing MinIO bucket.
-
-        Args:
-            bucket_name: Name of the bucket to upload to.
-            object_name: Name of the object to create.
-            file_data: Binary data of the file to upload.
-
-        Returns:
-            str: Public URL to access the uploaded file.
-        """
-        await run_in_threadpool(
-            self.client.put_object,
-            bucket_name,
-            object_name,
-            io.BytesIO(file_data),
-            len(file_data),
-        )
-        return f"{settings.MINIO_PUBLIC_URL}/{bucket_name}/{object_name}"
 
     async def upload_file(
         self, bucket_name: str, object_name: str, file_data: bytes

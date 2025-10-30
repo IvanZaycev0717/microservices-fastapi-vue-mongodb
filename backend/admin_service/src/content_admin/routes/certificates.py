@@ -63,7 +63,8 @@ async def get_certificates(
         results = await certificates_crud.read_all(sort=sort.value)
         if not results:
             raise HTTPException(
-                status_code=404, detail="Certificates not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Certificates not found",
             )
         logger.info("All certificates successfully fetched")
         return results
@@ -71,7 +72,10 @@ async def get_certificates(
         logger.exception(e)
     except Exception as e:
         logger.exception(f"Database error: {e}")
-        raise HTTPException(500, detail="Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -123,11 +127,15 @@ async def create_certificate(
         else:
             await file.seek(0)
             if not await has_image_allowed_extention(file):
-                raise HTTPException(400, "Invalid image format")
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST, "Invalid image format"
+                )
             if not await has_image_proper_size_kb(
                 file, settings.CERTIFICATE_MAX_IMAGE_SIZE_KB
             ):
-                raise HTTPException(400, "Image size exceeds limit")
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST, "Image size exceeds limit"
+                )
             processing_file = file
 
         main_image_resized = await resize_image(
@@ -172,7 +180,9 @@ async def create_certificate(
         raise
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
-        raise HTTPException(500, "Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal server error"
+        )
 
 
 @router.get("/{certificate_id}")
@@ -256,7 +266,8 @@ async def update_certificate_image(
         current_cert = await certificates_crud.read_one_by_id(certificate_id)
         if not current_cert:
             raise HTTPException(
-                404, f"Certificate with id {certificate_id} not found"
+                status.HTTP_404_NOT_FOUND,
+                f"Certificate with id {certificate_id} not found",
             )
 
         file_bytes = await file.read()
@@ -273,11 +284,15 @@ async def update_certificate_image(
         else:
             await file.seek(0)
             if not await has_image_allowed_extention(file):
-                raise HTTPException(400, "Invalid image format")
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST, "Invalid image format"
+                )
             if not await has_image_proper_size_kb(
                 file, settings.CERTIFICATE_MAX_IMAGE_SIZE_KB
             ):
-                raise HTTPException(400, "Image size exceeds limit")
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST, "Image size exceeds limit"
+                )
             processing_file = file
 
         main_image_resized = await resize_image(
@@ -326,7 +341,10 @@ async def update_certificate_image(
 
         updated = await certificates_crud.update(certificate_id, update_data)
         if not updated:
-            raise HTTPException(500, "Failed to update certificate image")
+            raise HTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "Failed to update certificate image",
+            )
 
         logger.info(f"Certificate image updated: {certificate_id}")
         return "Certificate image updated successfully"
@@ -335,7 +353,9 @@ async def update_certificate_image(
         raise
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
-        raise HTTPException(500, "Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal server error"
+        )
 
 
 @router.patch("/{certificate_id}")
@@ -374,14 +394,18 @@ async def update_certificate_popularity(
         current_cert = await certificates_crud.read_one_by_id(certificate_id)
         if not current_cert:
             raise HTTPException(
-                404, f"Certificate with id {certificate_id} not found"
+                status.HTTP_404_NOT_FOUND,
+                f"Certificate with id {certificate_id} not found",
             )
 
         updated = await certificates_crud.update(
             certificate_id, {"popularity": popularity}
         )
         if not updated:
-            raise HTTPException(500, "Failed to update certificate popularity")
+            raise HTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "Failed to update certificate popularity",
+            )
 
         return "Certificate popularity updated successfully"
 
@@ -389,7 +413,9 @@ async def update_certificate_popularity(
         raise
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
-        raise HTTPException(500, "Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal server error"
+        )
 
 
 @router.delete("/{certificate_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -421,7 +447,8 @@ async def delete_certificate(
         certificate = await certificates_crud.read_one_by_id(certificate_id)
         if not certificate:
             raise HTTPException(
-                404, f"Certificate with id {certificate_id} not found"
+                status.HTTP_404_NOT_FOUND,
+                f"Certificate with id {certificate_id} not found",
             )
 
         try:
@@ -445,11 +472,14 @@ async def delete_certificate(
         deleted = await certificates_crud.delete(certificate_id)
         if not deleted:
             raise HTTPException(
-                500, "Failed to delete certificate from database"
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "Failed to delete certificate from database",
             )
 
     except HTTPException:
         raise
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
-        raise HTTPException(500, "Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal server error"
+        )

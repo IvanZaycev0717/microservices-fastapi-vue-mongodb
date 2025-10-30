@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -21,7 +21,7 @@ class ProjectsCRUD:
         """Create new project document in MongoDB collection.
 
         Args:
-            project_data: Dictionary with project data including multilingual fields.
+            project_data: dictionary with project data including multilingual fields.
 
         Returns:
             str: String representation of inserted document's ObjectId.
@@ -35,7 +35,7 @@ class ProjectsCRUD:
     # READ
     async def read_all(
         self, lang: str, sort: str = "date_desc"
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         if sort.startswith("date"):
             sort_field = "date"
             sort_direction = DESCENDING if sort.endswith("desc") else ASCENDING
@@ -80,7 +80,7 @@ class ProjectsCRUD:
                 )
         return transformed_results
 
-    async def read_by_id(self, project_id: str, lang: str) -> Dict[str, Any]:
+    async def read_by_id(self, project_id: str, lang: str) -> dict[str, Any]:
         """Retrieve a project by ID with optional language translation.
 
         Args:
@@ -88,7 +88,7 @@ class ProjectsCRUD:
             lang (str): Language code for translation ('en' or 'ru').
 
         Returns:
-            Dict[str, Any]: Project data as dictionary if found, None otherwise.
+            dict[str, Any]: Project data as dictionary if found, None otherwise.
         """
         try:
             object_id = ObjectId(project_id)
@@ -128,13 +128,13 @@ class ProjectsCRUD:
 
     # UPDATE
     async def update(
-        self, project_id: str, update_data: Dict[str, Any]
+        self, project_id: str, update_data: dict[str, Any]
     ) -> None:
         """Update project document by ID.
 
         Args:
             project_id (str): ID of the project to update.
-            update_data (Dict[str, Any]): Dictionary containing fields to update.
+            update_data (dict[str, Any]): dictionary containing fields to update.
         """
         await self.collection.update_one(
             {"_id": ObjectId(project_id)}, {"$set": update_data}

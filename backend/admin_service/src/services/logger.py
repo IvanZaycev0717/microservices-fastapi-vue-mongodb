@@ -1,11 +1,11 @@
 import asyncio
+import json
 import logging
 import sys
-import json
 from datetime import datetime
 
-from settings import settings
 from services.kafka_logger_producer import kafka_logger_producer
+from settings import settings
 
 
 class AppLogger:

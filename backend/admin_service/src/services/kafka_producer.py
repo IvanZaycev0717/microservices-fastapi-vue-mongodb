@@ -19,9 +19,9 @@ class KafkaCacheInvalidationProducer:
         self.producer: AIOProducer | None = None
         self.config = {
             "bootstrap.servers": settings.KAFKA_BOOTSTRAP_SERVERS,
-            "enable.idempotence": True,
-            "acks": "all",
-            "retries": 3,
+            "enable.idempotence": settings.KAFKA_IS_IDEMPOTENCE_ENABLED,
+            "acks": settings.KAFKA_ACKS,
+            "retries": settings.KAFKA_RETRIES,
         }
 
     async def connect(self):

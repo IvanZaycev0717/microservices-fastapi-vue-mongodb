@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 
@@ -11,7 +10,7 @@ logger = logging.getLogger("KafkaLoggerProducer")
 
 class KafkaLoggerProducer:
     """Kafka producer for sending logs to Kafka topic."""
-    
+
     def __init__(self):
         self.producer: AIOProducer | None = None
         self.config = {
@@ -32,7 +31,7 @@ class KafkaLoggerProducer:
 
     async def send_log(self, log_data: dict):
         """Send log entry to Kafka topic.
-        
+
         Args:
             log_data: Dictionary with log data
         """

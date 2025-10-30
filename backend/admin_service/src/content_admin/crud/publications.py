@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -38,7 +38,7 @@ class PublicationsCRUD:
     # READ
     async def read_all(
         self, lang: str, sort: str = "date_desc"
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Retrieve all publications with sorting and language options.
 
         Args:
@@ -46,7 +46,7 @@ class PublicationsCRUD:
             sort (str): Sorting criteria ('date_desc', 'date_asc', 'rating_desc').
 
         Returns:
-            List[Dict[str, Any]]: List of publication data as dictionaries.
+            list[dict[str, Any]]: list of publication data as dictionaries.
         """
         if sort.startswith("date"):
             sort_field = "date"
@@ -118,13 +118,13 @@ class PublicationsCRUD:
 
     # UPDATE
     async def update(
-        self, publication_id: str, update_data: Dict[str, Any]
+        self, publication_id: str, update_data: dict[str, Any]
     ) -> None:
         """Update publication document by ID.
 
         Args:
             publication_id (str): ID of the publication to update.
-            update_data (Dict[str, Any]): Dictionary containing fields to update.
+            update_data (dict[str, Any]): dictionary containing fields to update.
         """
         await self.collection.update_one(
             {"_id": ObjectId(publication_id)}, {"$set": update_data}

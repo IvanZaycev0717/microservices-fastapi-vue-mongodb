@@ -1,5 +1,5 @@
 import logging
-from typing import Annotated, Any, Dict, List
+from typing import Annotated, Any
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, Form, HTTPException, Path, status
@@ -30,7 +30,7 @@ async def get_publications(
     ),
     lang: Language = Language.EACH,
     sort: SortOrder = SortOrder.DATE_DESC,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Retrieve all publications with language and sorting options.
 
     Args:
@@ -40,7 +40,7 @@ async def get_publications(
         sort: Sorting order for publications.
 
     Returns:
-        List[Dict[str, Any]]: List of publication data.
+        list[dict[str, Any]]: list of publication data.
 
     Raises:
         HTTPException: If publications not found or internal error occurs.

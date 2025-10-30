@@ -83,6 +83,9 @@ class Settings(BaseSettings):
     KAFKA_CACHE_INVALIDATION_TOPIC: str = "cache-invalidation"
     KAFKA_LOGS_TOPIC: str = "admin_service_logs"
     KAFKA_LOGS_ENABLED: bool = True
+    KAFKA_IS_IDEMPOTENCE_ENABLED: bool = True
+    KAFKA_ACKS: str = "all"
+    KAFKA_RETRIES: int = 3
 
     # Tokens Settings
     ACCESS_TOKEN_EXPIRE_AT: timedelta = timedelta(minutes=30)
@@ -215,6 +218,13 @@ class Settings(BaseSettings):
 
     # Logging configuration
     LOGGING_LEVEL: int = Field(logging.INFO, description="Logging level")
+
+    # PDF Settings
+    PDF_FIRST_PAGE: int = 1
+    PDF_LAST_PAGE: int = 1
+    PDF_DPI: int = 300
+    PDF_OUTPUT_IMAGE_FORMAT: str = "webp"
+    PDF_THREAD_COUNT: int = 4
 
     # Email Settings
     IS_SEND_EMAIL_ENABLED: bool = True

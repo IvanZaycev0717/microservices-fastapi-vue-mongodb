@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -36,7 +35,7 @@ class Comment(Base):
     likes: Mapped[int] = mapped_column(Integer, default=0)
     dislikes: Mapped[int] = mapped_column(Integer, default=0)
 
-    children: Mapped[List["Comment"]] = relationship(
+    children: Mapped[list["Comment"]] = relationship(
         "Comment", cascade="all, delete-orphan", back_populates="parent"
     )
     parent: Mapped["Comment | None"] = relationship(

@@ -67,14 +67,20 @@ async def get_projects(
     try:
         result = await projects_crud.read_all(lang=lang.value, sort=sort.value)
         if not result:
-            raise HTTPException(status_code=404, detail="Projects not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Projects not found",
+            )
         logger.info("Projects data fetched successfully")
         return result
     except HTTPException as e:
         logger.exception(e)
     except Exception as e:
         logger.exception(f"Database error: {e}")
-        raise HTTPException(500, detail="Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.get("/{document_id}")
@@ -104,14 +110,20 @@ async def get_project_by_id(
     try:
         result = await projects_crud.read_by_id(document_id, lang.value)
         if not result:
-            raise HTTPException(status_code=404, detail="Project not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Project not found",
+            )
         logger.info(f"Project {document_id} fetched successfully")
         return result
     except HTTPException:
         raise
     except Exception as e:
         logger.exception(f"Database error: {e}")
-        raise HTTPException(500, detail="Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -144,11 +156,15 @@ async def create_project(
     """
     try:
         if not await has_image_allowed_extention(image):
-            raise HTTPException(400, "Invalid image format")
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, "Invalid image format"
+            )
         if not await has_image_proper_size_kb(
             image, settings.PROJECT_MAX_IMAGE_SIZE_KB
         ):
-            raise HTTPException(400, "Image size exceeds limit")
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, "Image size exceeds limit"
+            )
 
         image_data = await image.read()
         await image.seek(0)
@@ -195,7 +211,9 @@ async def create_project(
         raise
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
-        raise HTTPException(500, "Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal server error"
+        )
 
 
 @router.patch("/{document_id}/image")
@@ -227,14 +245,18 @@ async def update_project_image(
     try:
         project = await projects_crud.read_by_id(document_id, "en")
         if not project:
-            raise HTTPException(404, "Project not found")
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Project not found")
 
         if not await has_image_allowed_extention(image):
-            raise HTTPException(400, "Invalid image format")
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, "Invalid image format"
+            )
         if not await has_image_proper_size_kb(
             image, settings.PROJECT_MAX_IMAGE_SIZE_KB
         ):
-            raise HTTPException(400, "Image size exceeds limit")
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, "Image size exceeds limit"
+            )
 
         image_data = await image.read()
         await image.seek(0)
@@ -286,7 +308,9 @@ async def update_project_image(
         raise
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
-        raise HTTPException(500, "Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal server error"
+        )
 
 
 @router.patch("/{document_id}")
@@ -323,12 +347,16 @@ async def update_project(
                 detail="Only application/x-www-form-urlencoded data is supported",
             )
         if not ObjectId.is_valid(document_id):
-            raise HTTPException(404, f"Invalid Document ID': {document_id}")
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                f"Invalid Document ID': {document_id}",
+            )
 
         document = await projects_crud.read_by_id(document_id, "all")
         if not document:
             raise HTTPException(
-                404, f"Document with id {document_id} not found"
+                status.HTTP_404_NOT_FOUND,
+                f"Document with id {document_id} not found",
             )
 
         update_data = {"title": {}, "description": {}}
@@ -363,7 +391,9 @@ async def update_project(
         raise
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
-        raise HTTPException(500, "Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal server error"
+        )
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -389,7 +419,9 @@ async def delete_project(
     """
     try:
         if not ObjectId.is_valid(document_id):
-            raise HTTPException(400, "Invalid document ID format")
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, "Invalid document ID format"
+            )
 
         document = await projects_crud.read_by_id(document_id, Language.EN)
 

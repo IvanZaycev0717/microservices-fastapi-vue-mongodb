@@ -479,7 +479,9 @@ async def delete_user_by_email(
         user = await auth_crud.get_user_by_email(email)
         if not user:
             logger.warning(f"Attempt to delete non-existent user: {email}")
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
 
         await token_crud.collection.delete_many({"user_id": user.id})
 
@@ -487,7 +489,8 @@ async def delete_user_by_email(
         if not deleted:
             logger.error(f"Failed to delete user: {email}")
             raise HTTPException(
-                status_code=500, detail="Failed to delete user"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to delete user",
             )
 
         background_tasks.add_task(send_delete_notification_webhook, email)
@@ -498,7 +501,10 @@ async def delete_user_by_email(
         raise
     except Exception as e:
         logger.exception(f"Error during user deletion: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post("/refresh", response_model=dict)

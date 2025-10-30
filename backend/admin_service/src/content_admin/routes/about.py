@@ -77,14 +77,15 @@ async def get_about_content(
         result = await about_crud.read_all(lang)
         if not result:
             raise HTTPException(
-                status_code=404, detail="About content not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="About content not found",
             )
         logger.info("About collection fetched successfully")
         return result
     except Exception as e:
         logger.exception(f"Database error: {e}")
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while fetching about content",
         )
 
@@ -164,13 +165,13 @@ async def create_about_content(
         if not await has_image_allowed_extention(image):
             error_message = "Image invalid format"
             logger.exception(error_message)
-            raise HTTPException(400, error_message)
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, error_message)
         if not await has_image_proper_size_kb(
             image, settings.ABOUT_MAX_IMAGE_SIZE_KB
         ):
             error_message = "Image size exceeds 500KB"
             logger.exception(error_message)
-            raise HTTPException(400, error_message)
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, error_message)
 
         resized_image = await resize_image(
             image,
@@ -212,15 +213,23 @@ async def create_about_content(
 
     except ValidationError as e:
         logger.exception(f"Validation error: {e}")
-        raise HTTPException(422, detail=e.errors())
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.errors()
+        )
 
     except minio.error.S3Error as e:
         logger.exception(f"MinIO error: {e}")
-        raise HTTPException(500, detail="Failed to upload image to storage")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to upload image to storage",
+        )
 
     except Exception as e:
         logger.exception(f"Unexpected error: {e}")
-        raise HTTPException(500, detail="Internal server error")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.patch("/{document_id}/image", status_code=status.HTTP_200_OK)
@@ -263,14 +272,21 @@ async def update_about_image(
             raise ValueError(f"Invalid ObjectId format: {document_id}")
         current_document = await about_crud.read_one(document_id)
         if not current_document:
-            raise HTTPException(status_code=404, detail="Document not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found",
+            )
 
         if not await has_image_allowed_extention(image):
-            raise HTTPException(400, detail="Invalid image format")
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, detail="Invalid image format"
+            )
         if not await has_image_proper_size_kb(
             image, settings.ABOUT_MAX_IMAGE_SIZE_KB
         ):
-            raise HTTPException(400, detail="Image size exceeds limit")
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, detail="Image size exceeds limit"
+            )
 
         resized_image = await resize_image(
             image,
@@ -311,7 +327,10 @@ async def update_about_image(
 
     except Exception as e:
         logger.exception(f"Error updating image: {e}")
-        raise HTTPException(500, detail="Failed to update image")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update image",
+        )
 
 
 @router.patch("/{document_id}", status_code=status.HTTP_200_OK)
