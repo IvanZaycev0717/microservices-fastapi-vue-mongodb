@@ -1,4 +1,4 @@
-from redis import Redis
+from redis.asyncio import Redis
 from typing import Any
 import json
 from logger import get_logger
@@ -41,7 +41,7 @@ class CacheService:
                        None to allow graceful degradation.
         """
         try:
-            cached = self.redis.get(key)
+            cached = await self.redis.get(key)
             if cached:
                 return json.loads(cached)
             return None
@@ -66,7 +66,7 @@ class CacheService:
         """
         try:
             serialized = json.dumps(value)
-            self.redis.setex(key, self.ttl, serialized)
+            await self.redis.setex(key, self.ttl, serialized)
             return True
         except Exception as e:
             logger.exception(f"Cache set error for key {key} - {e}")
@@ -88,7 +88,7 @@ class CacheService:
                        False to allow graceful degradation.
         """
         try:
-            result = self.redis.delete(key)
+            result = await self.redis.delete(key)
             return result > 0
         except Exception as e:
             logger.exception(f"Cache delete error for key {key} - {e}")
@@ -119,7 +119,7 @@ class CacheService:
         """
         try:
             keys = []
-            for key in self.redis.scan_iter(match=pattern):
+            async for key in self.redis.scan_iter(match=pattern):
                 keys.append(key)
 
             logger.info(
@@ -130,7 +130,7 @@ class CacheService:
                 deleted_count = 0
                 for i in range(0, len(keys), 100):  # Batch size 100
                     batch = keys[i : i + 100]
-                    result = self.redis.delete(*batch)
+                    result = await self.redis.delete(*batch)
                     deleted_count += result
                     logger.info(f"Deleted batch: {result} keys")
 

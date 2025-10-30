@@ -1,29 +1,42 @@
 from fastapi import Request, Depends
-from redis import Redis
+from redis.asyncio import Redis
 from services.redis_connect_management import RedisDatabase
 from services.token_bucket import TokenBucket
 from settings import settings
 from logger import get_logger
+from services.cache_service import CacheService
 
 
-def get_redis_cache(request: Request) -> Redis:
+async def get_cache_service(request: Request) -> CacheService:
+    """Dependency to get CacheService instance for decorators."""
+    redis_client = await request.app.state.redis_manager.get_client(
+        RedisDatabase.CACHE
+    )
+    return CacheService(redis_client)
+
+
+async def get_redis_cache(request: Request) -> Redis:
     """Dependency to get cache Redis client.
 
     Returns:
         Redis client configured for cache database.
     """
-    return request.app.state.redis_manager.get_client(RedisDatabase.CACHE)
+    client = await request.app.state.redis_manager.get_client(
+        RedisDatabase.CACHE
+    )
+    return client
 
 
-def get_redis_rate_limiter(request: Request) -> Redis:
+async def get_redis_rate_limiter(request: Request) -> Redis:
     """Dependency to get rate limiter Redis client.
 
     Returns:
         Redis client configured for rate limiting database.
     """
-    return request.app.state.redis_manager.get_client(
+    client = await request.app.state.redis_manager.get_client(
         RedisDatabase.RATE_LIMITER
     )
+    return client
 
 
 def get_token_bucket(

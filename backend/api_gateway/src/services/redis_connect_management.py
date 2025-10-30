@@ -1,5 +1,5 @@
 from enum import Enum
-from redis import Redis
+from redis.asyncio import Redis
 from redis.exceptions import RedisError
 from logger import get_logger
 from settings import settings
@@ -27,8 +27,8 @@ class RedisManager:
         """Establish connections to all Redis databases."""
         try:
             for db_type in RedisDatabase:
-                client = self._create_client(db_type)
-                client.ping()
+                client = await self._create_client(db_type)
+                await client.ping()
                 self._clients[db_type] = client
 
             logger.info("All Redis connections established successfully")
@@ -36,7 +36,7 @@ class RedisManager:
             logger.error(f"Redis connection failed: {e}")
             raise
 
-    def _create_client(self, db_type: RedisDatabase) -> Redis:
+    async def _create_client(self, db_type: RedisDatabase) -> Redis:
         """Create Redis client for specific database type.
 
         Args:
@@ -67,7 +67,7 @@ class RedisManager:
                     retry_on_timeout=True,
                 )
 
-    def get_client(self, db_type: RedisDatabase) -> Redis:
+    async def get_client(self, db_type: RedisDatabase) -> Redis:
         """Get Redis client for specific database type.
 
         Args:
@@ -86,7 +86,7 @@ class RedisManager:
     async def disconnect(self):
         """Close all Redis connections and cleanup resources."""
         for client in self._clients.values():
-            client.close()
+            await client.close()
         logger.info("All Redis connections closed")
 
 

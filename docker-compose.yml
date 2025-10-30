@@ -408,37 +408,37 @@ services:
   # =====================
   # MANAGEMENT TOOLS
   # =====================
-  # redisinsight:
-  #   image: redis/redisinsight:2.70
-  #   container_name: redisinsight
-  #   ports:
-  #     - "5540:5540"
-  #   volumes:
-  #     - redisinsight_data:/data
-  #   environment:
-  #     - RI_REDIS_HOST0=redis
-  #     - RI_REDIS_PORT0=6379
-  #     - RI_REDIS_USERNAME0=default
-  #     - RI_REDIS_PASSWORD0=${REDIS_PASSWORD}
-  #   depends_on:
-  #     - redis
-  #   restart: unless-stopped
-
-  kafka-ui:
-    container_name: kafka-ui
-    image: kafbat/kafka-ui:5ba27d9
+  redisinsight:
+    image: redis/redisinsight:2.70
+    container_name: redisinsight
     ports:
-      - "8084:8080"
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
     environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
-      KAFKA_CLUSTERS_0_NAME: 'auth-cluster'
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'broker-1:19092,broker-2:19092,broker-3:19092'
-      KAFKA_CLUSTERS_0_READONLY: 'false'
+      - RI_REDIS_HOST0=redis
+      - RI_REDIS_PORT0=6379
+      - RI_REDIS_USERNAME0=default
+      - RI_REDIS_PASSWORD0=${REDIS_PASSWORD}
     depends_on:
-      - broker-1
-      - broker-2
-      - broker-3
+      - redis
     restart: unless-stopped
+
+  # kafka-ui:
+  #   container_name: kafka-ui
+  #   image: kafbat/kafka-ui:5ba27d9
+  #   ports:
+  #     - "8084:8080"
+  #   environment:
+  #     DYNAMIC_CONFIG_ENABLED: 'true'
+  #     KAFKA_CLUSTERS_0_NAME: 'auth-cluster'
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'broker-1:19092,broker-2:19092,broker-3:19092'
+  #     KAFKA_CLUSTERS_0_READONLY: 'false'
+  #   depends_on:
+  #     - broker-1
+  #     - broker-2
+  #     - broker-3
+  #   restart: unless-stopped
 
   # mongo-express-content:
   #   image: mongo-express:1.0.2-20-alpine3.19

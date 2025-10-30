@@ -1,8 +1,7 @@
 import time
 import json
-import asyncio
 from typing import TypedDict
-from redis import Redis
+from redis.asyncio import Redis
 from logger import get_logger
 
 logger = get_logger("TokenBucket")
@@ -99,14 +98,11 @@ class TokenBucket:
             valid, None if key doesn't exist or deserialization fails.
 
         Note:
-            - Uses run_in_executor to avoid blocking the event loop
             - Returns None for both missing keys and deserialization errors
             - Logs errors for debugging but doesn't propagate exceptions
         """
         try:
-            data = await asyncio.get_event_loop().run_in_executor(
-                None, self.redis.get, key
-            )
+            data = await self.redis.get(key)
             return json.loads(data) if data else None
         except Exception as e:
             logger.error(f"Error getting bucket state: {e}")
@@ -181,9 +177,6 @@ class TokenBucket:
         """
         try:
             expiration = int(2 * (self.capacity / self.refill_rate))
-            await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: self.redis.setex(key, expiration, json.dumps(state)),
-            )
+            await self.redis.setex(key, expiration, json.dumps(state))
         except Exception as e:
             logger.error(f"Error saving bucket state: {e}")

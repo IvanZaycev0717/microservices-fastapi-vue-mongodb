@@ -173,7 +173,9 @@ class KafkaCacheInvalidationConsumer:
                 f"Processing cache invalidation: {entity_type}.{action}.{entity_id or 'all'}"
             )
 
-            cache_client = self.redis_manager.get_client(RedisDatabase.CACHE)
+            cache_client = await self.redis_manager.get_client(
+                RedisDatabase.CACHE
+            )
             cache_service = CacheService(cache_client)
 
             pattern = f"content:*{entity_type}*"

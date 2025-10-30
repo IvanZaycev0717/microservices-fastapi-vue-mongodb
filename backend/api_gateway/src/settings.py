@@ -53,7 +53,6 @@ class Settings(BaseSettings):
     AUTH_RATE_LIMIT_REFILL_RATE: float = 10.0 / 3600
     COMMENTS_RATE_LIMIT_CAPACITY: int = 30
     COMMENTS_RATE_LIMIT_REFILL_RATE: float = 30.0 / 3600
-    CACHE_TTL_MINUTES: int = 30
 
     # Kafka Settings
     KAFKA_BOOTSTRAP_SERVERS: str
