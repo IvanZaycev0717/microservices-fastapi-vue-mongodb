@@ -16,8 +16,8 @@ services:
       - kafka
     environment:
       # Base
-      - BASE_HOST=0.0.0.0
-      - BASE_PORT=8000
+      - ADMIN_SERVICE_HOST=0.0.0.0
+      - ADMIN_SERVICE_PORT=8000
       
       # Secrets
       - SECRET_KEY=c761fd5cd80df51276932a6a044502b1404ab945a694c1234c56e33f06b780c1

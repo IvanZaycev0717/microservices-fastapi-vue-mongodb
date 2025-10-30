@@ -15,7 +15,29 @@ auth_client = AuthClient()
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> dict:
-    """Verify JWT token and return current user data."""
+    """Extracts and verifies JWT token to get current user information.
+
+    Validates the bearer token from Authorization header and extracts
+    user claims from the verified token payload.
+
+    Args:
+        credentials: HTTP authorization credentials containing the bearer token.
+
+    Returns:
+        dict: User information dictionary containing:
+            - user_id: Unique identifier of the authenticated user
+            - email: User's email address
+            - roles: List of user's roles
+
+    Raises:
+        HTTPException: 401 Unauthorized for invalid or expired tokens.
+        HTTPException: 500 Internal Server Error for token verification failures.
+
+    Note:
+        - Relies on external auth service for token validation
+        - Converts roles set to list for JSON serialization
+        - Includes WWW-Authenticate header in 401 responses
+    """
     try:
         token = credentials.credentials
         response = auth_client.verify_token(token)
@@ -47,7 +69,28 @@ async def get_comment_author(
     comment_id: int,
     current_user: dict = Depends(get_current_user),
 ) -> dict:
-    """Verify that current user is the author of the comment."""
+    """Verifies that the current user is the author of the specified comment.
+
+    Checks comment ownership by comparing current user ID with comment author ID
+    retrieved from the comments service via gRPC.
+
+    Args:
+        comment_id: Integer ID of the comment to verify ownership for.
+        current_user: Authenticated user information from token verification.
+
+    Returns:
+        dict: The current_user dictionary if ownership is verified.
+
+    Raises:
+        HTTPException: 403 Forbidden if user is not the comment author.
+        HTTPException: 404 Not Found if the comment doesn't exist.
+        HTTPException: 500 Internal Server Error for service or unexpected errors.
+
+    Note:
+        - Uses gRPC client to communicate with comments service
+        - Handles specific gRPC error codes with appropriate HTTP status codes
+        - Logs authorization attempts for security monitoring
+    """
     try:
         comments_client = CommentsClient()
         response = comments_client.get_comment(comment_id)

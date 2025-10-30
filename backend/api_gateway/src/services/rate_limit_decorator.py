@@ -9,6 +9,22 @@ logger = get_logger("rate_limit_decorator")
 
 
 def rate_limited():
+    """Decorator for applying rate limiting to endpoint functions.
+
+    Automatically detects Request and TokenBucket dependencies in function
+    arguments and applies rate limiting based on client identifier.
+
+    Returns:
+        Callable: Decorator function that wraps the original function with rate limiting logic.
+
+    Note:
+        - Extracts client identifier from the Request object
+        - Automatically finds TokenBucket instance from function kwargs
+        - Skips rate limiting if Request or TokenBucket are not available
+        - Raises HTTP 429 exception when rate limit is exceeded
+        - Logs rate limiting decisions for monitoring purposes
+    """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(*args, **kwargs) -> Any:

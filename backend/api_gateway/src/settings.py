@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     API_GATEWAY_HOST: str
     API_GATEWAY_PORT: int
 
+    # CORS
+    API_GATEWAY_FRONTENT_URL: str = "http://localhost:3000"
+
     # Service Hosts
     API_GATEWAY_CONTENT_HOST: str
     API_GATEWAY_AUTH_HOST: str

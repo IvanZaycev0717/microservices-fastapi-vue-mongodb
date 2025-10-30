@@ -7,18 +7,17 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    BASE_HOST: str
-    BASE_PORT: int
+    ADMIN_SERVICE_HOST: str
+    ADMIN_SERVICE_PORT: int
 
     # Secrets
     SECRET_KEY: SecretStr
     ALGORITHM: str
     ADMIN_EMAIL: SecretStr
     ADMIN_PASSWORD: SecretStr
-    MIN_PASSWORD_LENGTH: int = 5
-    MAX_PASSWORD_LENGTH: int = 31
-    MIN_EMAIL_LENGTH: int = 3
-    MAX_EMAIL_LENGTH: int = 255
+
+    # CORS
+    ADMIN_GUI_URL: str = "http://localhost:9500"
 
     # Cookie Settings
     COOKIE_KEY: str = "refresh_token"
@@ -190,6 +189,10 @@ class Settings(BaseSettings):
     MAX_POPULARITY_BOUNDARY: int = 1000
     MIN_PUBLICATIONS_RATING_BOUNDARY: int = -1000
     MAX_PUBLICATIONS_RATING_BOUNDARY: int = 1000
+    MIN_PASSWORD_LENGTH: int = 5
+    MAX_PASSWORD_LENGTH: int = 31
+    MIN_EMAIL_LENGTH: int = 3
+    MAX_EMAIL_LENGTH: int = 255
 
     # About Images Sizes PIXELS
     ABOUT_IMAGE_OUTPUT_WIDTH: int = 1024

@@ -11,7 +11,7 @@ async def send_ban_notification_webhook(email: str):
     """
     async with httpx.AsyncClient() as client:
         await client.post(
-            f"http://{settings.BASE_HOST}:{settings.BASE_PORT}/notifications/ban",
+            f"http://{settings.ADMIN_SERVICE_HOST}:{settings.ADMIN_SERVICE_PORT}/notifications/ban",
             json={
                 "email": email,
                 "subject": "Блокировка аккаунта",
@@ -28,7 +28,7 @@ async def send_delete_notification_webhook(email: str):
     """
     async with httpx.AsyncClient() as client:
         await client.post(
-            f"http://{settings.BASE_HOST}:{settings.BASE_PORT}/notifications/account-deleted",
+            f"http://{settings.ADMIN_SERVICE_HOST}:{settings.ADMIN_SERVICE_PORT}/notifications/account-deleted",
             json={
                 "email": email,
                 "subject": "Удаление аккаунта",
@@ -45,5 +45,5 @@ async def send_ban_comments_webhook(user_id: str):
     """
     async with httpx.AsyncClient() as client:
         await client.patch(
-            f"http://{settings.BASE_HOST}:{settings.BASE_PORT}/comments/ban_user/{user_id}",
+            f"http://{settings.ADMIN_SERVICE_HOST}:{settings.ADMIN_SERVICE_PORT}/comments/ban_user/{user_id}",
         )

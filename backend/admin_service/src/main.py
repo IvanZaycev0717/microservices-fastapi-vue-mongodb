@@ -296,7 +296,7 @@ app.include_router(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:9500"],
+    allow_origins=[settings.ADMIN_GUI_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -407,8 +407,8 @@ if __name__ == "__main__":
 
     uvicorn.run(
         app,
-        host=settings.BASE_HOST,
-        port=settings.BASE_PORT,
+        host=settings.ADMIN_SERVICE_HOST,
+        port=settings.ADMIN_SERVICE_PORT,
         log_config={
             "version": 1,
             "disable_existing_loggers": False,

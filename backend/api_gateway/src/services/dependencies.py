@@ -42,7 +42,23 @@ def get_token_bucket(
 def get_auth_token_bucket(
     redis_client: Redis = Depends(get_redis_rate_limiter),
 ) -> TokenBucket:
-    """Dependency to get Auth TokenBucket instance with stricter limits."""
+    """Dependency to get Auth TokenBucket instance with stricter limits.
+
+    Creates a TokenBucket instance specifically configured for authentication
+    endpoints with more restrictive rate limiting parameters.
+
+    Args:
+        redis_client: Redis client instance provided by dependency injection,
+            configured for rate limiting operations.
+
+    Returns:
+        TokenBucket: A TokenBucket instance with authentication-specific
+        capacity and refill rate settings.
+
+    Note:
+        Logs the creation of the TokenBucket instance for monitoring purposes.
+        Uses settings from AUTH_RATE_LIMIT_CAPACITY and AUTH_RATE_LIMIT_REFILL_RATE.
+    """
     logger = get_logger("TokenBucketDependency")
     logger.info("Creating Auth TokenBucket with stricter limits")
     return TokenBucket(
@@ -55,7 +71,23 @@ def get_auth_token_bucket(
 def get_comments_token_bucket(
     redis_client: Redis = Depends(get_redis_rate_limiter),
 ) -> TokenBucket:
-    """Dependency to get Comments TokenBucket instance."""
+    """Dependency to get Comments TokenBucket instance for rate limiting.
+
+    Creates a TokenBucket instance specifically configured for comments
+    endpoints with appropriate rate limiting parameters.
+
+    Args:
+        redis_client: Redis client instance provided by dependency injection,
+            configured for rate limiting operations.
+
+    Returns:
+        TokenBucket: A TokenBucket instance with comments-specific
+        capacity and refill rate settings.
+
+    Note:
+        Logs the creation of the TokenBucket instance for monitoring purposes.
+        Uses settings from COMMENTS_RATE_LIMIT_CAPACITY and COMMENTS_RATE_LIMIT_REFILL_RATE.
+    """
     logger = get_logger("TokenBucketDependency")
     logger.info("Creating Comments TokenBucket for rate limiting")
     return TokenBucket(

@@ -63,8 +63,8 @@ addopts = [
 pythonpath = ["src"]
 
 env = [
-    "BASE_HOST=localhost",
-    "BASE_PORT=8000",
+    "ADMIN_SERVICE_HOST=localhost",
+    "ADMIN_SERVICE_PORT=8000",
     "SECRET_KEY=test-secret-key",
     "ALGORITHM=HS256",
     "CONTENT_ADMIN_MONGO_ROOT_USERNAME=test",
