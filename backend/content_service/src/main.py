@@ -11,11 +11,35 @@ from service.content_service import ContentService
 from service.database import db_manager
 from settings import settings
 
-logger = get_logger(f"{settings.GRPC_CONTENT_SERVICE_NAME} - Main")
+logger = get_logger("Main")
 
 
 class HealthServicer(health_pb2_grpc.HealthServicer):
+    """gRPC health check servicer implementation for database connectivity.
+
+    Implements the Health service Check method to verify database connectivity
+    and report service health status.
+
+    Methods:
+        Check: Performs health check by testing database connection.
+    """
+
     async def Check(self, request, context):
+        """Performs health check by testing database connectivity.
+
+        Args:
+            request: The health check request object.
+            context: gRPC servicer context.
+
+        Returns:
+            health_pb2.HealthCheckResponse: Health check response with status:
+                - SERVING if database ping succeeds
+                - NOT_SERVING if database ping fails
+
+        Note:
+            Uses MongoDB's ping command to verify database connectivity.
+            Returns NOT_SERVING status for any exception during ping.
+        """
         try:
             await db_manager.db.command("ping")
             return health_pb2.HealthCheckResponse(
@@ -28,7 +52,22 @@ class HealthServicer(health_pb2_grpc.HealthServicer):
 
 
 async def serve() -> None:
-    """Starts the gRPC server and manages database connection."""
+    """Starts and runs the gRPC server for Content service.
+
+    Initializes database connection and gRPC server with service registration
+    and reflection. Manages server lifecycle and graceful shutdown.
+
+    Raises:
+        Exception: Any exception encountered during server startup that
+        prevents the server from starting properly.
+
+    Note:
+        - Establishes database connection before starting services
+        - Registers HealthServicer and ContentService with gRPC server
+        - Enables server reflection for service discovery
+        - Uses configuration from settings for server address
+        - Ensures proper cleanup of database connection on shutdown
+    """
     try:
         await db_manager.connect()
         logger.info("Database connection established")
@@ -44,7 +83,9 @@ async def serve() -> None:
         )
         reflection.enable_server_reflection(service_names, server)
 
-        server_address = f"{settings.GRPC_CONTENT_HOST}:{settings.GRPC_CONTENT_PORT}"
+        server_address = (
+            f"{settings.GRPC_CONTENT_HOST}:{settings.GRPC_CONTENT_PORT}"
+        )
         server.add_insecure_port(server_address)
         await server.start()
 

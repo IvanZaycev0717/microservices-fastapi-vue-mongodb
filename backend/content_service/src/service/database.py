@@ -1,6 +1,5 @@
 from typing import List
 
-from bson import ObjectId
 from pymongo import ASCENDING, DESCENDING, AsyncMongoClient
 from pymongo.asynchronous.database import AsyncDatabase
 
@@ -14,25 +13,38 @@ from models.schemas import (
 )
 from settings import settings
 
-logger = get_logger(f"{settings.GRPC_CONTENT_SERVICE_NAME} - Database")
+logger = get_logger("Database")
 
 
 class DatabaseManager:
-    """Manages MongoDB database connections and operations.
+    """Manages MongoDB database connections and provides database access.
+
+    This class handles connection lifecycle and provides access to
+    database collections through a centralized interface.
 
     Attributes:
-        client: Async MongoDB client instance.
-        db: Async MongoDB database instance.
-
+        client: MongoDB async client instance.
+        db: MongoDB async database instance.
     """
 
     def __init__(self) -> None:
-        """Initializes the database manager with connection settings."""
         self.client: AsyncMongoClient | None = None
         self.db: AsyncDatabase | None = None
 
     async def connect(self) -> None:
-        """Establishes connection to MongoDB database."""
+        """Establishes connection to MongoDB database.
+
+        Creates MongoDB client, selects database, and verifies connection
+        with a ping command.
+
+        Raises:
+            Exception: If connection to MongoDB fails or ping command times out.
+
+        Note:
+            - Uses connection settings from application configuration
+            - Applies timeout settings for connection and server selection
+            - Verifies connection with ping command before proceeding
+        """
         try:
             self.client = AsyncMongoClient(
                 settings.GRPC_CONTENT_MONGODB_URL,
@@ -47,23 +59,38 @@ class DatabaseManager:
             raise
 
     async def disconnect(self) -> None:
-        """Closes the MongoDB connection."""
+        """Closes the MongoDB connection.
+
+        Safely closes the database client connection if it exists.
+
+        Note:
+            - Idempotent operation - safe to call multiple times
+            - Logs connection closure for monitoring purposes
+        """
         if self.client is not None:
             await self.client.close()
             logger.info("MongoDB connection closed")
 
     async def get_about(self, lang: str | None = None) -> List[AboutDocument]:
-        """Retrieves about documents with optional language filtering.
+        """Retrieves about section documents with optional language filtering.
+
+        Fetches about documents from the database, with support for filtering
+        by language and projecting only relevant translation fields.
 
         Args:
-            lang: Language code for filtering translations.
+            lang: Language code to filter translations ('en' or 'ru').
+                If None or invalid, returns all documents with full translations.
 
         Returns:
-            List of about documents.
+            List[AboutDocument]: List of about documents with requested translations.
 
         Raises:
-            Exception: If database operation fails.
+            RuntimeError: If database connection is not established.
 
+        Note:
+            - Uses aggregation pipeline for language-specific projection
+            - Returns all languages if no valid language specified
+            - Converts MongoDB documents to Pydantic models
         """
         if self.db is None:
             raise RuntimeError("Database not connected")
@@ -87,14 +114,19 @@ class DatabaseManager:
             return [AboutDocument(**doc) for doc in documents]
 
     async def get_tech(self) -> List[TechDocument]:
-        """Retrieves all technology documents.
+        """Retrieves all technology stack documents.
+
+        Fetches all technology documents from the database without filtering.
 
         Returns:
-            List of technology documents.
+            List[TechDocument]: List of all technology documents.
 
         Raises:
-            Exception: If database operation fails.
+            RuntimeError: If database connection is not established.
 
+        Note:
+            - Returns all documents in the tech collection
+            - Converts MongoDB documents to Pydantic models
         """
         if self.db is None:
             raise RuntimeError("Database not connected")
@@ -106,6 +138,29 @@ class DatabaseManager:
     async def get_projects(
         self, lang: str = "en", sort: str = "date_desc"
     ) -> list[ProjectDocument]:
+        """Retrieves projects with language-specific content and sorting options.
+
+        Fetches projects from database with support for multiple languages
+        and customizable sorting by date or popularity.
+
+        Args:
+            lang: Language code for translations ('en' or 'ru'). Defaults to 'en'.
+            sort: Sorting preference. Options: 'date_desc', 'date_asc',
+                'popularity_desc', 'popularity_asc'. Defaults to 'date_desc'.
+
+        Returns:
+            list[ProjectDocument]: List of projects with requested language
+            and sorting applied.
+
+        Raises:
+            RuntimeError: If database connection is not established.
+
+        Note:
+            - Supports English and Russian language translations
+            - Handles both datetime objects and string dates
+            - Returns empty strings for missing translations
+            - Converts MongoDB ObjectId to string ID
+        """
         if sort.startswith("date"):
             sort_field = "date"
             sort_direction = DESCENDING if sort.endswith("desc") else ASCENDING
@@ -153,17 +208,25 @@ class DatabaseManager:
     async def get_certificates(
         self, sort: str = "date_desc"
     ) -> List[CertificateDocument]:
-        """Retrieves certificates with sorting options.
+        """Retrieves certificates with customizable sorting.
+
+        Fetches certificate documents from the database with options to sort
+        by date or popularity in ascending or descending order.
 
         Args:
-            sort: Sorting criteria.
+            sort: Sorting preference. Options: 'date_desc', 'date_asc',
+                'popularity_desc', 'popularity_asc'. Defaults to 'date_desc'.
 
         Returns:
-            List of certificate documents.
+            List[CertificateDocument]: List of certificates with requested sorting.
 
         Raises:
-            Exception: If database operation fails.
+            RuntimeError: If database connection is not established.
 
+        Note:
+            - Sorts by date or popularity field as specified
+            - Defaults to descending order for both date and popularity
+            - Converts MongoDB documents to Pydantic models
         """
         if self.db is None:
             raise RuntimeError("Database not connected")
@@ -182,18 +245,28 @@ class DatabaseManager:
     async def get_publications(
         self, lang: str, sort: str = "date_desc"
     ) -> List[PublicationDocument]:
-        """Retrieves publications with language and sorting options.
+        """Retrieves publications with language-specific titles and sorting.
+
+        Fetches publication documents with support for language-specific titles
+        and customizable sorting by date or rating.
 
         Args:
-            lang: Language code for publication data.
-            sort: Sorting criteria.
+            lang: Language code for title translation ('en' or 'ru').
+            sort: Sorting preference. Options: 'date_desc', 'date_asc',
+                'rating_desc', 'rating_asc'. Defaults to 'date_desc'.
 
         Returns:
-            List of publication documents.
+            List[PublicationDocument]: List of publications with requested
+            language and sorting applied.
 
         Raises:
-            Exception: If database operation fails.
+            RuntimeError: If database connection is not established.
 
+        Note:
+            - Extracts language-specific title from nested dictionary
+            - Returns empty string if translation for specified language is missing
+            - Sorts by date or rating field as specified
+            - Converts MongoDB documents to Pydantic models
         """
         if self.db is None:
             raise RuntimeError("Database not connected")
