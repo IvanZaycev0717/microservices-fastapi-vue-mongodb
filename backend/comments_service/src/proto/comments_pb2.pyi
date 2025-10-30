@@ -1,13 +1,23 @@
-from google.protobuf.internal import containers as _containers
-from google.protobuf import descriptor as _descriptor
-from google.protobuf import message as _message
 from collections.abc import Iterable as _Iterable, Mapping as _Mapping
-from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
+from typing import (
+    ClassVar as _ClassVar,
+    Optional as _Optional,
+    Union as _Union,
+)
+
+from google.protobuf import descriptor as _descriptor, message as _message
+from google.protobuf.internal import containers as _containers
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class CreateCommentRequest(_message.Message):
-    __slots__ = ("project_id", "author_id", "author_email", "comment_text", "parent_comment_id")
+    __slots__ = (
+        "project_id",
+        "author_id",
+        "author_email",
+        "comment_text",
+        "parent_comment_id",
+    )
     PROJECT_ID_FIELD_NUMBER: _ClassVar[int]
     AUTHOR_ID_FIELD_NUMBER: _ClassVar[int]
     AUTHOR_EMAIL_FIELD_NUMBER: _ClassVar[int]
@@ -18,7 +28,14 @@ class CreateCommentRequest(_message.Message):
     author_email: str
     comment_text: str
     parent_comment_id: int
-    def __init__(self, project_id: _Optional[str] = ..., author_id: _Optional[str] = ..., author_email: _Optional[str] = ..., comment_text: _Optional[str] = ..., parent_comment_id: _Optional[int] = ...) -> None: ...
+    def __init__(
+        self,
+        project_id: _Optional[str] = ...,
+        author_id: _Optional[str] = ...,
+        author_email: _Optional[str] = ...,
+        comment_text: _Optional[str] = ...,
+        parent_comment_id: _Optional[int] = ...,
+    ) -> None: ...
 
 class CreateCommentResponse(_message.Message):
     __slots__ = ("comment_id", "message")
@@ -26,7 +43,9 @@ class CreateCommentResponse(_message.Message):
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
     comment_id: int
     message: str
-    def __init__(self, comment_id: _Optional[int] = ..., message: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self, comment_id: _Optional[int] = ..., message: _Optional[str] = ...
+    ) -> None: ...
 
 class GetAllCommentsRequest(_message.Message):
     __slots__ = ()
@@ -36,7 +55,9 @@ class GetAllCommentsResponse(_message.Message):
     __slots__ = ("comments",)
     COMMENTS_FIELD_NUMBER: _ClassVar[int]
     comments: _containers.RepeatedCompositeFieldContainer[Comment]
-    def __init__(self, comments: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...) -> None: ...
+    def __init__(
+        self, comments: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...
+    ) -> None: ...
 
 class GetCommentRequest(_message.Message):
     __slots__ = ("comment_id",)
@@ -48,7 +69,9 @@ class GetCommentResponse(_message.Message):
     __slots__ = ("comment",)
     COMMENT_FIELD_NUMBER: _ClassVar[int]
     comment: Comment
-    def __init__(self, comment: _Optional[_Union[Comment, _Mapping]] = ...) -> None: ...
+    def __init__(
+        self, comment: _Optional[_Union[Comment, _Mapping]] = ...
+    ) -> None: ...
 
 class GetCommentsByProjectIdRequest(_message.Message):
     __slots__ = ("project_id",)
@@ -60,7 +83,9 @@ class GetCommentsByProjectIdResponse(_message.Message):
     __slots__ = ("comments",)
     COMMENTS_FIELD_NUMBER: _ClassVar[int]
     comments: _containers.RepeatedCompositeFieldContainer[Comment]
-    def __init__(self, comments: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...) -> None: ...
+    def __init__(
+        self, comments: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...
+    ) -> None: ...
 
 class UpdateCommentRequest(_message.Message):
     __slots__ = ("comment_id", "new_text")
@@ -68,7 +93,9 @@ class UpdateCommentRequest(_message.Message):
     NEW_TEXT_FIELD_NUMBER: _ClassVar[int]
     comment_id: int
     new_text: str
-    def __init__(self, comment_id: _Optional[int] = ..., new_text: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self, comment_id: _Optional[int] = ..., new_text: _Optional[str] = ...
+    ) -> None: ...
 
 class UpdateCommentResponse(_message.Message):
     __slots__ = ("comment_id", "message")
@@ -76,7 +103,9 @@ class UpdateCommentResponse(_message.Message):
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
     comment_id: int
     message: str
-    def __init__(self, comment_id: _Optional[int] = ..., message: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self, comment_id: _Optional[int] = ..., message: _Optional[str] = ...
+    ) -> None: ...
 
 class DeleteCommentRequest(_message.Message):
     __slots__ = ("comment_id",)
@@ -90,10 +119,22 @@ class DeleteCommentResponse(_message.Message):
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
     comment_id: int
     message: str
-    def __init__(self, comment_id: _Optional[int] = ..., message: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self, comment_id: _Optional[int] = ..., message: _Optional[str] = ...
+    ) -> None: ...
 
 class Comment(_message.Message):
-    __slots__ = ("id", "project_id", "author_id", "author_email", "comment_text", "created_at", "parent_comment_id", "likes", "dislikes")
+    __slots__ = (
+        "id",
+        "project_id",
+        "author_id",
+        "author_email",
+        "comment_text",
+        "created_at",
+        "parent_comment_id",
+        "likes",
+        "dislikes",
+    )
     ID_FIELD_NUMBER: _ClassVar[int]
     PROJECT_ID_FIELD_NUMBER: _ClassVar[int]
     AUTHOR_ID_FIELD_NUMBER: _ClassVar[int]
@@ -112,7 +153,18 @@ class Comment(_message.Message):
     parent_comment_id: int
     likes: int
     dislikes: int
-    def __init__(self, id: _Optional[int] = ..., project_id: _Optional[str] = ..., author_id: _Optional[str] = ..., author_email: _Optional[str] = ..., comment_text: _Optional[str] = ..., created_at: _Optional[str] = ..., parent_comment_id: _Optional[int] = ..., likes: _Optional[int] = ..., dislikes: _Optional[int] = ...) -> None: ...
+    def __init__(
+        self,
+        id: _Optional[int] = ...,
+        project_id: _Optional[str] = ...,
+        author_id: _Optional[str] = ...,
+        author_email: _Optional[str] = ...,
+        comment_text: _Optional[str] = ...,
+        created_at: _Optional[str] = ...,
+        parent_comment_id: _Optional[int] = ...,
+        likes: _Optional[int] = ...,
+        dislikes: _Optional[int] = ...,
+    ) -> None: ...
 
 class GetCommentsByAuthorIdRequest(_message.Message):
     __slots__ = ("author_id",)
@@ -124,4 +176,6 @@ class GetCommentsByAuthorIdResponse(_message.Message):
     __slots__ = ("comments",)
     COMMENTS_FIELD_NUMBER: _ClassVar[int]
     comments: _containers.RepeatedCompositeFieldContainer[Comment]
-    def __init__(self, comments: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...) -> None: ...
+    def __init__(
+        self, comments: _Optional[_Iterable[_Union[Comment, _Mapping]]] = ...
+    ) -> None: ...

@@ -1,5 +1,6 @@
-import grpc
 from datetime import datetime
+
+import grpc
 from grpc import ServicerContext
 
 from crud.comments import CommentsCRUD
@@ -7,9 +8,8 @@ from logger import get_logger
 from proto import comments_pb2, comments_pb2_grpc
 from schemas import CreateCommentForm, UpdateCommentRequest
 from services.database import get_db_session
-from settings import settings
 
-logger = get_logger(f"{settings.GRPC_COMMENTS_SERVICE_NAME} - gRPC")
+logger = get_logger("gRPC")
 
 
 class CommentsService(comments_pb2_grpc.CommentsServiceServicer):
@@ -18,7 +18,23 @@ class CommentsService(comments_pb2_grpc.CommentsServiceServicer):
         request: comments_pb2.CreateCommentRequest,
         context: ServicerContext,
     ):
-        """Create a new comment."""
+        """Handles creation of new comments.
+
+        Validates comment data, stores it in the database, and returns the created comment ID.
+
+        Args:
+            request: CreateCommentRequest containing comment details.
+            context: gRPC servicer context for error handling.
+
+        Returns:
+            comments_pb2.CreateCommentResponse: Response containing the created comment ID.
+
+        Note:
+            - Sets default values for created_at, likes, and dislikes
+            - Handles both top-level comments and replies to parent comments
+            - Uses database transaction via context manager
+            - Provides appropriate gRPC status codes for different error scenarios
+        """
         logger.info(f"Create comment for project {request.project_id}")
 
         try:
@@ -32,7 +48,6 @@ class CommentsService(comments_pb2_grpc.CommentsServiceServicer):
                 else None,
             )
 
-            # Prepare data for database
             comment_data = comment_form.model_dump()
             comment_data.update(
                 {"created_at": datetime.now(), "likes": 0, "dislikes": 0}
@@ -63,7 +78,22 @@ class CommentsService(comments_pb2_grpc.CommentsServiceServicer):
         request: comments_pb2.GetAllCommentsRequest,
         context: ServicerContext,
     ):
-        """Get all comments."""
+        """Retrieves all comments from the database.
+
+        Fetches all available comments and converts them to protobuf format.
+
+        Args:
+            request: GetAllCommentsRequest (empty request).
+            context: gRPC servicer context for error handling.
+
+        Returns:
+            comments_pb2.GetAllCommentsResponse: Response containing all comments.
+
+        Note:
+            - Returns comments in protobuf format
+            - Handles database errors and converts to gRPC status codes
+            - Returns empty list if no comments exist
+        """
         logger.info("Get all comments")
 
         try:
@@ -87,7 +117,24 @@ class CommentsService(comments_pb2_grpc.CommentsServiceServicer):
     async def GetComment(
         self, request: comments_pb2.GetCommentRequest, context: ServicerContext
     ):
-        """Get a specific comment by ID."""
+        """Retrieves a specific comment by its ID.
+
+        Fetches a single comment from the database and returns it in protobuf format.
+
+        Args:
+            request: GetCommentRequest containing the comment ID.
+            context: gRPC servicer context for error handling.
+
+        Returns:
+            comments_pb2.GetCommentResponse: Response containing the requested comment.
+
+        Raises:
+            ValueError: If comment with the specified ID is not found.
+
+        Note:
+            - Returns NOT_FOUND status if comment doesn't exist
+            - Converts database comment to protobuf format
+        """
         logger.info(f"Get comment {request.comment_id}")
 
         try:
@@ -114,7 +161,24 @@ class CommentsService(comments_pb2_grpc.CommentsServiceServicer):
         request: comments_pb2.GetCommentsByProjectIdRequest,
         context: ServicerContext,
     ):
-        """Get comments by project ID."""
+        """Retrieves all comments for a specific project.
+
+        Fetches comments associated with a particular project ID and returns
+        them in protobuf format.
+
+        Args:
+            request: GetCommentsByProjectIdRequest containing the project ID.
+            context: gRPC servicer context for error handling.
+
+        Returns:
+            comments_pb2.GetCommentsByProjectIdResponse: Response containing
+            all comments for the specified project.
+
+        Note:
+            - Returns NOT_FOUND status if no comments exist for the project
+            - Returns empty list if project exists but has no comments
+            - Converts database comments to protobuf format
+        """
         logger.info(f"Get comments for project {request.project_id}")
 
         try:
@@ -147,13 +211,32 @@ class CommentsService(comments_pb2_grpc.CommentsServiceServicer):
         request: comments_pb2.GetCommentsByAuthorIdRequest,
         context: ServicerContext,
     ):
-        """Get comments by author ID."""
+        """Retrieves all comments by a specific author.
+
+        Fetches comments associated with a particular author ID and returns
+        them in protobuf format.
+
+        Args:
+            request: GetCommentsByAuthorIdRequest containing the author ID.
+            context: gRPC servicer context for error handling.
+
+        Returns:
+            comments_pb2.GetCommentsByAuthorIdResponse: Response containing
+            all comments by the specified author.
+
+        Note:
+            - Returns NOT_FOUND status if no comments exist for the author
+            - Returns empty list if author exists but has no comments
+            - Converts database comments to protobuf format
+        """
         logger.info(f"Get comments for author {request.author_id}")
 
         try:
             async with get_db_session() as session:
                 crud = CommentsCRUD(session)
-                comments = await crud.get_comments_by_author_id(request.author_id)
+                comments = await crud.get_comments_by_author_id(
+                    request.author_id
+                )
 
                 comment_protos = [
                     self._comment_to_proto(comment) for comment in comments
@@ -211,7 +294,23 @@ class CommentsService(comments_pb2_grpc.CommentsServiceServicer):
         request: comments_pb2.DeleteCommentRequest,
         context: ServicerContext,
     ):
-        """Delete a comment."""
+        """Deletes a comment by its ID.
+
+        Removes a comment from the database and returns the deleted comment ID.
+
+        Args:
+            request: DeleteCommentRequest containing the comment ID to delete.
+            context: gRPC servicer context for error handling.
+
+        Returns:
+            comments_pb2.DeleteCommentResponse: Response confirming deletion
+            with the deleted comment ID.
+
+        Note:
+            - Returns NOT_FOUND status if comment doesn't exist
+            - Cascades deletion to any child comments (replies)
+            - Returns success message upon successful deletion
+        """
         logger.info(f"Delete comment {request.comment_id}")
 
         try:
@@ -236,7 +335,19 @@ class CommentsService(comments_pb2_grpc.CommentsServiceServicer):
             return comments_pb2.DeleteCommentResponse()
 
     def _comment_to_proto(self, comment):
-        """Convert SQLAlchemy Comment to protobuf Comment."""
+        """Converts a database Comment object to protobuf format.
+
+        Args:
+            comment: The database Comment object to convert.
+
+        Returns:
+            comments_pb2.Comment: The converted comment in protobuf format.
+
+        Note:
+            - Converts datetime objects to ISO format strings
+            - Handles None values for parent_comment_id by converting to 0
+            - Preserves all comment attributes including engagement metrics
+        """
         return comments_pb2.Comment(
             id=comment.id,
             project_id=comment.project_id,

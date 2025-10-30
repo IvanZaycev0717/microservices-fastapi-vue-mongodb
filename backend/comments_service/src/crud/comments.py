@@ -103,9 +103,25 @@ class CommentsCRUD:
             raise ValueError(
                 f"Database error reading comments for project {project_id}: {str(e)}"
             )
-    
+
     async def get_comments_by_author_id(self, author_id: str) -> list[Comment]:
-        """Retrieve all comments by specific author."""
+        """Retrieves all comments for a specific author.
+
+        Fetches comments from the database ordered by creation date (newest first).
+
+        Args:
+            author_id: The unique identifier of the author.
+
+        Returns:
+            list[Comment]: List of Comment objects authored by the specified user.
+
+        Raises:
+            ValueError: If a database error occurs during the query.
+
+        Note:
+            - Results are ordered by creation date in descending order
+            - Returns empty list if no comments found for the author
+        """
         try:
             stmt = (
                 select(Comment)
@@ -116,7 +132,9 @@ class CommentsCRUD:
             comments = result.scalars().all()
             return comments
         except SQLAlchemyError as e:
-            raise ValueError(f"Database error reading author comments: {str(e)}")
+            raise ValueError(
+                f"Database error reading author comments: {str(e)}"
+            )
 
     # UPDATE
     async def update_comment(self, comment_id: int, new_text: str) -> int:

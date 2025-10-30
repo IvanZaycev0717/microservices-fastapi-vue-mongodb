@@ -4,17 +4,31 @@ import sys
 import grpc
 from grpc_reflection.v1alpha import reflection
 
-from services.comments_service import CommentsService
-from services.database import init_db, close_db
 from logger import get_logger
+from proto import comments_pb2, comments_pb2_grpc
+from services.comments_service import CommentsService
+from services.database import close_db, init_db
 from settings import settings
-from proto import comments_pb2_grpc, comments_pb2
 
 logger = get_logger("main")
 
 
 async def main():
-    """Main application entry point."""
+    """Main application entry point for Comments gRPC service.
+
+    Initializes database, starts gRPC server with CommentsService,
+    enables reflection, and manages server lifecycle.
+
+    Returns:
+        int: Exit code (0 for success, 1 for failure).
+
+    Note:
+        - Initializes database connection before starting server
+        - Registers CommentsService servicer with gRPC server
+        - Enables server reflection for service discovery
+        - Handles graceful shutdown on KeyboardInterrupt
+        - Ensures proper cleanup of resources on exit
+    """
     logger.info(f"Starting {settings.GRPC_COMMENTS_SERVICE_NAME}...")
 
     server = None
@@ -22,15 +36,12 @@ async def main():
         await init_db()
         logger.info("Database initialized successfully")
 
-        # Start gRPC server
         server = grpc.aio.server()
 
-        # Add Comments service
         comments_pb2_grpc.add_CommentsServiceServicer_to_server(
             CommentsService(), server
         )
 
-        # Enable reflection only (без health checks)
         SERVICE_NAMES = (
             comments_pb2.DESCRIPTOR.services_by_name[
                 "CommentsService"
@@ -48,7 +59,6 @@ async def main():
         logger.info(f"gRPC server started on {server_address}")
         logger.info("Reflection enabled")
 
-        # Keep server running
         await server.wait_for_termination()
 
     except KeyboardInterrupt:
@@ -57,7 +67,6 @@ async def main():
         logger.error(f"Application failed: {e}")
         return 1
     finally:
-        # Cleanup
         if server:
             logger.info("Stopping gRPC server...")
             await server.stop(5)
