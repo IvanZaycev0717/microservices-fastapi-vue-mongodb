@@ -1,13 +1,21 @@
 from pathlib import Path
 
 from logger import get_logger
-from settings import settings
 
-logger = get_logger(f"{settings.NOTIFICATION_SERVICE_NAME} - EmailTemplates")
+logger = get_logger("EmailTemplates")
 
 
 class EmailTemplateManager:
-    """Manager for loading and rendering email templates."""
+    """Manages email template loading and styling.
+
+    Handles the loading of HTML email templates and associated CSS styles
+    for consistent email formatting.
+
+    Attributes:
+        templates_dir: Path to the templates directory.
+        css_file: Path to the CSS styles file for emails.
+        _css_content: Cached CSS content for performance.
+    """
 
     def __init__(self):
         self.templates_dir = Path(__file__).parent.parent / "templates"
@@ -15,7 +23,18 @@ class EmailTemplateManager:
         self._css_content = None
 
     def _load_css(self) -> str:
-        """Load CSS styles from file."""
+        """Load CSS styles from file.
+
+        Reads CSS content from file and caches it for subsequent calls.
+
+        Returns:
+            str: CSS content as string, or empty string if loading fails.
+
+        Note:
+            - Caches CSS content to avoid repeated file reads
+            - Returns empty string if file cannot be read
+            - Logs errors but doesn't raise exceptions
+        """
         if self._css_content is None:
             try:
                 with open(self.css_file, "r", encoding="utf-8") as f:
@@ -26,7 +45,19 @@ class EmailTemplateManager:
         return self._css_content
 
     def _load_template(self, template_name: str) -> str:
-        """Load HTML template from file."""
+        """Load HTML template from file.
+
+        Args:
+            template_name: Name of the template file to load.
+
+        Returns:
+            str: Template content as string, or empty string if loading fails.
+
+        Note:
+            - Looks for templates in 'emails' subdirectory
+            - Returns empty string if template cannot be read
+            - Logs errors but doesn't raise exceptions
+        """
         try:
             template_path = self.templates_dir / "emails" / template_name
             with open(template_path, "r", encoding="utf-8") as f:
@@ -36,13 +67,18 @@ class EmailTemplateManager:
             return ""
 
     def render_reset_password(self, reset_token: str) -> tuple[str, str]:
-        """Render password reset email template.
+        """Renders password reset email template.
 
         Args:
-            reset_token: Password reset token
+            reset_token: Password reset token to include in the email.
 
         Returns:
-            tuple: (subject, html_content)
+            tuple[str, str]: Tuple containing email subject and HTML content.
+
+        Note:
+            - Uses reset_password.html template
+            - Injects CSS styles and reset token into template
+            - Returns formatted subject line with emoji
         """
         subject = "🔐 Сброс пароля"
         template = self._load_template("reset_password.html")
@@ -54,10 +90,15 @@ class EmailTemplateManager:
         return subject, html_content
 
     def render_reset_success(self) -> tuple[str, str]:
-        """Render password reset success email template.
+        """Renders password reset success email template.
 
         Returns:
-            tuple: (subject, html_content)
+            tuple[str, str]: Tuple containing email subject and HTML content.
+
+        Note:
+            - Uses successful_reset.html template
+            - Injects CSS styles into template
+            - Returns formatted subject line with emoji
         """
         subject = "✅ Пароль успешно изменен"
         template = self._load_template("successful_reset.html")
