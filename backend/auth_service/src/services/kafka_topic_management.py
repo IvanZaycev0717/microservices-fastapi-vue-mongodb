@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from confluent_kafka.admin import AdminClient, NewTopic
+from aiokafka.admin import AIOKafkaAdminClient, NewTopic
 
 from settings import settings
 
@@ -11,7 +11,7 @@ logger = logging.getLogger("KafkaTopics")
 async def wait_for_kafka_ready(
     max_retries: int = 30, retry_delay: int = 2
 ) -> None:
-    """Wait for Kafka cluster to be fully ready.
+    """Wait for Kafka cluster to be fully ready using aiokafka.
 
     Args:
         max_retries: Maximum number of connection attempts.
@@ -24,15 +24,15 @@ async def wait_for_kafka_ready(
 
     for attempt in range(max_retries):
         try:
-            admin = AdminClient(
-                {
-                    "bootstrap.servers": settings.KAFKA_BOOTSTRAP_SERVERS,
-                    "socket.timeout.ms": 5000,
-                    "metadata.request.timeout.ms": 5000,
-                }
+            admin = AIOKafkaAdminClient(
+                bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+                request_timeout_ms=5000,
             )
 
-            admin.list_topics(timeout=5)
+            await admin.start()
+            await admin.list_topics()
+            await admin.close()
+
             logger.info("Kafka cluster is ready")
             return
 
@@ -48,39 +48,53 @@ async def wait_for_kafka_ready(
 
 
 async def create_kafka_topics():
-    """Create necessary Kafka topics on startup.
+    """Create necessary Kafka topics on startup using aiokafka.
 
     Creates topics with recommended partitioning and replication.
     Safe to run multiple times - topics won't be recreated if they exist.
     """
     await wait_for_kafka_ready()
 
-    admin = AdminClient(
-        {"bootstrap.servers": settings.KAFKA_BOOTSTRAP_SERVERS}
+    admin = AIOKafkaAdminClient(
+        bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS
     )
 
     topics = [
         NewTopic(
-            settings.KAFKA_PASSWORD_RESET_TOPIC,
+            name=settings.KAFKA_PASSWORD_RESET_TOPIC,
             num_partitions=3,
             replication_factor=1,
         ),
         NewTopic(
-            settings.KAFKA_PASSWORD_RESET_SUCCESS_TOPIC,
+            name=settings.KAFKA_PASSWORD_RESET_SUCCESS_TOPIC,
             num_partitions=3,
             replication_factor=1,
         ),
     ]
 
     try:
-        fs = admin.create_topics(topics)
-        for topic, f in fs.items():
-            f.result()
-        logger.info("Kafka topics created successfully")
+        await admin.start()
+
+        existing_topics = await admin.list_topics()
+        topics_to_create = [
+            topic for topic in topics if topic.name not in existing_topics
+        ]
+
+        if topics_to_create:
+            await admin.create_topics(
+                new_topics=topics_to_create,
+                validate_only=False,
+            )
+            logger.info("Kafka topics created successfully")
+        else:
+            logger.info("Kafka topics already exist")
+
     except Exception as e:
-        logger.warning(f"Kafka topics may already exist: {e}")
+        logger.warning(f"Kafka topics creation issue: {e}")
+    finally:
+        await admin.close()
 
 
 async def ensure_topics_exist():
-    """Ensure required Kafka topics exist."""
+    """Ensure required Kafka topics exist using async aiokafka."""
     await create_kafka_topics()

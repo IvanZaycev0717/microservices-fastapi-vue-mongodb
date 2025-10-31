@@ -76,9 +76,12 @@ async def serve() -> None:
         await db_manager.connect()
         logger.info("Database connection established")
 
+        logger.info("Ensuring Kafka topics exist...")
         await ensure_topics_exist()
+
+        logger.info("Initializing Kafka producer...")
         await kafka_producer.initialize()
-        logger.info("Kafka topics verified")
+        logger.info("Kafka topics verified and producer initialized")
 
         server = grpc.aio.server()
 
@@ -105,7 +108,7 @@ async def serve() -> None:
         logger.exception(f"Failed to start server: {e}")
         raise
     finally:
-        kafka_producer.close()
+        await kafka_producer.close()
         await db_manager.disconnect()
         logger.info("Server shutdown complete")
 

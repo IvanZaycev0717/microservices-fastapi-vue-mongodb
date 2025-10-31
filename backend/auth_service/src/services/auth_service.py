@@ -27,7 +27,8 @@ logger = get_logger("Service")
 class AuthService(auth_pb2_grpc.AuthServiceServicer):
     """gRPC servicer implementation for authentication operations.
 
-    Handles user authentication, token management, and related gRPC methods.
+    Handles user authentication, token management, and password reset functionality
+    using async Kafka producer for messaging.
 
     Attributes:
         db_manager: Database manager instance for data access.
@@ -36,6 +37,11 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
     """
 
     def __init__(self, db_manager):
+        """Initializes AuthService with database dependencies.
+
+        Args:
+            db_manager: Database manager instance providing CRUD operations.
+        """
         self.db_manager = db_manager
         self.auth_crud = db_manager.get_auth_crud()
         self.token_crud = db_manager.get_token_crud()
@@ -44,9 +50,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
         self, request: auth_pb2.LoginRequest, context: ServicerContext
     ) -> auth_pb2.LoginResponse:
         """Handles user login authentication and token generation.
-
-        Processes login requests, validates credentials, and generates access
-        and refresh tokens upon successful authentication.
 
         Args:
             request: LoginRequest containing email and password.
@@ -61,12 +64,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                 - UNAUTHENTICATED for invalid credentials
                 - PERMISSION_DENIED for banned users
                 - INTERNAL for server errors
-
-        Note:
-            - Validates user credentials against stored hash
-            - Updates last login timestamp on successful authentication
-            - Creates both access and refresh tokens with different expiration
-            - Stores refresh token in database for future validation
         """
         try:
             logger.info(f"Login attempt for email: {request.email}")
@@ -161,28 +158,19 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
     ) -> auth_pb2.RegisterResponse:
         """Handles new user registration and account creation.
 
-        Processes registration requests, validates input, creates new user account,
-        and generates initial authentication tokens.
-
         Args:
             request: RegisterRequest containing email and password.
             context: gRPC servicer context for handling errors.
 
         Returns:
             auth_pb2.RegisterResponse: Response containing authentication tokens
-            and user information for the newly created account.
+            and user information.
 
         Raises:
             grpc.aio.ServicerContext.abort:
                 - ALREADY_EXISTS if user with email already registered
                 - INVALID_ARGUMENT for invalid email format
-                - INTERNAL for server errors or password hashing failures
-
-        Note:
-            - Assigns default "user" role to new registrations
-            - Validates email format using Pydantic validation
-            - Creates both access and refresh tokens upon successful registration
-            - Stores refresh token in database for session management
+                - INTERNAL for server errors
         """
         try:
             logger.info(f"Registration attempt for email: {request.email}")
@@ -283,25 +271,12 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
     ) -> auth_pb2.LogoutResponse:
         """Logout user by invalidating refresh token.
 
-        Processes logout requests by marking the provided refresh token as used,
-        preventing its future use for token refresh operations.
-
         Args:
             request: LogoutRequest containing the refresh token to invalidate.
             context: gRPC servicer context for handling errors.
 
         Returns:
             auth_pb2.LogoutResponse: Response indicating logout success status.
-
-        Raises:
-            grpc.aio.ServicerContext.abort:
-                - INVALID_ARGUMENT if refresh token is not provided
-                - INTERNAL for server errors during token invalidation
-
-        Note:
-            - Returns success even if token was already invalidated (security measure)
-            - Only invalidates refresh tokens, access tokens remain valid until expiration
-            - Prevents replay attacks by marking tokens as used in database
         """
         try:
             if not request.refresh_token:
@@ -336,29 +311,19 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
     ) -> auth_pb2.RefreshTokenResponse:
         """Refreshes authentication tokens using a valid refresh token.
 
-        Validates the provided refresh token and issues new access and refresh tokens
-        if validation passes. Implements token rotation for enhanced security.
-
         Args:
             request: RefreshTokenRequest containing the refresh token.
             context: gRPC servicer context for handling errors.
 
         Returns:
-            auth_pb2.RefreshTokenResponse: Response containing new access and refresh tokens.
+            auth_pb2.RefreshTokenResponse: Response containing new tokens.
 
         Raises:
             grpc.aio.ServicerContext.abort:
-                - INVALID_ARGUMENT if refresh token is not provided
-                - UNAUTHENTICATED for invalid, wrong type, or expired tokens
+                - UNAUTHENTICATED for invalid tokens
                 - NOT_FOUND if user no longer exists
                 - PERMISSION_DENIED if user is banned
                 - INTERNAL for server errors
-
-        Note:
-            - Implements token rotation by issuing new refresh token and invalidating old one
-            - Validates token type to ensure only refresh tokens are accepted
-            - Checks token expiration and user status before issuing new tokens
-            - Marks used refresh tokens as invalid to prevent reuse
         """
         try:
             if not request.refresh_token:
@@ -457,9 +422,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
     ) -> auth_pb2.VerifyTokenResponse:
         """Verifies the validity of a JWT token and extracts user claims.
 
-        Validates the token signature and expiration, then returns the decoded
-        payload if the token is valid.
-
         Args:
             request: VerifyTokenRequest containing the token to verify.
             context: gRPC servicer context.
@@ -467,12 +429,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
         Returns:
             auth_pb2.VerifyTokenResponse: Response indicating token validity
             and containing user claims if valid.
-
-        Note:
-            - Returns detailed error messages for different failure scenarios
-            - Extracts user_id, email, and roles from valid token payload
-            - Handles JWT exceptions gracefully without aborting the call
-            - Logs verification failures for security monitoring
         """
         try:
             if not request.token:
@@ -507,9 +463,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
     ) -> auth_pb2.ForgotPasswordResponse:
         """Generate reset token for password recovery.
 
-        Processes password reset requests by generating a time-limited reset token
-        and sending it via Kafka message for email delivery.
-
         Args:
             request: ForgotPasswordRequest containing the user's email.
             context: gRPC servicer context for handling errors.
@@ -520,12 +473,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
 
         Raises:
             grpc.aio.ServicerContext.abort: INTERNAL for server errors.
-
-        Note:
-            - Returns success even for non-existent emails as security measure
-            - Generates reset token with specific type and shorter expiration
-            - Sends reset token via Kafka for email delivery
-            - Logs failures in message delivery but doesn't fail the request
         """
         try:
             forgot_data = ForgotPasswordRequest(email=request.email)
@@ -557,9 +504,17 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                 email=user.email, reset_token=reset_token, user_id=user.id
             )
 
-            if not kafka_producer.send_password_reset(password_reset_msg):
+            success = await kafka_producer.send_password_reset(
+                password_reset_msg
+            )
+
+            if not success:
                 logger.error(
                     f"Failed to send password reset message for: {user.email}"
+                )
+            else:
+                logger.info(
+                    f"Password reset message sent to Kafka for: {user.email}"
                 )
 
             return auth_pb2.ForgotPasswordResponse(
@@ -581,9 +536,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
     ) -> auth_pb2.ResetPasswordResponse:
         """Reset password using reset token.
 
-        Validates the reset token and updates the user's password if all
-        checks pass. Sends notification upon successful password reset.
-
         Args:
             request: ResetPasswordRequest containing reset token, email, and new password.
             context: gRPC servicer context for handling errors.
@@ -594,13 +546,6 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
 
         Raises:
             grpc.aio.ServicerContext.abort: INTERNAL for server errors.
-
-        Note:
-            - Validates reset token type and expiration
-            - Ensures token email matches request email
-            - Enforces minimum password length requirement
-            - Sends success notification via Kafka after password update
-            - Returns detailed error messages for different failure scenarios
         """
         try:
             try:
@@ -647,9 +592,18 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
                 email=request.email, user_id=user_id
             )
 
-            kafka_producer.send_password_reset_success(
+            success = await kafka_producer.send_password_reset_success(
                 password_reset_success_msg
             )
+
+            if success:
+                logger.info(
+                    f"Password reset success message sent for: {request.email}"
+                )
+            else:
+                logger.error(
+                    f"Failed to send password reset success message for: {request.email}"
+                )
 
             logger.info(
                 f"Password successfully reset for user: {request.email}"

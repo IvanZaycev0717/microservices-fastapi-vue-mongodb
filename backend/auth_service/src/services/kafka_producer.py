@@ -1,23 +1,17 @@
+import asyncio
 import json
-import logging
-from typing import Any
 
-from confluent_kafka import Producer
+from aiokafka import AIOKafkaProducer
 from pydantic import BaseModel
 
+from logger import get_logger
 from settings import settings
 
-logger = logging.getLogger("KafkaProducer")
+logger = get_logger("KafkaProducer")
 
 
 class PasswordResetMessage(BaseModel):
-    """Data model for password reset messages.
-
-    Attributes:
-        email: User's email address.
-        reset_token: Generated password reset token.
-        user_id: Unique user identifier.
-    """
+    """Data model for password reset messages."""
 
     email: str
     reset_token: str
@@ -25,177 +19,123 @@ class PasswordResetMessage(BaseModel):
 
 
 class PasswordResetSuccessMessage(BaseModel):
-    """Data model for password reset success messages.
-
-    Attributes:
-        email: User's email address.
-        user_id: Unique user identifier.
-    """
+    """Data model for password reset success messages."""
 
     email: str
     user_id: str
 
 
 class KafkaProducer:
-    """Kafka producer for sending messages to notification service.
+    """Async Kafka producer for sending messages using aiokafka.
 
     Attributes:
-        conf: Kafka producer configuration dictionary.
-        _producer: Confluent Kafka Producer instance.
+        producer: AIOKafkaProducer instance for async message production.
         _initialized: Flag indicating if producer is initialized.
     """
 
     def __init__(self) -> None:
-        """Initializes Kafka producer with configuration."""
-        self.conf = {
-            "bootstrap.servers": settings.KAFKA_BOOTSTRAP_SERVERS,
-            "acks": "all",
-            "retries": 3,
-            "client.id": "auth-service",
-        }
-        self._producer: Producer | None = None
+        self.producer: AIOKafkaProducer | None = None
         self._initialized: bool = False
 
-    async def initialize(self) -> None:
-        """Explicitly initialize Kafka producer.
-
-        Should be called after Kafka cluster is confirmed to be ready.
-
-        Raises:
-            RuntimeError: If producer initialization fails.
-        """
-        if not self._initialized:
-            try:
-                self._producer = Producer(self.conf)
-                self._initialized = True
-                logger.info("Kafka producer initialized successfully")
-            except Exception as e:
-                logger.error(f"Kafka producer initialization failed: {e}")
-                raise RuntimeError(
-                    "Failed to initialize Kafka producer"
-                ) from e
-
-    @property
-    def producer(self) -> Producer:
-        """Get Kafka producer instance.
-
-        Returns:
-            Producer: Configured Kafka producer instance.
-
-        Raises:
-            RuntimeError: If producer is not initialized.
-        """
-        if not self._initialized or self._producer is None:
-            raise RuntimeError(
-                "Kafka producer not initialized. Call initialize() first."
-            )
-        return self._producer
-
-    def _delivery_report(self, err: Any, msg: Any) -> None:
-        """Callback for message delivery reports.
+    async def initialize(
+        self, max_retries: int = 5, retry_delay: int = 2
+    ) -> None:
+        """Initialize AIOKafkaProducer with retry mechanism.
 
         Args:
-            err: Error object if delivery failed.
-            msg: Message object if delivery succeeded.
+            max_retries: Maximum number of initialization attempts.
+            retry_delay: Delay between retries in seconds.
 
-        Logs:
-            Error message if delivery failed, debug info if successful.
+        Raises:
+            RuntimeError: If producer initialization fails after all retries.
         """
-        if err:
-            logger.warning(f"Message delivery failed (will retry): {err}")
-        else:
-            logger.debug(
-                f"Message delivered to {msg.topic()} [{msg.partition()}]"
-            )
+        for attempt in range(max_retries):
+            try:
+                self.producer = AIOKafkaProducer(
+                    bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+                    client_id="auth-service",
+                )
+                await self.producer.start()
+                self._initialized = True
+                logger.info(
+                    "Kafka producer initialized successfully with aiokafka"
+                )
+                return
 
-    def send_password_reset(self, message: PasswordResetMessage) -> bool:
-        """Send password reset message to Kafka topic.
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    logger.warning(
+                        f"Kafka producer initialization failed (attempt {attempt + 1}/{max_retries}): {e}"
+                    )
+                    await asyncio.sleep(retry_delay)
+                else:
+                    logger.error(
+                        f"Kafka producer initialization failed after {max_retries} attempts: {e}"
+                    )
+                    raise RuntimeError(
+                        "Failed to initialize Kafka producer"
+                    ) from e
+
+    async def send_password_reset(self, message: PasswordResetMessage) -> bool:
+        """Send password reset message to Kafka topic asynchronously.
 
         Args:
             message: PasswordResetMessage instance with reset data.
 
         Returns:
-            bool: True if message was queued successfully, False otherwise.
-
-        Raises:
-            BufferError: If producer message queue is full.
-            Exception: For any other unexpected errors during message production.
+            bool: True if message was sent successfully, False otherwise.
         """
         try:
             message_dict = message.model_dump()
             value = json.dumps(message_dict).encode("utf-8")
 
-            self.producer.produce(
+            await self.producer.send_and_wait(
                 topic=settings.KAFKA_PASSWORD_RESET_TOPIC,
                 value=value,
-                callback=self._delivery_report,
             )
 
-            self.producer.poll(1)
             logger.info(f"Password reset message sent for: {message.email}")
             return True
 
-        except BufferError as e:
-            logger.error(f"Producer queue full: {e}")
-            return False
         except Exception as e:
             logger.exception(f"Failed to send password reset message: {e}")
             return False
 
-    def send_password_reset_success(
+    async def send_password_reset_success(
         self, message: PasswordResetSuccessMessage
     ) -> bool:
-        """Send password reset success message to Kafka topic.
+        """Send password reset success message to Kafka topic asynchronously.
 
         Args:
             message: PasswordResetSuccessMessage instance with success data.
 
         Returns:
-            bool: True if message was queued successfully, False otherwise.
+            bool: True if message was sent successfully, False otherwise.
         """
         try:
             message_dict = message.model_dump()
             value = json.dumps(message_dict).encode("utf-8")
 
-            self.producer.produce(
+            await self.producer.send_and_wait(
                 topic=settings.KAFKA_PASSWORD_RESET_SUCCESS_TOPIC,
                 value=value,
-                callback=self._delivery_report,
             )
 
-            self.producer.poll(1)
             logger.info(
                 f"Password reset success message sent for: {message.email}"
             )
             return True
 
-        except BufferError as e:
-            logger.error(f"Producer queue full: {e}")
-            return False
         except Exception as e:
             logger.exception(
                 f"Failed to send password reset success message: {e}"
             )
             return False
 
-    def flush(self) -> None:
-        """Wait for all outstanding messages to be delivered.
-
-        Blocks until all messages in the producer queue are delivered
-        or timeout occurs.
-        """
-        if self._producer:
-            self._producer.flush()
-            logger.info("Kafka producer flushed")
-
-    def close(self) -> None:
-        """Close the producer connection.
-
-        Flushes any outstanding messages and closes the producer connection.
-        """
-        if self._producer:
-            self.flush()
-            self._producer = None
+    async def close(self) -> None:
+        """Close the producer connection asynchronously."""
+        if self.producer:
+            await self.producer.stop()
             self._initialized = False
             logger.info("Kafka producer closed")
 
