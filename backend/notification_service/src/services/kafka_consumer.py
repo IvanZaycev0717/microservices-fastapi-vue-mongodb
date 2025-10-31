@@ -1,9 +1,8 @@
 import asyncio
 import json
-import threading
 from typing import Any
 
-from confluent_kafka import Consumer, KafkaError, KafkaException
+from aiokafka import AIOKafkaConsumer
 
 from logger import get_logger
 from models.notification import NotificationCreate
@@ -15,125 +14,69 @@ logger = get_logger("KafkaConsumer")
 
 
 class KafkaConsumer:
-    """Kafka message consumer for notification service.
+    """Kafka message consumer for notification service using aiokafka.
 
-    Handles configuration, message consumption, and lifecycle management
-    for Kafka consumer in a separate thread.
+    Handles async message consumption for notification topics with pure asyncio.
 
     Attributes:
-        conf: Kafka consumer configuration dictionary.
-        consumer: Confluent Kafka Consumer instance.
+        consumer: AIOKafkaConsumer instance for message consumption.
         running: Flag indicating if consumer is actively running.
-        consumer_thread: Thread running the consumer loop.
-        main_loop: Reference to the main asyncio event loop.
+        _consume_task: Asyncio task for message consumption loop.
     """
 
     def __init__(self):
-        self.conf = {
-            "bootstrap.servers": settings.KAFKA_BOOTSTRAP_SERVERS,
-            "group.id": "notification-service",
-            "auto.offset.reset": "earliest",
-            "enable.auto.commit": False,
-        }
-        self.consumer: Consumer | None = None
+        self.consumer: AIOKafkaConsumer | None = None
         self.running = False
-        self.consumer_thread: threading.Thread | None = None
-        self.main_loop = None
+        self._consume_task: asyncio.Task | None = None
 
     async def initialize(self):
         """Initializes Kafka consumer and subscribes to topics.
 
-        Sets up the Kafka consumer with configuration and subscribes to
-        password reset related topics.
+        Sets up the AIOKafkaConsumer with configuration for notification topics.
 
         Raises:
-            Exception: If consumer initialization or topic subscription fails.
-
-        Note:
-            - Subscribes to both password reset request and success topics
-            - Logs successful subscription to configured topics
+            Exception: If consumer initialization fails.
         """
         try:
-            self.consumer = Consumer(self.conf)
-            topics = [
+            self.consumer = AIOKafkaConsumer(
                 settings.KAFKA_PASSWORD_RESET_TOPIC,
                 settings.KAFKA_PASSWORD_RESET_SUCCESS_TOPIC,
-            ]
-            self.consumer.subscribe(topics)
-            logger.info(f"Subscribed to topics: {topics}")
+                bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+                group_id="notification-service",
+                auto_offset_reset="earliest",
+                enable_auto_commit=False,
+            )
+
+            await self.consumer.start()
+            logger.info("Kafka consumer initialized with aiokafka")
+
         except Exception as e:
             logger.error(f"Failed to initialize Kafka consumer: {e}")
             raise
 
     async def consume_messages(self):
-        """Starts the Kafka message consumption loop in a separate thread.
+        """Starts the Kafka message consumption loop.
 
-        Runs a blocking consumer that polls for messages and processes them
-        in the main asyncio event loop using thread-safe coroutine execution.
-
-        Note:
-            - Runs consumer in daemon thread to allow graceful shutdown
-            - Handles various Kafka errors with appropriate logging and retry logic
-            - Commits offsets only after successful message processing
-            - Uses thread-safe asyncio coroutine execution for message processing
+        Begins async message consumption using AIOKafkaConsumer's async iterator.
         """
         self.running = True
-        self.main_loop = asyncio.get_running_loop()
+        self._consume_task = asyncio.create_task(self._consume_loop())
+        logger.info("Kafka message consumption started")
 
-        def _run_consumer():
-            """Blocking consumer running in separate thread"""
-            logger.info("Starting Kafka consumer thread")
-
-            while self.running:
-                try:
-                    msg = self.consumer.poll(1.0)
-
-                    if msg is None:
-                        continue
-
-                    if msg.error():
-                        error_code = msg.error().code()
-
-                        if error_code == KafkaError._PARTITION_EOF:
-                            continue
-                        elif error_code == KafkaError.UNKNOWN_TOPIC_OR_PART:
-                            logger.warning(
-                                f"Topic not available: {msg.topic()}, retrying..."
-                            )
-                            continue
-                        elif error_code == KafkaError._ALL_BROKERS_DOWN:
-                            logger.error(
-                                "All Kafka brokers are down, retrying..."
-                            )
-                            continue
-                        elif error_code == KafkaError._TRANSPORT:
-                            logger.error("Kafka transport error, retrying...")
-                            continue
-                        else:
-                            logger.error(f"Kafka error: {msg.error()}")
-                            continue
-
-                    asyncio.run_coroutine_threadsafe(
-                        self.process_message(msg), self.main_loop
-                    )
-
-                    self.consumer.commit(msg)
-
-                except KafkaException as e:
-                    logger.error(f"Kafka exception: {e}")
-                except Exception as e:
-                    logger.error(f"Unexpected error in consumer thread: {e}")
-
-        self.consumer_thread = threading.Thread(
-            target=_run_consumer, daemon=True
-        )
-        self.consumer_thread.start()
-        logger.info("Kafka consumer thread started")
+    async def _consume_loop(self):
+        """Main message consumption loop using async iterator."""
+        try:
+            async for msg in self.consumer:
+                if not self.running:
+                    break
+                await self.process_message(msg)
+        except Exception as e:
+            logger.exception(f"Error in consumption loop: {e}")
+        finally:
+            await self.consumer.stop()
 
     async def process_message(self, msg):
-        """Process incoming Kafka message in main event loop.
-
-        Decodes and routes Kafka messages to appropriate handlers based on topic.
+        """Process incoming Kafka message.
 
         Args:
             msg: The Kafka message object to process.
@@ -141,15 +84,14 @@ class KafkaConsumer:
         Note:
             - Handles JSON decoding errors for malformed messages
             - Routes messages to specific handlers based on topic
-            - Logs message reception and processing errors
         """
         try:
-            message_data = json.loads(msg.value().decode("utf-8"))
-            logger.info(f"Received message from topic: {msg.topic()}")
+            message_data = json.loads(msg.value.decode("utf-8"))
+            logger.info(f"Received message from topic: {msg.topic}")
 
-            if msg.topic() == settings.KAFKA_PASSWORD_RESET_TOPIC:
+            if msg.topic == settings.KAFKA_PASSWORD_RESET_TOPIC:
                 await self.handle_password_reset_request(message_data)
-            elif msg.topic() == settings.KAFKA_PASSWORD_RESET_SUCCESS_TOPIC:
+            elif msg.topic == settings.KAFKA_PASSWORD_RESET_SUCCESS_TOPIC:
                 await self.handle_password_reset_success(message_data)
 
         except json.JSONDecodeError as e:
@@ -162,19 +104,8 @@ class KafkaConsumer:
     ):
         """Handle password reset request message.
 
-        Processes password reset request by creating notification record and
-        triggering email sending task.
-
         Args:
-            message_data: Dictionary containing reset request data with keys:
-                - email: User email address
-                - reset_token: Password reset token
-                - user_id: User identifier
-
-        Note:
-            - Creates notification record in database before sending email
-            - Spawns async task for email sending to avoid blocking
-            - Handles missing fields in message data with KeyError
+            message_data: Dictionary containing reset request data.
         """
         try:
             notification = NotificationCreate(
@@ -214,18 +145,8 @@ class KafkaConsumer:
     ):
         """Handle password reset success message.
 
-        Processes password reset success confirmation by creating notification
-        record and triggering success email sending task.
-
         Args:
-            message_data: Dictionary containing reset success data with keys:
-                - email: User email address
-                - user_id: User identifier
-
-        Note:
-            - Creates notification record in database before sending email
-            - Spawns async task for email sending to avoid blocking
-            - Handles missing fields in message data with KeyError
+            message_data: Dictionary containing reset success data.
         """
         try:
             notification = NotificationCreate(
@@ -257,21 +178,14 @@ class KafkaConsumer:
             logger.error(f"Error handling reset success: {e}")
 
     async def stop(self):
-        """Stop the Kafka consumer.
-
-        Gracefully stops the consumer thread and closes the Kafka consumer.
-
-        Note:
-            - Sets running flag to false to stop the consumption loop
-            - Waits for consumer thread to finish with timeout
-            - Closes Kafka consumer to release resources
-            - Logs consumer shutdown completion
-        """
+        """Stop the Kafka consumer gracefully."""
         self.running = False
-        if self.consumer_thread and self.consumer_thread.is_alive():
-            self.consumer_thread.join(timeout=5.0)
-        if self.consumer:
-            self.consumer.close()
+        if self._consume_task:
+            self._consume_task.cancel()
+            try:
+                await self._consume_task
+            except asyncio.CancelledError:
+                pass
         logger.info("Kafka consumer stopped")
 
 
