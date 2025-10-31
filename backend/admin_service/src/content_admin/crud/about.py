@@ -135,7 +135,7 @@ class AboutCRUD:
         )
 
         if result.modified_count == 0:
-            logger.debug(
+            logger.info(
                 f"Document with id {document_id} not found for update"
             )
             return False

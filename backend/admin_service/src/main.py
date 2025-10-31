@@ -22,9 +22,9 @@ from content_admin.routes import (
 from notification_admin.routes import notification
 from services.data_loader import DataLoader
 from services.kafka_logger_producer import kafka_logger_producer
-from services.kafka_producer import kafka_producer
+from services.kafka_cache_invalidation_producer import kafka_producer
 from services.kafka_topic_management import kafka_topic_manager
-from services.logger import get_logger
+from services.logger import get_logger, start_log_processing, stop_log_processing
 from services.minio_management import MinioCRUD
 from services.mongo_db_management import (
     MongoCollectionsManager,
@@ -52,6 +52,11 @@ async def lifespan(app: FastAPI):
     databases = {}
 
     try:
+        # Запускаем фоновую обработку логов
+        await start_log_processing()
+        logger.info("Log processing started")
+
+        # Инициализация подключений к базам данных
         connections["content_admin"] = MongoConnectionManager(
             host=settings.CONTENT_ADMIN_MONGODB_URL
         )
@@ -70,6 +75,7 @@ async def lifespan(app: FastAPI):
             database="postgres",
         )
 
+        # Инициализация MongoDB баз
         (
             clients["content_admin"],
             databases["content_admin"],
@@ -97,6 +103,7 @@ async def lifespan(app: FastAPI):
             "notification admin",
         )
 
+        # Инициализация PostgreSQL
         comments_admin_client = await connections[
             "comments_admin"
         ].open_connection()
@@ -146,6 +153,7 @@ async def lifespan(app: FastAPI):
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Comments database tables created successfully")
 
+        # Инициализация MinIO
         minio_crud = MinioCRUD()
 
         data_loader = DataLoader(
@@ -188,6 +196,7 @@ async def lifespan(app: FastAPI):
                     f"MinIO {bucket_type} bucket already has required files"
                 )
 
+        # Загрузка админ пользователя
         auth_admin_db_manager = MongoDatabaseManager(clients["auth_admin"])
         admin_loaded = await data_loader.load_admin_user_to_auth_db(
             auth_admin_db_manager,
@@ -202,6 +211,7 @@ async def lifespan(app: FastAPI):
         else:
             logger.info("Admin user loaded successfully")
 
+        # Инициализация коллекций MongoDB
         content_admin_mongo_collections_manager = MongoCollectionsManager(
             clients["content_admin"], databases["content_admin"]
         )
@@ -210,30 +220,25 @@ async def lifespan(app: FastAPI):
             "Content admin database collections initialized successfully"
         )
 
+        # Инициализация Kafka
         await kafka_topic_manager.ensure_cache_topics_exist()
         await kafka_producer.connect()
         await kafka_logger_producer.connect()
 
-        # Content states
+        # Состояния приложения
         app.state.content_admin_mongo_client = clients["content_admin"]
         app.state.content_admin_mongo_db = databases["content_admin"]
 
-        # Auth states
         app.state.auth_admin_mongo_client = clients["auth_admin"]
         app.state.auth_admin_mongo_db = databases["auth_admin"]
 
-        # Comments states
         app.state.postgres_engine = engine
-        app.state.comments_admin_client = comments_admin_client  # ← добавляем
+        app.state.comments_admin_client = comments_admin_client
 
-        # Notifications states
         app.state.notification_admin_client = clients["notification_admin"]
         app.state.notification_admin_db = databases["notification_admin"]
 
-        # Minio States
         app.state.minio_crud = minio_crud
-
-        # Kafka States
         app.state.kafka_producer = kafka_producer
 
         logger.info("Application startup complete - all services initialized")
@@ -246,6 +251,10 @@ async def lifespan(app: FastAPI):
     finally:
         close_tasks = []
 
+        # Останавливаем обработку логов
+        close_tasks.append(stop_log_processing())
+
+        # Закрываем соединения с базами данных
         for name, connection in connections.items():
             if connection:
                 close_tasks.append(connection.close_connection())
@@ -253,6 +262,7 @@ async def lifespan(app: FastAPI):
         if "engine" in locals():
             await engine.dispose()
 
+        # Закрываем Kafka продюсеры
         close_tasks.append(kafka_producer.close())
         close_tasks.append(kafka_logger_producer.close())
 
@@ -274,6 +284,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Маршруты приложения
 app.include_router(about.router, tags=[settings.CONTENT_ADMIN_ABOUT_NAME])
 app.include_router(tech.router, tags=[settings.CONTENT_ADMIN_TECH_NAME])
 app.include_router(
@@ -287,9 +298,7 @@ app.include_router(
 )
 
 app.include_router(auth.router, tags=[settings.AUTH_ADMIN_NAME])
-
 app.include_router(comments.router, tags=[settings.COMMENTS_ADMIN_NAME])
-
 app.include_router(
     notification.router, tags=[settings.NOTIFICATION_ADMIN_NAME]
 )
@@ -305,18 +314,7 @@ app.add_middleware(
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    """Middleware to log HTTP requests and responses.
-
-    Args:
-        request: Incoming HTTP request.
-        call_next: Next middleware or route handler.
-
-    Returns:
-        Response: HTTP response from the next handler.
-
-    Raises:
-        Exception: Re-raises any exceptions from the request processing.
-    """
+    """Middleware to log HTTP requests and responses."""
     logger.info(f"Request: {request.method} {request.url}")
     try:
         response = await call_next(request)
@@ -334,26 +332,22 @@ async def log_requests(request: Request, call_next):
 
 @app.get("/", tags=["Admin Service Maintenance"])
 async def root():
-    """Root endpoint for service health check.
-
-    Returns:
-        dict: Service status message.
-    """
+    """Root endpoint for service health check."""
     logger.info("Root endpoint accessed")
     return {"message": "Content Service is running"}
 
 
 @app.get("/health", tags=["Admin Service Maintenance"])
 async def health_check():
-    """Health check endpoint for service monitoring.
-
-    Returns:
-        dict: Service health status and database connection state.
-    """
-    logger.debug("Health check endpoint accessed")
+    """Health check endpoint for service monitoring."""
+    logger.info("Health check endpoint accessed")
     try:
-        logger.info("Health check: MongoDB connection OK")
-        return {"status": "healthy", "database": "connected"}
+        logger.info("Health check: All services OK")
+        return {
+            "status": "healthy", 
+            "database": "connected",
+            "kafka": "connected"
+        }
     except Exception as e:
         logger.exception(f"Health check failed: {e}")
         return {
@@ -366,19 +360,7 @@ async def health_check():
 async def ensure_mongo_database(
     connection_manager: MongoConnectionManager, db_name: str, manager_name: str
 ):
-    """Ensure MongoDB database exists and return client and database instances.
-
-    Args:
-        connection_manager (MongoConnectionManager): MongoDB connection manager.
-        db_name (str): Name of the database to ensure.
-        manager_name (str): Descriptive name for the database manager.
-
-    Returns:
-        tuple: MongoDB client and database instances.
-
-    Raises:
-        Exception: If database creation or connection fails.
-    """
+    """Ensure MongoDB database exists and return client and database instances."""
     client = None
     try:
         client = await connection_manager.open_connection()

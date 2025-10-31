@@ -1,59 +1,31 @@
-import json
 import logging
+from typing import Any
 
-from confluent_kafka.experimental.aio import AIOProducer
-
+from services.base_kafka_producer import BaseKafkaProducer
 from settings import settings
 
 logger = logging.getLogger("KafkaLoggerProducer")
 
 
-class KafkaLoggerProducer:
-    """Kafka producer for sending logs to Kafka topic."""
+class KafkaLoggerProducer(BaseKafkaProducer):
+    """Kafka producer for sending logs to Kafka topic using aiokafka."""
 
-    def __init__(self):
-        self.producer: AIOProducer | None = None
-        self.config = {
-            "bootstrap.servers": settings.KAFKA_BOOTSTRAP_SERVERS,
-            "enable.idempotence": True,
-            "acks": "all",
-            "retries": 3,
-        }
+    def _get_client_id(self) -> str:
+        return "admin-service-logger"
 
-    async def connect(self):
-        """Initialize async Kafka producer for logs."""
-        try:
-            self.producer = AIOProducer(self.config)
-            logger.info("Kafka logger producer connected successfully")
-        except Exception:
-            logger.exception("Failed to connect Kafka logger producer")
-            raise
-
-    async def send_log(self, log_data: dict):
+    async def send_log(self, log_data: dict[str, Any]) -> bool:
         """Send log entry to Kafka topic.
 
         Args:
-            log_data: Dictionary with log data
+            log_data: dictionary with log data.
+
+        Returns:
+            bool: True if log was sent successfully, False otherwise.
         """
-        if not self.producer or not settings.KAFKA_LOGS_ENABLED:
+        if not settings.KAFKA_LOGS_ENABLED:
             return False
 
-        try:
-            value = json.dumps(log_data).encode("utf-8")
-            future = await self.producer.produce(
-                topic=settings.KAFKA_LOGS_TOPIC,
-                value=value,
-            )
-            await future
-            return True
-        except Exception:
-            return False
-
-    async def close(self):
-        """Close producer connection."""
-        if self.producer:
-            await self.producer.flush()
-            await self.producer.close()
+        return await self.send_message(settings.KAFKA_LOGS_TOPIC, log_data)
 
 
 kafka_logger_producer = KafkaLoggerProducer()

@@ -26,7 +26,7 @@ async def send_cache_invalidation(
             )
         )
 
-        logger.debug(
+        logger.info(
             f"Cache invalidation queued: {entity_type}.{action}.{entity_id or 'all'}"
         )
         return True
@@ -46,7 +46,7 @@ async def _send_cache_invalidation_async(
         )
 
         if success:
-            logger.debug(
+            logger.info(
                 f"Cache invalidation delivered: {entity_type}.{action}.{entity_id or 'all'}"
             )
         else:

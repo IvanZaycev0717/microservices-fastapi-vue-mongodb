@@ -202,7 +202,7 @@ class DataLoader:
                     transformed_item["image_url"] = minio_urls_mapping[
                         original_filename
                     ]
-                    logger.debug(
+                    logger.info(
                         f"Replaced {original_filename} with MinIO URL"
                     )
                 else:
