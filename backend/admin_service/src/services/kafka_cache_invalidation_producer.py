@@ -41,7 +41,9 @@ class KafkaCacheInvalidationProducer(BaseKafkaProducer):
         if success:
             logger.info(f"Cache invalidation sent: {entity_type}.{action}")
         else:
-            logger.error(f"Failed to send cache invalidation: {entity_type}.{action}")
+            logger.error(
+                f"Failed to send cache invalidation: {entity_type}.{action}"
+            )
 
         return success
 

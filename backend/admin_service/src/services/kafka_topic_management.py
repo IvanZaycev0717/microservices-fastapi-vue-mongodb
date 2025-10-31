@@ -1,4 +1,3 @@
-# src/services/kafka_topic_management.py
 import asyncio
 import logging
 
@@ -32,7 +31,7 @@ class KafkaTopicManager:
                     bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
                     request_timeout_ms=5000,
                 )
-                
+
                 await self.admin_client.start()
                 await self.admin_client.list_topics()
                 logger.info("Kafka cluster is ready")
@@ -73,13 +72,12 @@ class KafkaTopicManager:
 
         try:
             await self.admin_client.start()
-            
-            # Проверяем существующие топики
+
             existing_topics = await self.admin_client.list_topics()
             topics_to_create = [
                 topic for topic in topics if topic.name not in existing_topics
             ]
-            
+
             if topics_to_create:
                 await self.admin_client.create_topics(
                     new_topics=topics_to_create,
@@ -88,7 +86,7 @@ class KafkaTopicManager:
                 logger.info("Kafka topics created successfully")
             else:
                 logger.info("Kafka topics already exist")
-                
+
         except Exception as e:
             logger.warning(f"Kafka topics creation issue: {e}")
         finally:

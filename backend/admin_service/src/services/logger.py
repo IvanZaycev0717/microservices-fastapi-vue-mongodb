@@ -1,13 +1,12 @@
+import asyncio
 import json
 import logging
 import sys
-from datetime import datetime
-from typing import Deque, Any, Optional
 from collections import deque
-import asyncio
+from datetime import datetime
+from typing import Any, Deque, Optional
 
 from settings import settings
-
 
 log_queue: Deque[dict[str, Any]] = deque()
 log_queue_task: Optional[asyncio.Task] = None

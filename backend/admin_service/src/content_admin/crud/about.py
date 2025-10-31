@@ -135,9 +135,7 @@ class AboutCRUD:
         )
 
         if result.modified_count == 0:
-            logger.info(
-                f"Document with id {document_id} not found for update"
-            )
+            logger.info(f"Document with id {document_id} not found for update")
             return False
 
         logger.info(f"Successfully updated document with id {document_id}")
