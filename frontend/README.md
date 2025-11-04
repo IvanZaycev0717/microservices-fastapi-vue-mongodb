@@ -1,57 +1,86 @@
-# frontend
+# Frontend приложение
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue 3 SPA-приложение для персонального сайта с адаптивным дизайном и многоязычной поддержкой.
 
-## Recommended IDE Setup
+## Функциональность
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- **Главная страница** - фотография автора, описание, социальные сети
+- **Обо мне** - интерактивная карусель с информацией
+- **Технологии** - интерактивная карта навыков
+- **Проекты** - портфолио с фильтрацией и сортировкой
+- **Сертификаты** - галерея сертификатов с просмотром
+- **Публикации** - таблица статей с рейтингом и датами
+- **Контакты** - ссылки на социальные сети с анимацией
+- **Личный кабинет** - управление комментариями (требует авторизации)
+- **Сброс пароля** - форма восстановления доступа
 
-## Customize configuration
+## Технологии
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- Vue 3.5.13 + Composition API
+- Vue Router для навигации
+- Pinia для управления состоянием
+- Vue I18n для локализации (русский/английский)
+- Vite для сборки
+- Axios для HTTP-запросов
+- Vee-Validate для валидации форм
 
-## Project Setup
+## Запуск
 
-```sh
+### Разработка
+```bash
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
-
-```sh
+### Сборка
+```bash
 npm run build
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+### Docker
+```bash
+# Development
+docker build -f Dockerfile.dev -t frontend-dev .
 
-```sh
-npm run test:unit
+# Production  
+docker build -f Dockerfile.prod -t frontend-prod .
+docker run -p 80:80 frontend-prod
 ```
 
-### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
+## Особенности
 
-```sh
-npm run test:e2e:dev
+### Аутентификация
+- JWT токены с автоматическим обновлением
+- Защищенные маршруты
+- Interceptor для обработки 401 ошибок
+
+### Локализация
+- Русский и английский языки
+- Автоопределение языка браузера
+- Переключение в реальном времени
+
+### Темы
+- Light/Dark темы
+- Автоопределение системной темы
+- Сохранение предпочтений
+
+### Адаптивность
+- Mobile-first дизайн
+- Адаптивные изображения
+- Оптимизация для разных разрешений
+
+### Производительность
+- Lazy loading компонентов
+- Оптимизированные изображения
+- Кэширование статических ресурсов
+
+## Конфигурация
+
+Environment variables:
+```bash
+VITE_API_BASE_URL=http://localhost:50055
+VITE_API_TIMEOUT=10000
+BASE_URL=/
 ```
 
-This runs the end-to-end tests against the Vite development server.
-It is much faster than the production build.
-
-But it's still recommended to test the production build with `test:e2e` before deploying (e.g. in CI environments):
-
-```sh
-npm run build
-npm run test:e2e
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+Приложение готово к развертыванию и интегрировано с бекенд-микросервисами через API Gateway.
