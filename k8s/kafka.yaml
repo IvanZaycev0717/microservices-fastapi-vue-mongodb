@@ -1,0 +1,163 @@
+# Kafka Controllers
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka-controller
+  namespace: microservices-app
+spec:
+  serviceName: kafka-controller
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka-controller
+  template:
+    metadata:
+      labels:
+        app: kafka-controller
+    spec:
+      containers:
+      - name: kafka
+        image: apache/kafka:4.1.0
+        env:
+        - name: KAFKA_NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: KAFKA_PROCESS_ROLES
+          value: "controller"
+        - name: KAFKA_LISTENERS
+          value: "CONTROLLER://:9093"
+        - name: KAFKA_CONTROLLER_LISTENER_NAMES
+          value: "CONTROLLER"
+        - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+          value: "1@kafka-controller-0.kafka-controller:9093,2@kafka-controller-1.kafka-controller:9093,3@kafka-controller-2.kafka-controller:9093"
+        command:
+        - sh
+        - -c
+        - |
+          # Получаем номер пода из имени (kafka-controller-0 -> 0)
+          POD_NUM=$(echo $KAFKA_NODE_ID | sed 's/kafka-controller-//')
+          # Преобразуем в NODE_ID (0 -> 1, 1 -> 2, 2 -> 3)
+          NODE_ID=$((POD_NUM + 1))
+          echo "Starting Kafka controller with NODE_ID: $NODE_ID"
+          export KAFKA_NODE_ID=$NODE_ID
+          
+          # Форматируем storage если нужно
+          if [ ! -f /tmp/kafka-formatted ]; then
+            echo "Formatting Kafka storage..."
+            /opt/kafka/bin/kafka-storage.sh format -t "$(./opt/kafka/bin/kafka-storage.sh random-uuid)" -c /opt/kafka/config/kraft.properties
+            touch /tmp/kafka-formatted
+          fi
+          
+          # Запускаем Kafka
+          exec /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/kraft.properties
+        ports:
+        - containerPort: 9093
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-controller
+  namespace: microservices-app
+spec:
+  clusterIP: None
+  selector:
+    app: kafka-controller
+  ports:
+  - name: controller
+    port: 9093
+    targetPort: 9093
+
+# Kafka Brokers
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka-broker
+  namespace: microservices-app
+spec:
+  serviceName: kafka-broker
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka-broker
+  template:
+    metadata:
+      labels:
+        app: kafka-broker
+    spec:
+      containers:
+      - name: kafka
+        image: apache/kafka:4.1.0
+        env:
+        - name: KAFKA_NODE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: KAFKA_PROCESS_ROLES
+          value: "broker"
+        - name: KAFKA_LISTENERS
+          value: "PLAINTEXT://:19092"
+        - name: KAFKA_CONTROLLER_LISTENER_NAMES
+          value: "CONTROLLER"
+        - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+          value: "1@kafka-controller-0.kafka-controller:9093,2@kafka-controller-1.kafka-controller:9093,3@kafka-controller-2.kafka-controller:9093"
+        - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+          value: "0"
+        - name: KAFKA_LOG_RETENTION_HOURS
+          value: "168"
+        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+          value: "false"
+        command:
+        - sh
+        - -c
+        - |
+          # Получаем номер пода из имени (kafka-broker-0 -> 0)
+          POD_NUM=$(echo $KAFKA_NODE_ID | sed 's/kafka-broker-//')
+          # Преобразуем в NODE_ID (0 -> 4, 1 -> 5, 2 -> 6)
+          NODE_ID=$((POD_NUM + 4))
+          echo "Starting Kafka broker with NODE_ID: $NODE_ID"
+          export KAFKA_NODE_ID=$NODE_ID
+          
+          # Устанавливаем advertised listeners для каждого брокера
+          export KAFKA_ADVERTISED_LISTENERS="PLAINTEXT://kafka-broker-$POD_NUM.kafka-broker:19092"
+          echo "ADVERTISED_LISTENERS: $KAFKA_ADVERTISED_LISTENERS"
+          
+          # Форматируем storage если нужно
+          if [ ! -f /tmp/kafka-formatted ]; then
+            echo "Formatting Kafka storage..."
+            /opt/kafka/bin/kafka-storage.sh format -t "$(./opt/kafka/bin/kafka-storage.sh random-uuid)" -c /opt/kafka/config/kraft.properties
+            touch /tmp/kafka-formatted
+          fi
+          
+          # Запускаем Kafka
+          exec /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/kraft.properties
+        ports:
+        - containerPort: 19092
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-broker
+  namespace: microservices-app
+spec:
+  selector:
+    app: kafka-broker
+  ports:
+  - name: broker
+    port: 19092
+    targetPort: 19092

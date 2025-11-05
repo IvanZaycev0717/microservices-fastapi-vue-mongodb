@@ -1,0 +1,244 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: content-db
+  namespace: microservices-app
+spec:
+  serviceName: content-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: content-db
+  template:
+    metadata:
+      labels:
+        app: content-db
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:8.0
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: "admin"
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: CONTENT_ADMIN_MONGO_ROOT_PASSWORD
+        ports:
+        - containerPort: 27017
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: content-db
+  namespace: microservices-app
+spec:
+  selector:
+    app: content-db
+  ports:
+  - port: 27017
+    targetPort: 27017
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: auth-db
+  namespace: microservices-app
+spec:
+  serviceName: auth-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-db
+  template:
+    metadata:
+      labels:
+        app: auth-db
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:8.0
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: "admin"
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AUTH_ADMIN_MONGO_ROOT_PASSWORD
+        ports:
+        - containerPort: 27017
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-db
+  namespace: microservices-app
+spec:
+  selector:
+    app: auth-db
+  ports:
+  - port: 27017
+    targetPort: 27017
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: notification-db
+  namespace: microservices-app
+spec:
+  serviceName: notification-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-db
+  template:
+    metadata:
+      labels:
+        app: notification-db
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:8.0
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: "admin"
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: NOTIFICATION_ADMIN_MONGO_ROOT_PASSWORD
+        ports:
+        - containerPort: 27017
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-db
+  namespace: microservices-app
+spec:
+  selector:
+    app: notification-db
+  ports:
+  - port: 27017
+    targetPort: 27017
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: comments-db
+  namespace: microservices-app
+spec:
+  serviceName: comments-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comments-db
+  template:
+    metadata:
+      labels:
+        app: comments-db
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:17.6
+        env:
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          value: "postgres"
+        ports:
+        - containerPort: 5432
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-db
+  namespace: microservices-app
+spec:
+  selector:
+    app: comments-db
+  ports:
+  - port: 5432
+    targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: microservices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:8.2.2-alpine3.22
+        command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: REDIS_PASSWORD
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: microservices-app
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379

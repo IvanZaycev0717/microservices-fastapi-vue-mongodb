@@ -1,0 +1,363 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: content-service
+  namespace: microservices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: content-service
+  template:
+    metadata:
+      labels:
+        app: content-service
+    spec:
+      containers:
+      - name: content
+        image: content-service:latest
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        ports:
+        - containerPort: 50051
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: content-service
+  namespace: microservices-app
+spec:
+  selector:
+    app: content-service
+  ports:
+  - port: 50051
+    targetPort: 50051
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: microservices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth
+        image: auth-service:latest
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        ports:
+        - containerPort: 50052
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: microservices-app
+spec:
+  selector:
+    app: auth-service
+  ports:
+  - port: 50052
+    targetPort: 50052
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-service
+  namespace: microservices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comments-service
+  template:
+    metadata:
+      labels:
+        app: comments-service
+    spec:
+      containers:
+      - name: comments
+        image: comments-service:latest
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        ports:
+        - containerPort: 50054
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-service
+  namespace: microservices-app
+spec:
+  selector:
+    app: comments-service
+  ports:
+  - port: 50054
+    targetPort: 50054
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: microservices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+      - name: notification
+        image: notification-service:latest
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        ports:
+        - containerPort: 50053
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: microservices-app
+spec:
+  selector:
+    app: notification-service
+  ports:
+  - port: 50053
+    targetPort: 50053
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: microservices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: api-gateway:latest
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        ports:
+        - containerPort: 50055
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: microservices-app
+spec:
+  type: NodePort
+  selector:
+    app: api-gateway
+  ports:
+  - port: 50055
+    targetPort: 50055
+    nodePort: 30055
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: microservices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: microservices-app
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-service
+  namespace: microservices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-service
+  template:
+    metadata:
+      labels:
+        app: admin-service
+    spec:
+      containers:
+      - name: admin-service
+        image: admin-service:latest
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-service
+  namespace: microservices-app
+spec:
+  selector:
+    app: admin-service
+  ports:
+  - port: 8000
+    targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-gui
+  namespace: microservices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-gui
+  template:
+    metadata:
+      labels:
+        app: admin-gui
+    spec:
+      containers:
+      - name: admin-gui
+        image: admin-gui:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-gui
+  namespace: microservices-app
+spec:
+  type: NodePort
+  selector:
+    app: admin-gui
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080

@@ -1,0 +1,168 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: microservices-app
+data:
+  # =====================
+  # BASE CONFIGURATION
+  # =====================
+  ALGORITHM: "HS256"
+  ADMIN_EMAIL: "admin@admin.com"
+  
+  # Cookie Settings
+  COOKIE_KEY: "refresh_token"
+  COOKIE_HTTPONLY: "true"
+  COOKIE_SECURE: "false"
+  COOKIE_SAMESITE: "lax"
+  COOKIE_PATH: "/"
+  
+  # Email Settings
+  SMTP_SERVER: "smtp.yandex.ru"
+  SMTP_PORT: "465"
+  
+  # Object Storage
+  MINIO_HOST: "minio"
+  MINIO_API_PORT: "9000"
+  MINIO_GUI_PORT: "9001"
+  MINIO_PUBLIC_URL: "http://localhost:9000"
+  
+  # =====================
+  # API GATEWAY
+  # =====================
+  API_GATEWAY_HOST: "0.0.0.0"
+  API_GATEWAY_PORT: "50055"
+  API_GATEWAY_NAME: "API_Gateway"
+  API_GATEWAY_CONTENT_HOST: "content-service"
+  API_GATEWAY_AUTH_HOST: "auth-service"
+  API_GATEWAY_COMMENTS_HOST: "comments-service"
+  
+  # =====================
+  # CONTENT SERVICE
+  # =====================
+  GRPC_CONTENT_MONGODB_DB_NAME: "content_db"
+  GRPC_CONTENT_HOST: "0.0.0.0"
+  GRPC_CONTENT_PORT: "50051"
+  GRPC_CONTENT_SERVICE_NAME: "Content_Service"
+  
+  # =====================
+  # AUTH SERVICE
+  # =====================
+  GRPC_AUTH_MONGODB_DB_NAME: "auth_db"
+  GRPC_AUTH_GRPC_HOST: "0.0.0.0"
+  GRPC_AUTH_PORT: "50052"
+  GRPC_AUTH_NAME: "Auth_Service"
+  
+  # =====================
+  # COMMENTS SERVICE
+  # =====================
+  GRPC_COMMENTS_HOST: "0.0.0.0"
+  GRPC_COMMENTS_PORT: "50054"
+  GRPC_COMMENTS_SERVICE_NAME: "Comments_Service"
+  GRPC_COMMENTS_POSTGRES_URL: "postgresql+asyncpg://postgres:postgres@comments-db:5432/comments_db"
+  
+  # =====================
+  # NOTIFICATION SERVICE
+  # =====================
+  NOTIFICATION_SERVICE_MONGO_DATABASE_NAME: "notification_db"
+  NOTIFICATION_SERVICE_NAME: "Notification_Service"
+  NOTIFICATION_HOST: "0.0.0.0"
+  NOTIFICATION_PORT: "50053"
+  
+  # =====================
+  # ADMIN SERVICE
+  # =====================
+  ADMIN_SERVICE_HOST: "0.0.0.0"
+  ADMIN_SERVICE_PORT: "8000"
+  
+  # =====================
+  # DATABASE CONFIGURATION
+  # =====================
+  # MongoDB CONTENT ADMIN DATABASE
+  CONTENT_ADMIN_MONGO_ROOT_USERNAME: "admin"
+  CONTENT_ADMIN_MONGO_DATABASE_NAME: "content_db"
+  CONTENT_ADMIN_MONGO_PORT: "27017"
+  
+  # MongoDB AUTH ADMIN DATABASE
+  AUTH_ADMIN_MONGO_ROOT_USERNAME: "admin"
+  AUTH_ADMIN_MONGO_DATABASE_NAME: "auth_db"
+  AUTH_ADMIN_MONGO_PORT: "27018"
+  AUTH_ADMIN_MONGO_COLLECTION_NAME: "users"
+  
+  # MongoDB NOTIFICATION ADMIN DATABASE
+  NOTIFICATION_ADMIN_MONGO_ROOT_USERNAME: "admin"
+  NOTIFICATION_ADMIN_MONGO_DATABASE_NAME: "notification_db"
+  NOTIFICATION_ADMIN_MONGO_PORT: "27019"
+  
+  # PostgreSQL Comments Admin Database
+  COMMENTS_ADMIN_POSTGRES_ROOT_NAME: "comments_db"
+  COMMENTS_ADMIN_POSTGRES_PORT: "5432"
+  POSTGRES_USER: "postgres"
+  COMMENTS_ADMIN_POSTGRES_DB_NAME: "comments_db"
+  
+  # =====================
+  # CACHE SERVICES
+  # =====================
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  CACHE_TTL: "300"
+  CACHE_TTL_MINUTES: "60"
+  
+  # =====================
+  # MESSAGE BROKERS
+  # =====================
+  KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
+  KAFKA_AUTO_OFFSET_RESET: "latest"
+  KAFKA_ENABLE_AUTO_COMMIT: "true"
+  
+  # Topics
+  KAFKA_PASSWORD_RESET_TOPIC: "password-reset-requests"
+  KAFKA_PASSWORD_RESET_SUCCESS_TOPIC: "password-reset-success"
+  KAFKA_CACHE_INVALIDATION_TOPIC: "cache-invalidation"
+  KAFKA_LOGS_TOPIC: "admin_service_logs"
+  
+  # Groups
+  KAFKA_CONSUMER_GROUP_ID: "api_gateway_cache_invalidation"
+  
+  # =====================
+  # APPLICATION SETTINGS
+  # =====================
+  # Logging
+  LOG_LEVEL: "INFO"
+  
+  # Validation Boundaries
+  MIN_TITLE_LENGTH: "1"
+  MAX_TITLE_LENGTH: "255"
+  MAX_DESCRIPTION_LENGTH: "255"
+  MIN_POPULARITY_BOUNDARY: "0"
+  MAX_POPULARITY_BOUNDARY: "1000"
+  MIN_PUBLICATIONS_RATING_BOUNDARY: "-1000"
+  MAX_PUBLICATIONS_RATING_BOUNDARY: "1000"
+  
+  # MongoDB Connection Timeouts
+  MONGO_CONNECTION_TIMEOUT_MS: "3000"
+  MONGO_SERVER_SELECTION_TIMEOUT_MS: "3000"
+  
+  # Password Constraints
+  MIN_PASSWORD_LENGTH: "5"
+  MAX_PASSWORD_LENGTH: "31"
+  MIN_EMAIL_LENGTH: "3"
+  MAX_EMAIL_LENGTH: "255"
+  
+  # Token Settings
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+  REFRESH_TOKEN_EXPIRE_DAYS: "7"
+  RESET_PASSWORD_TOKEN_EXPIRE_MINUTES: "15"
+  
+  # Comments Settings
+  COMMENTS_PROJECT_ID_LENGTH: "24"
+  COMMENTS_AUTHOR_ID_LENGTH: "24"
+  MIN_COMMENT_LENGTH: "1"
+  MAX_COMMENT_LENGTH: "1000"
+  
+  # Email Constraints
+  MIN_EMAIL_SUBJECT_LENGTH: "1"
+  MAX_EMAIL_SUBJECT_LENGTH: "63"
+  MIN_EMAIL_MESSAGE_LENGTH: "1"
+  MAX_EMAIL_MESSAGE_LENGTH: "255"
