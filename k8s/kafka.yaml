@@ -29,10 +29,8 @@ spec:
           NODE_ID=$((POD_NUM + 1))
           echo "Starting Kafka controller $HOSTNAME with NODE_ID: $NODE_ID"
 
-          # Создаем директорию конфигурации
           mkdir -p /opt/kafka/config
 
-          # Генерируем kraft.properties для controller
           cat > /opt/kafka/config/kraft.properties <<EOF
           process.roles=controller
           node.id=$NODE_ID
