@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     SMTP_SERVER: str
     SMTP_PORT: int
 
+    FRONTEND_URL: str = "http://localhost:3000"
+
     MIN_EMAIL_SUBJECT_LENGTH: int
     MAX_EMAIL_SUBJECT_LENGTH: int
     MIN_EMAIL_MESSAGE_LENGTH: int

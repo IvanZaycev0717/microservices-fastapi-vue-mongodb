@@ -9,6 +9,13 @@ data:
   # =====================
   ALGORITHM: "HS256"
   ADMIN_EMAIL: "admin@admin.com"
+  FRONTEND_URL: "http://localhost:30000"
+  
+  # Admin Service
+  ADMIN_SERVICE_HOST: "0.0.0.0"
+  ADMIN_SERVICE_PORT: "8000"
+  ADMIN_GUI_URL: "http://admin-gui:80"
+  SERVICE_NAME: "ADMIN_SERVICE"
   
   # Cookie Settings
   COOKIE_KEY: "refresh_token"
@@ -25,7 +32,7 @@ data:
   MINIO_HOST: "minio"
   MINIO_API_PORT: "9000"
   MINIO_GUI_PORT: "9001"
-  MINIO_PUBLIC_URL: "http://localhost:9000"
+  MINIO_PUBLIC_URL: "/minio"
   
   # =====================
   # API GATEWAY
@@ -69,32 +76,29 @@ data:
   NOTIFICATION_PORT: "50053"
   
   # =====================
-  # ADMIN SERVICE
-  # =====================
-  ADMIN_SERVICE_HOST: "0.0.0.0"
-  ADMIN_SERVICE_PORT: "8000"
-  
-  # =====================
   # DATABASE CONFIGURATION
   # =====================
   # MongoDB CONTENT ADMIN DATABASE
   CONTENT_ADMIN_MONGO_ROOT_USERNAME: "admin"
   CONTENT_ADMIN_MONGO_DATABASE_NAME: "content_db"
   CONTENT_ADMIN_MONGO_PORT: "27017"
+  CONTENT_ADMIN_ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@content-db:27017/?authSource=admin"
   
   # MongoDB AUTH ADMIN DATABASE
   AUTH_ADMIN_MONGO_ROOT_USERNAME: "admin"
   AUTH_ADMIN_MONGO_DATABASE_NAME: "auth_db"
-  AUTH_ADMIN_MONGO_PORT: "27018"
+  AUTH_ADMIN_MONGO_PORT: "27017"
+  AUTH_ADMIN_ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@auth-db:27017/?authSource=admin"
   AUTH_ADMIN_MONGO_COLLECTION_NAME: "users"
   
   # MongoDB NOTIFICATION ADMIN DATABASE
   NOTIFICATION_ADMIN_MONGO_ROOT_USERNAME: "admin"
   NOTIFICATION_ADMIN_MONGO_DATABASE_NAME: "notification_db"
-  NOTIFICATION_ADMIN_MONGO_PORT: "27019"
+  NOTIFICATION_ADMIN_MONGO_PORT: "27017"
+  NOTIFICATION_ADMIN_ME_CONFIG_MONGODB_URL: "mongodb://admin:securepassword123@notification-db:27017/?authSource=admin"
   
   # PostgreSQL Comments Admin Database
-  COMMENTS_ADMIN_POSTGRES_ROOT_NAME: "comments_db"
+  COMMENTS_ADMIN_POSTGRES_ROOT_NAME: "comments-db"
   COMMENTS_ADMIN_POSTGRES_PORT: "5432"
   POSTGRES_USER: "postgres"
   COMMENTS_ADMIN_POSTGRES_DB_NAME: "comments_db"

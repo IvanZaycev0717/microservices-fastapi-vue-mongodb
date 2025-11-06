@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from settings import settings
 from logger import get_logger
 
 logger = get_logger("EmailTemplates")
@@ -86,6 +87,7 @@ class EmailTemplateManager:
 
         html_content = template.replace("{{ css_content }}", css_content)
         html_content = html_content.replace("{{ reset_token }}", reset_token)
+        html_content = html_content.replace("{{ frontend_url }}", settings.FRONTEND_URL)
 
         return subject, html_content
 

@@ -25,25 +25,18 @@ spec:
         - name: ES_JAVA_OPTS
           value: "-Xms512m -Xmx512m"
         - name: indices.query.bool.max_clause_count
-          value: "1024"
+          value: "256"
         - name: thread_pool.write.queue_size
-          value: "100"
+          value: "50"
         ports:
         - containerPort: 9200
-        - containerPort: 9300
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: "768Mi"
+            cpu: "250m"
           limits:
             memory: "1Gi"
-            cpu: "1000m"
-        volumeMounts:
-        - name: es-data
-          mountPath: /usr/share/elasticsearch/data
-      volumes:
-      - name: es-data
-        emptyDir: {}
+            cpu: "500m"
 ---
 apiVersion: v1
 kind: Service
@@ -57,9 +50,6 @@ spec:
   - name: http
     port: 9200
     targetPort: 9200
-  - name: transport
-    port: 9300
-    targetPort: 9300
 
 # Kibana
 ---
@@ -85,16 +75,16 @@ spec:
         - name: ELASTICSEARCH_HOSTS
           value: "http://elasticsearch:9200"
         - name: NODE_OPTIONS
-          value: "--max-old-space-size=1024"
+          value: "--max-old-space-size=384"
         ports:
         - containerPort: 5601
         resources:
           requests:
-            memory: "256Mi"
+            memory: "384Mi"
             cpu: "100m"
           limits:
             memory: "512Mi"
-            cpu: "200m"
+            cpu: "250m"
 ---
 apiVersion: v1
 kind: Service
