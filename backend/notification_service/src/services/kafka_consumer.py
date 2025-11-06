@@ -69,7 +69,11 @@ class KafkaConsumer:
             async for msg in self.consumer:
                 if not self.running:
                     break
-                await self.process_message(msg)
+                try:
+                    await self.process_message(msg)
+                    await self.consumer.commit()
+                except Exception as e:
+                    logger.error(f"Failed to process message, skipping commit: {e}")
         except Exception as e:
             logger.exception(f"Error in consumption loop: {e}")
         finally:
@@ -96,12 +100,11 @@ class KafkaConsumer:
 
         except json.JSONDecodeError as e:
             logger.error(f"Failed to decode JSON message: {e}")
+            await self.consumer.commit()
         except Exception as e:
             logger.error(f"Error processing message: {e}")
 
-    async def handle_password_reset_request(
-        self, message_data: dict[str, Any]
-    ):
+    async def handle_password_reset_request(self, message_data: dict[str, Any]):
         """Handle password reset request message.
 
         Args:
