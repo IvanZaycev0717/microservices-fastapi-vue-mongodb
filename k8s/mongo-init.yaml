@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-init-scripts
+  namespace: microservices-app
+data:
+  content-init.js: |
+    db = db.getSiblingDB('content_db');
+    db.createUser({
+      user: 'content_user',
+      pwd: 'content_password',
+      roles: [{ role: 'readWrite', db: 'content_db' }]
+    });
+  auth-init.js: |
+    db = db.getSiblingDB('auth_db');
+    db.createUser({
+      user: 'auth_user',
+      pwd: 'auth_password', 
+      roles: [{ role: 'readWrite', db: 'auth_db' }]
+    });
+  notification-init.js: |
+    db = db.getSiblingDB('notification_db');
+    db.createUser({
+      user: 'notification_user',
+      pwd: 'notification_password',
+      roles: [{ role: 'readWrite', db: 'notification_db' }]
+    });

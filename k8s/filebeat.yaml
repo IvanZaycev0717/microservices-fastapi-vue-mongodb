@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: microservices-app
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+    - type: kafka
+      hosts: ["kafka-broker-0.kafka-broker:19092", "kafka-broker-1.kafka-broker:19092", "kafka-broker-2.kafka-broker:19092"]
+      topics: ["admin_service_logs"]
+      group_id: "filebeat"
+      consumer_group: "filebeat-logs-group"
+
+    processors:
+    - decode_json_fields:
+        fields: ["message"]
+        target: ""
+        overwrite_keys: true
+        add_error_key: true
+
+    output.elasticsearch:
+      hosts: ["elasticsearch:9200"]
+      index: "admin_service_logs"
+      protocol: "http"
+
+    setup.ilm.enabled: false
+    setup.template.enabled: false
+    output.elasticsearch.allow_auto_create: true
+
+    logging.level: debug
+    logging.to_files: true
+    logging.files:
+      path: /usr/share/filebeat/logs
+      name: filebeat
+      keepfiles: 7
+      permissions: 0644
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebeat
+  namespace: microservices-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      containers:
+      - name: filebeat
+        image: elastic/filebeat:8.18.8
+        args: [
+          "-c", "/etc/filebeat/filebeat.yml",
+          "-e"
+        ]
+        volumeMounts:
+        - name: filebeat-config
+          mountPath: /etc/filebeat
+          readOnly: true
+        - name: filebeat-logs
+          mountPath: /usr/share/filebeat/logs
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: filebeat-config
+        configMap:
+          name: filebeat-config
+          defaultMode: 0644
+      - name: filebeat-logs
+        emptyDir: {}

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: microservices-app
+data:
+  init.sql: |
+    CREATE DATABASE comments_db;
+    \c comments_db;
+    CREATE TABLE IF NOT EXISTS test_table (id SERIAL PRIMARY KEY, name VARCHAR(100));

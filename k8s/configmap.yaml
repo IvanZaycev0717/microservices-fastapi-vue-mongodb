@@ -59,7 +59,6 @@ data:
   GRPC_COMMENTS_HOST: "0.0.0.0"
   GRPC_COMMENTS_PORT: "50054"
   GRPC_COMMENTS_SERVICE_NAME: "Comments_Service"
-  GRPC_COMMENTS_POSTGRES_URL: "postgresql+asyncpg://postgres:postgres@comments-db:5432/comments_db"
   
   # =====================
   # NOTIFICATION SERVICE
@@ -112,7 +111,7 @@ data:
   # =====================
   # MESSAGE BROKERS
   # =====================
-  KAFKA_BOOTSTRAP_SERVERS: "broker-1:19092,broker-2:19092,broker-3:19092"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka-broker-0.kafka-broker:19092,kafka-broker-1.kafka-broker:19092,kafka-broker-2.kafka-broker:19092"
   KAFKA_AUTO_OFFSET_RESET: "latest"
   KAFKA_ENABLE_AUTO_COMMIT: "true"
   
