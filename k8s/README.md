@@ -198,9 +198,6 @@ k8s/
 ├── frontend-config.yaml  # Frontend configuration
 └── *-nginx-config.yaml   # Nginx proxy configurations
 
-src/
-└── kafka.yaml           # Kafka configuration
-
 backend/                 # Микросервисы бэкенда
 frontend/               # Vue.js приложение
 ```
