@@ -1,4 +1,4 @@
-# Проект: Микросервисная архитектура персонального сайта
+# Микросервисная архитектура персонального сайта
 ![Image](https://github.com/user-attachments/assets/73967fb9-564b-4cd6-8749-3d6ff9f653a7)
 
 ## Обзор системы
@@ -71,11 +71,9 @@
 ## 🚀 Быстрый запуск
 
 ### Development (Docker Compose)
+**ВАЖНО**: для комфортной работы требуется 24 ГБ оперативной памяти (DDR4) и 8-миядерный процессор
 ```bash
-# Клонирование и настройка
-git clone <repository>
-cp .env.example .env
-# Запуск всех сервисов
+git clone https://github.com/IvanZaycev0717/microservices-fastapi-vue-mongodb.git
 docker-compose up -d
 ```
 
@@ -88,7 +86,7 @@ docker-compose up -d
 
 ### Production (Kubernetes)
 ```bash
-minikube start --memory=8192 --cpus=4
+minikube start --memory=24g --cpus=7 --driver=docker --disk-size=50g
 kubectl apply -f k8s/
 minikube service -n microservices-app frontend
 ```
