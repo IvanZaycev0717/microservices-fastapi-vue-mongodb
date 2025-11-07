@@ -7,7 +7,7 @@
 
 ## Архитектура
 
-![Image](https://github.com/IvanZaycev0717/microservices-fastapi-vue-mongodb/issues/3#issue-3600694189)
+![Image](https://github.com/user-attachments/assets/895af6f2-d602-4f15-b20a-6b3bce2193d3)
 
 ### 🎯 Основные компоненты
 
