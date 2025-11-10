@@ -10,7 +10,7 @@
 ![Image](https://github.com/user-attachments/assets/895af6f2-d602-4f15-b20a-6b3bce2193d3)
 
 ## :white_check_mark: Правильный системный дизайн
-![Image](https://github.com/user-attachments/assets/66541098-4a1d-46a1-86d6-f37ee95a49bb)
+![Image](https://github.com/user-attachments/assets/af8fdaae-0004-4add-a18f-3e63d83ac1bf)
 
 ### 🎯 Основные компоненты
 
