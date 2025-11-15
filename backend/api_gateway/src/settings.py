@@ -41,12 +41,14 @@ class Settings(BaseSettings):
     REDIS_PORT: int
     REDIS_PASSWORD: str
 
-    # Cache Settings
+    # Redis Databases Numbers
     REDIS_CACHE_DB: int = 0
     REDIS_RATE_LIMIT_DB: int = 1
-    CACHE_TTL_MINUTES: int = 60
 
-    # Rate Limiter Settings
+    # Redis Cache Settings
+    CACHE_TTL_MINUTES: int = 1
+
+    # Redis Rate Limiter Settings
     RATE_LIMIT_CAPACITY: int = 100
     RATE_LIMIT_REFILL_RATE: float = 100.0 / 3600
     AUTH_RATE_LIMIT_CAPACITY: int = 10
